@@ -439,6 +439,21 @@ class GameProfile:
     # still show and edit normally, just with an extra label alongside it
     # (see games/dave.py, which looks up item names for Materials/Items
     # entries this way).
+    spawn_item_targets: Optional[Callable[[Any], List[Tuple[str, str]]]] = None
+    # spawn_item_targets(data) -> [(label, target_key), ...], the places
+    # Edit > Spawn Item... currently offers to create a new item in (e.g.
+    # "Backpack", "Player Storage"). Set this together with spawn_item; a
+    # game without either just doesn't show that menu item.
+    spawn_item: Optional[Callable[[Any, str, int, int], str]] = None
+    # spawn_item(data, target_key, item_id, quantity) -> a status message,
+    # mutating `data` in place to add `quantity` of item type `item_id`
+    # into whichever container `target_key` (one returned by
+    # spawn_item_targets) identifies. Raise ValueError (before mutating
+    # anything) to reject an invalid id/quantity/target - cedit shows that
+    # message and leaves `data` untouched, same convention as loads/dumps.
+    # See games/duckov.py, whose save format has no name catalog to
+    # validate an item id against, so this only checks structural things
+    # (a real positive id, room in a capacity-bounded container).
     pre_save_check: Optional[Callable[[str], Optional[str]]] = None
     # pre_save_check(path) -> a block-reason string, or None to allow the
     # save. Called by cedit.py right before it backs up/writes `path` -

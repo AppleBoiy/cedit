@@ -140,7 +140,19 @@ PER-GAME NOTES
 
 Escape from Duckov
   Plain-JSON Unity Easy Save 3 format, fully editable through the generic
-  tree editor. No extra setup needed.
+  tree editor - including inventory (Item/MainCharacterItemData for the
+  backpack/equipped items, Inventory/PlayerStorage and
+  Inventory/Inventory_Safe for base storage). Edit > Spawn Item... adds a
+  brand-new item by numeric type id into the backpack, player storage, or
+  the safe - it handles this format's own item-tree linking (unique
+  instanceIDs, equipment slotContents, inventory position lists,
+  capacity limits on storage containers) so you don't have to construct
+  that structure by hand through the generic tree. There's no bundled
+  item name catalog (none is published for this game), so look up type
+  ids via a wiki/datamine first. Each unit of a spawned quantity is its
+  own separate item entry rather than one entry with a fabricated "Count"
+  - whether an item type is actually stackable, and under which field,
+  is something only the game's own catalog would know for certain.
 
 Octopath Traveler / II
   Unreal Engine 4.27 GVAS binary saves, parsed by byte-offset scanning

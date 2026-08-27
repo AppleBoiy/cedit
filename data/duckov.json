@@ -49,5 +49,5 @@
       "4": "utf8"
     }
   },
-  "notes": "Save files: Save_1.sav .. Save_6.sav, Global.json, Options.ES3\nUses Unity's Easy Save 3 format (plain JSON). A quirk where some int/bool fields drop their 'value' key is patched automatically.\nInventory item stats are base64-packed bytes - shown decoded in the tree as 'item:<type>' rows."
+  "notes": "Save files: Save_1.sav .. Save_6.sav, Global.json, Options.ES3\nUses Unity's Easy Save 3 format (plain JSON). A quirk where some int/bool fields drop their 'value' key is patched automatically.\nInventory item stats are base64-packed bytes - shown decoded in the tree as 'item:<type>' rows.\nInventory is fully browsable/editable through the generic tree (Item/MainCharacterItemData, Inventory/PlayerStorage, Inventory/Inventory_Safe). Edit > Spawn Item... creates a brand-new item (by numeric type id - there's no bundled name catalog, so look ids up via a wiki/datamine) into the backpack, player storage, or the storage safe, handling this format's own item-tree linking (instanceID references, equipment slotContents, inventory position lists) for you."
 }

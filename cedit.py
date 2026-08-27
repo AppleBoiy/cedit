@@ -441,6 +441,60 @@ class SearchResultsDialog(QDialog):
         self.main_window.tree.scrollToItem(node)
 
 
+class SpawnItemDialog(QDialog):
+    """Edit > Spawn Item... - a small form for GameProfile.spawn_item(),
+    generic across any game that defines it (see lib/base.py). The target
+    list, and what "item id"/"quantity" actually mean, are entirely up to
+    that game's own spawn_item_targets()/spawn_item() - this dialog just
+    collects the three inputs they need."""
+
+    def __init__(self, parent_window, targets):
+        super().__init__(parent_window)
+        self.setWindowTitle("Spawn Item")
+        self.resize(360, 160)
+
+        layout = QVBoxLayout(self)
+
+        layout.addWidget(QLabel("Spawn into:"))
+        self.target_combo = QComboBox()
+        for label, key in targets:
+            self.target_combo.addItem(label, key)
+        layout.addWidget(self.target_combo)
+
+        layout.addWidget(QLabel("Item type id:"))
+        self.item_id_edit = QLineEdit()
+        self.item_id_edit.setPlaceholderText("e.g. 594 - find ids via a wiki/datamine")
+        layout.addWidget(self.item_id_edit)
+
+        layout.addWidget(QLabel("Quantity:"))
+        self.quantity_edit = QLineEdit("1")
+        layout.addWidget(self.quantity_edit)
+
+        button_row = QHBoxLayout()
+        button_row.addStretch(1)
+        cancel_btn = QPushButton("Cancel")
+        cancel_btn.clicked.connect(self.reject)
+        button_row.addWidget(cancel_btn)
+        spawn_btn = QPushButton("Spawn")
+        spawn_btn.clicked.connect(self._confirm)
+        button_row.addWidget(spawn_btn)
+        layout.addLayout(button_row)
+
+    def _confirm(self):
+        try:
+            self._item_id = int(self.item_id_edit.text().strip())
+            self._quantity = int(self.quantity_edit.text().strip())
+        except ValueError:
+            QMessageBox.critical(self, "Spawn Item", "Item type id and quantity must both be whole numbers.")
+            return
+        self._target_key = self.target_combo.currentData()
+        self.accept()
+
+    def values(self):
+        """(target_key, item_id, quantity) - only meaningful after accept()."""
+        return self._target_key, self._item_id, self._quantity
+
+
 class SaveEditorWindow(QMainWindow):
     def __init__(self, profile):
         super().__init__()
@@ -525,6 +579,11 @@ class SaveEditorWindow(QMainWindow):
         delete_action = QAction("Delete Selected", self)
         delete_action.triggered.connect(self.delete_selected)
         edit_menu.addAction(delete_action)
+        edit_menu.addSeparator()
+        self.spawn_item_action = QAction("Spawn Item...", self)
+        self.spawn_item_action.triggered.connect(self.open_spawn_item_dialog)
+        self.spawn_item_action.setEnabled(False)  # enabled per-profile in _apply_profile_to_ui
+        edit_menu.addAction(self.spawn_item_action)
         edit_menu.addSeparator()
         find_action = QAction("Find...", self, shortcut=QKeySequence.Find)
         find_action.triggered.connect(self.focus_search)
@@ -824,6 +883,7 @@ class SaveEditorWindow(QMainWindow):
         self.game_combo.setCurrentText(self.profile.display_name)
         self.game_combo.blockSignals(False)
         self._rebuild_quick_edit_widgets()
+        self.spawn_item_action.setEnabled(self.profile.spawn_item is not None)
         if self.profile.notes:
             self._set_status(self.profile.notes.splitlines()[0])
 
@@ -1427,6 +1487,35 @@ class SaveEditorWindow(QMainWindow):
         self.rebuild_tree()
         self._set_dirty(True)
         self._set_status(f"Deleted '{key}'")
+
+    def open_spawn_item_dialog(self):
+        if self.profile.spawn_item is None or self.data is None:
+            return
+        targets = self.profile.spawn_item_targets(self.data) if self.profile.spawn_item_targets else []
+        if not targets:
+            QMessageBox.information(self, APP_TITLE, "No spawn targets are available in this save.")
+            return
+        dialog = SpawnItemDialog(self, targets)
+        if dialog.exec() != QDialog.Accepted:
+            return
+        target_key, item_id, quantity = dialog.values()
+
+        # Snapshot taken before calling spawn_item, not after - same
+        # convention as _open_list_table: if spawn_item raises, it's
+        # required to do so before mutating anything, so `self.data` is
+        # still untouched and there's simply nothing to have snapshotted.
+        pre_spawn_snapshot = self._snapshot()
+        try:
+            message = self.profile.spawn_item(self.data, target_key, item_id, quantity)
+        except ValueError as e:
+            QMessageBox.critical(self, APP_TITLE, f"Couldn't spawn item:\n{e}")
+            return
+        self._push_undo(pre_spawn_snapshot)
+        self.rebuild_tree()
+        self.refresh_raw_from_tree()
+        self.refresh_quick_edit()
+        self._set_dirty(True)
+        self._set_status(message)
 
     # -------------------------------------------------------------- search
 
