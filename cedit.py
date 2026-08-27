@@ -55,7 +55,7 @@ from PySide6.QtWidgets import (
     QPlainTextEdit, QSplitter, QFileDialog, QMessageBox, QInputDialog,
     QGroupBox, QAbstractItemView, QMenu,
     QTableWidget, QTableWidgetItem, QDialog, QCheckBox,
-    QListWidget, QListWidgetItem, QGridLayout, QSizePolicy,
+    QListWidget, QListWidgetItem, QGridLayout, QSizePolicy, QHeaderView,
 )
 
 from games import list_games, get_game
@@ -70,8 +70,6 @@ from lib.base import (
     set_by_path,
     MAIN_WINDOW_SIZE,
     MAIN_WINDOW_MIN,
-    GAME_WINDOW_SIZE,
-    GAME_WINDOW_MIN,
 )
 
 APP_TITLE = "cedit"
@@ -455,21 +453,27 @@ class InventoryEditorWindow(QMainWindow):
     convention as the rest of the generic editor - so Undo/Redo cover
     everything done through this window too.
 
-    There's no bundled item-name catalog for a game like Duckov, so this
-    window shows raw numeric type ids throughout - it never fabricates or
-    guesses a name.
+    Type ids show a looked-up display name too, wherever the profile's
+    describe_entry hook (see lib/base.py) recognizes one - grid cells show
+    the bare id (a name usually won't fit in one small cell) with the name
+    in a hover tooltip, the occupied-slots list has its own Name column,
+    and typing an id into the spawn field previews its name live. A game
+    with no such catalog just shows ids everywhere instead - nothing here
+    ever fabricates or guesses a name.
     """
 
     GRID_COLUMNS = 10
-    CELL_SIZE = 56
+    CELL_SIZE = 64
     EXTRA_EMPTY_SLOTS = 20  # shown after the last occupied one, when capacity is unknown
+    WINDOW_SIZE = (860, 600)
+    WINDOW_MIN = (680, 460)
 
     def __init__(self, main_window):
         super().__init__(main_window)
         self.main_window = main_window
         self.setWindowTitle("Inventory Editor")
-        self.resize(*GAME_WINDOW_SIZE)
-        self.setMinimumSize(*GAME_WINDOW_MIN)
+        self.resize(*self.WINDOW_SIZE)
+        self.setMinimumSize(*self.WINDOW_MIN)
 
         self._state = None  # last inventory_state() result, for click/remove lookups
         self._slots_by_position = {}  # grid position -> slot dict, for the current container
@@ -496,15 +500,23 @@ class InventoryEditorWindow(QMainWindow):
         root.addWidget(splitter, 1)
 
         grid_box = QGroupBox("Slots (click a cell to select it)")
-        grid_layout = QVBoxLayout(grid_box)
+        grid_box_layout = QVBoxLayout(grid_box)
+        grid_box_layout.setAlignment(Qt.AlignTop)
         self.grid_table = QTableWidget()
         self.grid_table.setColumnCount(self.GRID_COLUMNS)
         self.grid_table.horizontalHeader().setVisible(False)
         self.grid_table.verticalHeader().setVisible(False)
         self.grid_table.setSelectionMode(QAbstractItemView.SingleSelection)
         self.grid_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.grid_table.setShowGrid(True)
+        # Fixed, not Expanding - a small backpack grid shouldn't stretch to
+        # fill however wide this window happens to be; that just leaves a
+        # big blank rectangle instead of keeping the cells a sensible size.
+        # The exact size is set once per render, in _render_grid(), since it
+        # depends on how many rows this particular container needs.
+        self.grid_table.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         self.grid_table.itemSelectionChanged.connect(self._on_grid_selection_changed)
-        grid_layout.addWidget(self.grid_table)
+        grid_box_layout.addWidget(self.grid_table, 0, Qt.AlignLeft | Qt.AlignTop)
         splitter.addWidget(grid_box)
 
         list_box = QGroupBox("Occupied slots")
@@ -515,17 +527,27 @@ class InventoryEditorWindow(QMainWindow):
         self.item_table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.item_table.setSelectionMode(QAbstractItemView.SingleSelection)
         self.item_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        header = self.item_table.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(2, QHeaderView.Stretch)
+        header.setSectionResizeMode(3, QHeaderView.ResizeToContents)
         self.item_table.itemSelectionChanged.connect(self._on_item_selection_changed)
         list_layout.addWidget(self.item_table)
         splitter.addWidget(list_box)
-        splitter.setStretchFactor(0, 2)
+        splitter.setStretchFactor(0, 0)
         splitter.setStretchFactor(1, 1)
 
         form_row = QHBoxLayout()
         form_row.addWidget(QLabel("Item type id:"))
         self.item_id_edit = QLineEdit()
-        self.item_id_edit.setPlaceholderText("e.g. 594 - shows a looked-up name below where known")
+        self.item_id_edit.setPlaceholderText("e.g. 594")
+        self.item_id_edit.setFixedWidth(140)
+        self.item_id_edit.textChanged.connect(self._update_item_id_preview)
         form_row.addWidget(self.item_id_edit)
+        self.item_id_preview_label = QLabel("")
+        self.item_id_preview_label.setStyleSheet("color: palette(mid);")
+        form_row.addWidget(self.item_id_preview_label, 1)
         form_row.addWidget(QLabel("Quantity:"))
         self.quantity_edit = QLineEdit("1")
         self.quantity_edit.setFixedWidth(50)
@@ -613,29 +635,40 @@ class InventoryEditorWindow(QMainWindow):
 
     def _render_grid(self, slots, total_cells):
         occupied_by_position = {s["position"]: s for s in slots if s.get("position") is not None}
-        rows = max(1, (total_cells + self.GRID_COLUMNS - 1) // self.GRID_COLUMNS)
+        columns = min(self.GRID_COLUMNS, max(1, total_cells))
+        rows = max(1, (total_cells + columns - 1) // columns)
+        self.grid_table.setColumnCount(columns)
         self.grid_table.setRowCount(rows)
         for row in range(rows):
             self.grid_table.setRowHeight(row, self.CELL_SIZE)
-        for col in range(self.GRID_COLUMNS):
+        for col in range(columns):
             self.grid_table.setColumnWidth(col, self.CELL_SIZE)
+        # Fixed size policy (set in __init__) needs an explicit size to
+        # actually take effect - +2 covers the outer frame border so the
+        # last row/column isn't clipped.
+        self.grid_table.setFixedSize(columns * self.CELL_SIZE + 2, rows * self.CELL_SIZE + 2)
 
         self._slots_by_position = {}
         for position in range(total_cells):
-            row, col = divmod(position, self.GRID_COLUMNS)
+            row, col = divmod(position, columns)
             slot = occupied_by_position.get(position)
             cell = QTableWidgetItem()
             cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)
+            cell.setTextAlignment(Qt.AlignCenter)
             if slot is not None:
                 type_id = slot.get("type_id")
                 name = self._type_name(type_id)
-                cell.setText(name if name else str(type_id if type_id is not None else "?"))
-                cell.setToolTip(f"type {type_id}" + (f" - {name}" if name else ""))
-                cell.setBackground(QColor("#5a8f5a"))
+                # The cell itself just shows the id - it's guaranteed to
+                # fit, unlike most item names. The full name (where known)
+                # shows on hover, and always in the Occupied Slots list.
+                cell.setText(str(type_id) if type_id is not None else "?")
+                cell.setToolTip(f"type {type_id}" + (f"\n{name}" if name else ""))
+                cell.setBackground(QColor("#4a7a4a"))
                 cell.setData(Qt.UserRole, position)
                 self._slots_by_position[position] = slot
             else:
                 cell.setText("")
+                cell.setToolTip("Empty - select, then Spawn Into Selected Slot")
                 cell.setBackground(QColor("#3a3a3a"))
                 cell.setData(Qt.UserRole, position)
             self.grid_table.setItem(row, col, cell)
@@ -664,6 +697,19 @@ class InventoryEditorWindow(QMainWindow):
             return profile.describe_entry(None, "typeID", type_id)
         except Exception:
             return None
+
+    def _update_item_id_preview(self, text):
+        text = text.strip()
+        if not text:
+            self.item_id_preview_label.setText("")
+            return
+        try:
+            type_id = int(text)
+        except ValueError:
+            self.item_id_preview_label.setText("(not a whole number)")
+            return
+        name = self._type_name(type_id)
+        self.item_id_preview_label.setText(f"→ {name}" if name else "(no known name for this id)")
 
     # ----------------------------------------------------------- selection
 
