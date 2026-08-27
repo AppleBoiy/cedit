@@ -48,7 +48,7 @@ import copy
 import argparse
 
 from PySide6.QtCore import Qt, QSettings
-from PySide6.QtGui import QAction, QKeySequence, QIcon
+from PySide6.QtGui import QAction, QKeySequence, QIcon, QColor
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QLineEdit, QPushButton, QComboBox, QTreeWidget, QTreeWidgetItem,
@@ -70,6 +70,8 @@ from lib.base import (
     set_by_path,
     MAIN_WINDOW_SIZE,
     MAIN_WINDOW_MIN,
+    GAME_WINDOW_SIZE,
+    GAME_WINDOW_MIN,
 )
 
 APP_TITLE = "cedit"
@@ -441,54 +443,306 @@ class SearchResultsDialog(QDialog):
         self.main_window.tree.scrollToItem(node)
 
 
-class SpawnItemDialog(QDialog):
-    """Edit > Spawn Item... - a small form for GameProfile.spawn_item(),
-    generic across any game that defines it (see lib/base.py). The target
-    list, and what "item id"/"quantity" actually mean, are entirely up to
-    that game's own spawn_item_targets()/spawn_item() - this dialog just
-    collects the three inputs they need."""
+class InventoryEditorWindow(QMainWindow):
+    """Edit > Inventory Editor... - a dedicated full window (matching the
+    visual weight of games/dredge.py's own window) for any game profile
+    that defines all four of spawn_item_targets/spawn_item/inventory_state/
+    remove_inventory_item (see lib/base.py). Shows a container picker, a
+    visual grid of occupied/free slots (colored via GameProfile
+    .inventory_state()), a side list of the occupied slots' item ids, and
+    Spawn/Remove buttons wired to GameProfile.spawn_item()/
+    remove_inventory_item() with the same pre-snapshot-then-push-undo
+    convention as the rest of the generic editor - so Undo/Redo cover
+    everything done through this window too.
 
-    def __init__(self, parent_window, targets):
-        super().__init__(parent_window)
-        self.setWindowTitle("Spawn Item")
-        self.resize(360, 160)
+    There's no bundled item-name catalog for a game like Duckov, so this
+    window shows raw numeric type ids throughout - it never fabricates or
+    guesses a name.
+    """
 
-        layout = QVBoxLayout(self)
+    GRID_COLUMNS = 10
+    CELL_SIZE = 56
+    EXTRA_EMPTY_SLOTS = 20  # shown after the last occupied one, when capacity is unknown
 
-        layout.addWidget(QLabel("Spawn into:"))
+    def __init__(self, main_window):
+        super().__init__(main_window)
+        self.main_window = main_window
+        self.setWindowTitle("Inventory Editor")
+        self.resize(*GAME_WINDOW_SIZE)
+        self.setMinimumSize(*GAME_WINDOW_MIN)
+
+        self._state = None  # last inventory_state() result, for click/remove lookups
+        self._slots_by_position = {}  # grid position -> slot dict, for the current container
+
+        central = QWidget()
+        self.setCentralWidget(central)
+        root = QVBoxLayout(central)
+
+        top_row = QHBoxLayout()
+        top_row.addWidget(QLabel("Container:"))
         self.target_combo = QComboBox()
-        for label, key in targets:
-            self.target_combo.addItem(label, key)
-        layout.addWidget(self.target_combo)
+        self.target_combo.currentIndexChanged.connect(self.refresh)
+        top_row.addWidget(self.target_combo, 1)
+        refresh_btn = QPushButton("Refresh")
+        refresh_btn.clicked.connect(self.refresh)
+        top_row.addWidget(refresh_btn)
+        root.addLayout(top_row)
 
-        layout.addWidget(QLabel("Item type id:"))
+        self.capacity_label = QLabel("")
+        self.capacity_label.setWordWrap(True)
+        root.addWidget(self.capacity_label)
+
+        splitter = QSplitter(Qt.Horizontal)
+        root.addWidget(splitter, 1)
+
+        grid_box = QGroupBox("Slots (click a cell to select it)")
+        grid_layout = QVBoxLayout(grid_box)
+        self.grid_table = QTableWidget()
+        self.grid_table.setColumnCount(self.GRID_COLUMNS)
+        self.grid_table.horizontalHeader().setVisible(False)
+        self.grid_table.verticalHeader().setVisible(False)
+        self.grid_table.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.grid_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.grid_table.itemSelectionChanged.connect(self._on_grid_selection_changed)
+        grid_layout.addWidget(self.grid_table)
+        splitter.addWidget(grid_box)
+
+        list_box = QGroupBox("Occupied slots")
+        list_layout = QVBoxLayout(list_box)
+        self.item_table = QTableWidget()
+        self.item_table.setColumnCount(3)
+        self.item_table.setHorizontalHeaderLabels(["Position", "Type ID", "Instance ID"])
+        self.item_table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.item_table.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.item_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.item_table.itemSelectionChanged.connect(self._on_item_selection_changed)
+        list_layout.addWidget(self.item_table)
+        splitter.addWidget(list_box)
+        splitter.setStretchFactor(0, 2)
+        splitter.setStretchFactor(1, 1)
+
+        form_row = QHBoxLayout()
+        form_row.addWidget(QLabel("Item type id:"))
         self.item_id_edit = QLineEdit()
         self.item_id_edit.setPlaceholderText("e.g. 594 - find ids via a wiki/datamine")
-        layout.addWidget(self.item_id_edit)
-
-        layout.addWidget(QLabel("Quantity:"))
+        form_row.addWidget(self.item_id_edit)
+        form_row.addWidget(QLabel("Quantity:"))
         self.quantity_edit = QLineEdit("1")
-        layout.addWidget(self.quantity_edit)
+        self.quantity_edit.setFixedWidth(50)
+        form_row.addWidget(self.quantity_edit)
+        root.addLayout(form_row)
 
         button_row = QHBoxLayout()
+        self.spawn_btn = QPushButton("Spawn Into Selected Slot")
+        self.spawn_btn.clicked.connect(self._spawn)
+        button_row.addWidget(self.spawn_btn)
+        self.remove_btn = QPushButton("Remove Selected Item")
+        self.remove_btn.clicked.connect(self._remove)
+        self.remove_btn.setEnabled(False)
+        button_row.addWidget(self.remove_btn)
         button_row.addStretch(1)
-        cancel_btn = QPushButton("Cancel")
-        cancel_btn.clicked.connect(self.reject)
-        button_row.addWidget(cancel_btn)
-        spawn_btn = QPushButton("Spawn")
-        spawn_btn.clicked.connect(self._confirm)
-        button_row.addWidget(spawn_btn)
-        layout.addLayout(button_row)
+        root.addLayout(button_row)
 
-    def _confirm(self):
-        try:
-            self._item_id = int(self.item_id_edit.text().strip())
-            self._quantity = int(self.quantity_edit.text().strip())
-        except ValueError:
-            QMessageBox.critical(self, "Spawn Item", "Item type id and quantity must both be whole numbers.")
+        self.status_label = QLabel("")
+        self.status_label.setWordWrap(True)
+        root.addWidget(self.status_label)
+
+        self._reload_targets()
+
+    # ---------------------------------------------------------------- data
+
+    def _reload_targets(self):
+        self.target_combo.blockSignals(True)
+        self.target_combo.clear()
+        targets = []
+        if self.main_window.data is not None and self.main_window.profile.spawn_item_targets:
+            try:
+                targets = self.main_window.profile.spawn_item_targets(self.main_window.data)
+            except Exception:
+                targets = []
+        for label, key in targets:
+            self.target_combo.addItem(label, key)
+        self.target_combo.blockSignals(False)
+        self.refresh()
+
+    def refresh(self):
+        """Re-read inventory_state() for the current container and redraw
+        both the grid and the item list. Safe to call any time (after an
+        edit, an undo/redo, a reload, or opening this window) - it never
+        assumes the previously selected container still exists."""
+        self._state = None
+        self._slots_by_position = {}
+        target_key = self.target_combo.currentData()
+        profile = self.main_window.profile
+        if (
+            target_key is None
+            or self.main_window.data is None
+            or profile.inventory_state is None
+        ):
+            self.grid_table.setRowCount(0)
+            self.item_table.setRowCount(0)
+            self.capacity_label.setText("No container selected.")
+            self.remove_btn.setEnabled(False)
             return
-        self._target_key = self.target_combo.currentData()
-        self.accept()
+
+        try:
+            state = profile.inventory_state(self.main_window.data, target_key)
+        except ValueError as e:
+            self.grid_table.setRowCount(0)
+            self.item_table.setRowCount(0)
+            self.capacity_label.setText(f"Couldn't read this container: {e}")
+            self.remove_btn.setEnabled(False)
+            return
+
+        self._state = state
+        capacity = state.get("capacity")
+        slots = state.get("slots", [])
+        note = state.get("capacity_note")
+
+        if capacity is not None:
+            self.capacity_label.setText(f"Capacity: {len(slots)} / {capacity} used.")
+            total_cells = max(capacity, len(slots))
+        else:
+            base = f"Occupied: {len(slots)} (no fixed capacity for this container)."
+            self.capacity_label.setText(f"{base}  {note}" if note else base)
+            total_cells = len(slots) + self.EXTRA_EMPTY_SLOTS
+
+        self._render_grid(slots, total_cells)
+        self._render_item_list(slots)
+        self.remove_btn.setEnabled(False)
+
+    def _render_grid(self, slots, total_cells):
+        occupied_by_position = {s["position"]: s for s in slots if s.get("position") is not None}
+        rows = max(1, (total_cells + self.GRID_COLUMNS - 1) // self.GRID_COLUMNS)
+        self.grid_table.setRowCount(rows)
+        for row in range(rows):
+            self.grid_table.setRowHeight(row, self.CELL_SIZE)
+        for col in range(self.GRID_COLUMNS):
+            self.grid_table.setColumnWidth(col, self.CELL_SIZE)
+
+        self._slots_by_position = {}
+        for position in range(total_cells):
+            row, col = divmod(position, self.GRID_COLUMNS)
+            slot = occupied_by_position.get(position)
+            cell = QTableWidgetItem()
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)
+            if slot is not None:
+                cell.setText(str(slot.get("type_id", "?")))
+                cell.setBackground(QColor("#5a8f5a"))
+                cell.setData(Qt.UserRole, position)
+                self._slots_by_position[position] = slot
+            else:
+                cell.setText("")
+                cell.setBackground(QColor("#3a3a3a"))
+                cell.setData(Qt.UserRole, position)
+            self.grid_table.setItem(row, col, cell)
+
+    def _render_item_list(self, slots):
+        self.item_table.setRowCount(len(slots))
+        for row, slot in enumerate(slots):
+            self.item_table.setItem(row, 0, QTableWidgetItem(str(slot.get("position"))))
+            self.item_table.setItem(row, 1, QTableWidgetItem(str(slot.get("type_id"))))
+            self.item_table.setItem(row, 2, QTableWidgetItem(str(slot.get("instance_id"))))
+            self.item_table.item(row, 0).setData(Qt.UserRole, slot.get("instance_id"))
+
+    # ----------------------------------------------------------- selection
+
+    def _on_grid_selection_changed(self):
+        items = self.grid_table.selectedItems()
+        if not items:
+            self.remove_btn.setEnabled(False)
+            return
+        position = items[0].data(Qt.UserRole)
+        slot = self._slots_by_position.get(position)
+        self.remove_btn.setEnabled(slot is not None)
+
+    def _on_item_selection_changed(self):
+        self.remove_btn.setEnabled(bool(self.item_table.selectedItems()))
+
+    def _selected_empty_position(self):
+        items = self.grid_table.selectedItems()
+        if not items:
+            return None
+        position = items[0].data(Qt.UserRole)
+        if position in self._slots_by_position:
+            return None  # occupied - spawn_item() picks its own free position anyway
+        return position
+
+    def _selected_instance_id(self):
+        grid_items = self.grid_table.selectedItems()
+        if grid_items:
+            slot = self._slots_by_position.get(grid_items[0].data(Qt.UserRole))
+            if slot is not None:
+                return slot.get("instance_id")
+        list_items = self.item_table.selectedItems()
+        if list_items:
+            row = list_items[0].row()
+            cell = self.item_table.item(row, 0)
+            if cell is not None:
+                return cell.data(Qt.UserRole)
+        return None
+
+    # --------------------------------------------------------------- edits
+
+    def _spawn(self):
+        profile = self.main_window.profile
+        target_key = self.target_combo.currentData()
+        if profile.spawn_item is None or target_key is None or self.main_window.data is None:
+            return
+        try:
+            item_id = int(self.item_id_edit.text().strip())
+            quantity = int(self.quantity_edit.text().strip())
+        except ValueError:
+            QMessageBox.critical(self, "Inventory Editor", "Item type id and quantity must both be whole numbers.")
+            return
+
+        # Snapshot before calling spawn_item, not after - spawn_item is
+        # required to raise before mutating anything on invalid input, so
+        # there's simply nothing to snapshot yet if it fails.
+        pre_spawn_snapshot = self.main_window._snapshot()
+        try:
+            message = profile.spawn_item(self.main_window.data, target_key, item_id, quantity)
+        except ValueError as e:
+            QMessageBox.critical(self, "Inventory Editor", f"Couldn't spawn item:\n{e}")
+            return
+        self.main_window._push_undo(pre_spawn_snapshot)
+        self.main_window.rebuild_tree()
+        self.main_window.refresh_raw_from_tree()
+        self.main_window.refresh_quick_edit()
+        self.main_window._set_dirty(True)
+        self.main_window._set_status(message)
+        self.status_label.setText(message)
+        self.refresh()
+
+    def _remove(self):
+        profile = self.main_window.profile
+        target_key = self.target_combo.currentData()
+        instance_id = self._selected_instance_id()
+        if profile.remove_inventory_item is None or target_key is None or instance_id is None:
+            return
+        if QMessageBox.question(
+            self, "Inventory Editor", f"Remove item (instance {instance_id})? (You can Undo this.)"
+        ) != QMessageBox.Yes:
+            return
+
+        pre_remove_snapshot = self.main_window._snapshot()
+        try:
+            message = profile.remove_inventory_item(self.main_window.data, target_key, instance_id)
+        except ValueError as e:
+            QMessageBox.critical(self, "Inventory Editor", f"Couldn't remove item:\n{e}")
+            return
+        self.main_window._push_undo(pre_remove_snapshot)
+        self.main_window.rebuild_tree()
+        self.main_window.refresh_raw_from_tree()
+        self.main_window.refresh_quick_edit()
+        self.main_window._set_dirty(True)
+        self.main_window._set_status(message)
+        self.status_label.setText(message)
+        self.refresh()
+
+    def closeEvent(self, event):
+        self.main_window._inventory_editor_window = None
+        super().closeEvent(event)
 
     def values(self):
         """(target_key, item_id, quantity) - only meaningful after accept()."""
@@ -580,8 +834,8 @@ class SaveEditorWindow(QMainWindow):
         delete_action.triggered.connect(self.delete_selected)
         edit_menu.addAction(delete_action)
         edit_menu.addSeparator()
-        self.spawn_item_action = QAction("Spawn Item...", self)
-        self.spawn_item_action.triggered.connect(self.open_spawn_item_dialog)
+        self.spawn_item_action = QAction("Inventory Editor...", self)
+        self.spawn_item_action.triggered.connect(self.open_inventory_editor)
         self.spawn_item_action.setEnabled(False)  # enabled per-profile in _apply_profile_to_ui
         edit_menu.addAction(self.spawn_item_action)
         edit_menu.addSeparator()
@@ -855,6 +1109,8 @@ class SaveEditorWindow(QMainWindow):
         self.refresh_raw_from_tree()
         self.refresh_quick_edit()
         self._set_dirty(dirty)
+        if getattr(self, "_inventory_editor_window", None) is not None:
+            self._inventory_editor_window.refresh()
 
     def undo(self):
         if not self._undo_stack:
@@ -883,7 +1139,12 @@ class SaveEditorWindow(QMainWindow):
         self.game_combo.setCurrentText(self.profile.display_name)
         self.game_combo.blockSignals(False)
         self._rebuild_quick_edit_widgets()
-        self.spawn_item_action.setEnabled(self.profile.spawn_item is not None)
+        self.spawn_item_action.setEnabled(
+            self.profile.spawn_item is not None
+            and self.profile.spawn_item_targets is not None
+            and self.profile.inventory_state is not None
+            and self.profile.remove_inventory_item is not None
+        )
         if self.profile.notes:
             self._set_status(self.profile.notes.splitlines()[0])
 
@@ -912,6 +1173,14 @@ class SaveEditorWindow(QMainWindow):
             self.game_combo.setCurrentText(self.profile.display_name)
             self.game_combo.blockSignals(False)
             return
+        if getattr(self, "_inventory_editor_window", None) is not None:
+            # Its cached view is tied to the OLD profile's hooks/shape -
+            # closing it here (rather than leaving it open to error on its
+            # next refresh) is simpler and safer than trying to re-target
+            # it at a profile that may not even define these hooks.
+            self._inventory_editor_window.close()
+            self._inventory_editor_window = None
+
         self.profile = profile
         self.file_path = None
         self.data = None
@@ -1488,34 +1757,20 @@ class SaveEditorWindow(QMainWindow):
         self._set_dirty(True)
         self._set_status(f"Deleted '{key}'")
 
-    def open_spawn_item_dialog(self):
-        if self.profile.spawn_item is None or self.data is None:
+    def open_inventory_editor(self):
+        if self.data is None:
             return
         targets = self.profile.spawn_item_targets(self.data) if self.profile.spawn_item_targets else []
         if not targets:
-            QMessageBox.information(self, APP_TITLE, "No spawn targets are available in this save.")
+            QMessageBox.information(self, APP_TITLE, "No inventory containers are available in this save.")
             return
-        dialog = SpawnItemDialog(self, targets)
-        if dialog.exec() != QDialog.Accepted:
-            return
-        target_key, item_id, quantity = dialog.values()
-
-        # Snapshot taken before calling spawn_item, not after - same
-        # convention as _open_list_table: if spawn_item raises, it's
-        # required to do so before mutating anything, so `self.data` is
-        # still untouched and there's simply nothing to have snapshotted.
-        pre_spawn_snapshot = self._snapshot()
-        try:
-            message = self.profile.spawn_item(self.data, target_key, item_id, quantity)
-        except ValueError as e:
-            QMessageBox.critical(self, APP_TITLE, f"Couldn't spawn item:\n{e}")
-            return
-        self._push_undo(pre_spawn_snapshot)
-        self.rebuild_tree()
-        self.refresh_raw_from_tree()
-        self.refresh_quick_edit()
-        self._set_dirty(True)
-        self._set_status(message)
+        if getattr(self, "_inventory_editor_window", None) is None:
+            self._inventory_editor_window = InventoryEditorWindow(self)
+        else:
+            self._inventory_editor_window._reload_targets()
+        self._inventory_editor_window.show()
+        self._inventory_editor_window.raise_()
+        self._inventory_editor_window.activateWindow()
 
     # -------------------------------------------------------------- search
 

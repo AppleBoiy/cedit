@@ -454,6 +454,23 @@ class GameProfile:
     # See games/duckov.py, whose save format has no name catalog to
     # validate an item id against, so this only checks structural things
     # (a real positive id, room in a capacity-bounded container).
+    inventory_state: Optional[Callable[[Any, str], dict]] = None
+    # inventory_state(data, target_key) -> {"capacity": int or None,
+    # "capacity_note": str or None, "slots": [{"position", "instance_id",
+    # "type_id"}, ...]} - a read-only snapshot of one of
+    # spawn_item_targets()'s containers, for cedit's Inventory Editor
+    # window (Edit > Inventory Editor...) to render as a grid + list.
+    # "capacity" of None means this format doesn't record a real limit
+    # for that container (show capacity_note to explain why, and just
+    # enough empty slots to spawn into). Set this together with
+    # remove_inventory_item to enable that window for a profile; a game
+    # without both keeps the plain generic tree editor only.
+    remove_inventory_item: Optional[Callable[[Any, str, int], str]] = None
+    # remove_inventory_item(data, target_key, instance_id) -> a status
+    # message, mutating `data` in place to remove that item (and,
+    # depending on the format, whatever it directly contains) from
+    # target_key's container. Raise ValueError (before mutating anything)
+    # to reject it, same convention as spawn_item.
     pre_save_check: Optional[Callable[[str], Optional[str]]] = None
     # pre_save_check(path) -> a block-reason string, or None to allow the
     # save. Called by cedit.py right before it backs up/writes `path` -

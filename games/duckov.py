@@ -218,6 +218,151 @@ def _spawn_into_inventory_data(data, container_key, item_id, quantity):
     return f"Spawned {quantity}x item type {item_id} into {container_key}."
 
 
+# ------------------------------------------------------------- full view
+#
+# Backing for cedit.py's Inventory Editor window: a read-only snapshot of
+# a container's slots (inventory_state) plus a matching removal hook
+# (remove_inventory_item). Both work in terms of the same target keys
+# spawn_item already uses ("backpack", "playerstorage", "safe").
+
+def inventory_state(data, target_key):
+    """{"capacity": int or None, "capacity_note": str or None,
+    "slots": [{"position", "instance_id", "type_id"}, ...]} (occupied
+    slots only - the window itself decides how many empty slots to show
+    alongside them)."""
+    if target_key == "backpack":
+        return _backpack_state(data)
+    if target_key in _INVENTORY_DATA_KEYS:
+        return _inventory_data_state(data, _INVENTORY_DATA_KEYS[target_key])
+    raise ValueError(f"Unknown inventory target {target_key!r}.")
+
+
+def _backpack_state(data):
+    container = data.get("Item/MainCharacterItemData")
+    if not isinstance(container, dict) or "value" not in container:
+        raise ValueError("This save has no Item/MainCharacterItemData.")
+    tree = container["value"]
+    entries = tree.get("entries") or []
+    entries_by_id = {e.get("instanceID"): e for e in entries}
+    root_id = tree.get("rootInstanceID")
+    root_entry = entries_by_id.get(root_id)
+    if root_entry is None:
+        raise ValueError("Couldn't find the root item entry (the player themselves) in this tree.")
+
+    slots = []
+    for ref in root_entry.get("inventory", []):
+        entry = entries_by_id.get(ref.get("instanceID"))
+        slots.append({
+            "position": ref.get("position"),
+            "instance_id": ref.get("instanceID"),
+            "type_id": entry.get("typeID") if entry else None,
+        })
+    return {
+        "capacity": None,
+        "capacity_note": (
+            "Backpack capacity isn't stored in the save file (it depends on "
+            "whichever backpack item is equipped) - shown are only the "
+            "currently occupied positions, plus a few empty ones to spawn into."
+        ),
+        "slots": slots,
+    }
+
+
+def _inventory_data_state(data, container_key):
+    container = data.get(container_key)
+    if not isinstance(container, dict) or "value" not in container:
+        raise ValueError(f"This save has no {container_key}.")
+    inv = container["value"]
+    entries = inv.get("entries") or []
+
+    slots = []
+    for e in entries:
+        tree = e.get("itemTreeData") or {}
+        root_id = tree.get("rootInstanceID")
+        root_entry = next(
+            (x for x in tree.get("entries", []) if x.get("instanceID") == root_id), None
+        )
+        slots.append({
+            "position": e.get("inventoryPosition"),
+            "instance_id": root_id,
+            "type_id": root_entry.get("typeID") if root_entry else None,
+        })
+    return {"capacity": inv.get("capacity"), "capacity_note": None, "slots": slots}
+
+
+def _collect_subtree_instance_ids(entries_by_id, root_id, out):
+    if root_id in out:
+        return
+    out.add(root_id)
+    entry = entries_by_id.get(root_id)
+    if entry is None:
+        return
+    for ref in entry.get("slotContents", []):
+        _collect_subtree_instance_ids(entries_by_id, ref.get("instanceID"), out)
+    for ref in entry.get("inventory", []):
+        _collect_subtree_instance_ids(entries_by_id, ref.get("instanceID"), out)
+
+
+def remove_inventory_item(data, target_key, instance_id):
+    """Remove the item `instance_id` from `target_key`'s container.
+
+    Only the top-level slot contents this profile shows are removable -
+    if a Player Storage/Safe slot's item is itself a container (e.g. a
+    stored backpack) holding further items, those nested contents aren't
+    exposed by inventory_state() here at all, so edit them through the
+    generic tree editor instead (Inventory/PlayerStorage -> that entry's
+    itemTreeData) rather than through this window.
+    """
+    if target_key == "backpack":
+        return _remove_from_backpack(data, instance_id)
+    if target_key in _INVENTORY_DATA_KEYS:
+        return _remove_from_inventory_data(data, _INVENTORY_DATA_KEYS[target_key], instance_id)
+    raise ValueError(f"Unknown inventory target {target_key!r}.")
+
+
+def _remove_from_backpack(data, instance_id):
+    container = data.get("Item/MainCharacterItemData")
+    if not isinstance(container, dict) or "value" not in container:
+        raise ValueError("This save has no Item/MainCharacterItemData.")
+    tree = container["value"]
+    entries = tree.get("entries") or []
+    root_id = tree.get("rootInstanceID")
+    if instance_id == root_id:
+        raise ValueError("Can't remove the character's own root entry.")
+    entries_by_id = {e.get("instanceID"): e for e in entries}
+    root_entry = entries_by_id.get(root_id)
+    if root_entry is None:
+        raise ValueError("Couldn't find the root item entry (the player themselves) in this tree.")
+    inventory = root_entry.get("inventory", [])
+    if not any(ref.get("instanceID") == instance_id for ref in inventory):
+        raise ValueError("That item isn't directly in the backpack (only top-level items can be removed here).")
+
+    to_remove = set()
+    _collect_subtree_instance_ids(entries_by_id, instance_id, to_remove)
+    tree["entries"] = [e for e in entries if e.get("instanceID") not in to_remove]
+    root_entry["inventory"] = [ref for ref in inventory if ref.get("instanceID") != instance_id]
+    return f"Removed item (instance {instance_id}) and anything it contained from the backpack."
+
+
+def _remove_from_inventory_data(data, container_key, instance_id):
+    container = data.get(container_key)
+    if not isinstance(container, dict) or "value" not in container:
+        raise ValueError(f"This save has no {container_key}.")
+    inv = container["value"]
+    entries = inv.get("entries") or []
+    match_index = next(
+        (i for i, e in enumerate(entries)
+         if (e.get("itemTreeData") or {}).get("rootInstanceID") == instance_id),
+        None,
+    )
+    if match_index is None:
+        raise ValueError("That item isn't a top-level slot in this container.")
+    del entries[match_index]
+    return f"Removed item (instance {instance_id}) from {container_key}."
+
+
 PROFILE = GameProfile.from_config(_CONFIG_PATH)
 PROFILE.spawn_item_targets = spawn_item_targets
 PROFILE.spawn_item = spawn_item
+PROFILE.inventory_state = inventory_state
+PROFILE.remove_inventory_item = remove_inventory_item

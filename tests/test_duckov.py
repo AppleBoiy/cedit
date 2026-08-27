@@ -234,10 +234,101 @@ class TestInstanceIdAllocation(unittest.TestCase):
         self.assertTrue(all(new_id < min(existing) for new_id in new_ids))
 
 
+class TestInventoryState(unittest.TestCase):
+    def test_backpack_state_has_no_capacity_but_notes_why(self):
+        state = duckov_game.inventory_state(fixture(), "backpack")
+        self.assertIsNone(state["capacity"])
+        self.assertIn("isn't stored", state["capacity_note"])
+        self.assertEqual(state["slots"], [{"position": 0, "instance_id": -116, "type_id": 594}])
+
+    def test_playerstorage_state_has_real_capacity(self):
+        state = duckov_game.inventory_state(fixture(), "playerstorage")
+        self.assertEqual(state["capacity"], 4)
+        self.assertIsNone(state["capacity_note"])
+        self.assertEqual(state["slots"], [{"position": 0, "instance_id": -200, "type_id": 10}])
+
+    def test_safe_state_is_empty(self):
+        state = duckov_game.inventory_state(fixture(), "safe")
+        self.assertEqual(state["capacity"], 2)
+        self.assertEqual(state["slots"], [])
+
+    def test_unknown_target_raises(self):
+        with self.assertRaises(ValueError):
+            duckov_game.inventory_state(fixture(), "nonexistent_target")
+
+    def test_missing_container_raises(self):
+        data = fixture()
+        del data["Inventory/PlayerStorage"]
+        with self.assertRaises(ValueError):
+            duckov_game.inventory_state(data, "playerstorage")
+
+
+class TestRemoveInventoryItem(unittest.TestCase):
+    def test_removes_backpack_item_and_reference(self):
+        data = fixture()
+        duckov_game.remove_inventory_item(data, "backpack", -116)
+        tree = data["Item/MainCharacterItemData"]["value"]
+        ids = {e["instanceID"] for e in tree["entries"]}
+        self.assertNotIn(-116, ids)
+        root_entry = next(e for e in tree["entries"] if e["instanceID"] == tree["rootInstanceID"])
+        self.assertEqual(root_entry["inventory"], [])
+
+    def test_removes_backpack_item_and_nested_contents(self):
+        data = fixture()
+        tree = data["Item/MainCharacterItemData"]["value"]
+        tree["entries"].append(
+            {"instanceID": -117, "typeID": 999, "variables": [], "slotContents": [], "inventory": [], "inventorySortLocks": []}
+        )
+        entry_116 = next(e for e in tree["entries"] if e["instanceID"] == -116)
+        entry_116["inventory"] = [{"position": 0, "instanceID": -117}]
+        duckov_game.remove_inventory_item(data, "backpack", -116)
+        ids = {e["instanceID"] for e in tree["entries"]}
+        self.assertNotIn(-116, ids)
+        self.assertNotIn(-117, ids)
+
+    def test_rejects_removing_the_root_entry(self):
+        data = fixture()
+        before = copy.deepcopy(data)
+        with self.assertRaises(ValueError):
+            duckov_game.remove_inventory_item(data, "backpack", -100)
+        self.assertEqual(data, before)
+
+    def test_rejects_removing_a_non_top_level_item(self):
+        # -108 is equipped via slotContents (PrimaryWeapon), not directly in
+        # the backpack's own inventory list.
+        data = fixture()
+        before = copy.deepcopy(data)
+        with self.assertRaises(ValueError):
+            duckov_game.remove_inventory_item(data, "backpack", -108)
+        self.assertEqual(data, before)
+
+    def test_removes_playerstorage_slot(self):
+        data = fixture()
+        duckov_game.remove_inventory_item(data, "playerstorage", -200)
+        inv = data["Inventory/PlayerStorage"]["value"]
+        self.assertEqual(inv["entries"], [])
+
+    def test_rejects_unknown_instance_in_playerstorage(self):
+        data = fixture()
+        before = copy.deepcopy(data)
+        with self.assertRaises(ValueError):
+            duckov_game.remove_inventory_item(data, "playerstorage", -999)
+        self.assertEqual(data, before)
+
+    def test_unknown_target_raises(self):
+        data = fixture()
+        with self.assertRaises(ValueError):
+            duckov_game.remove_inventory_item(data, "nonexistent_target", -200)
+
+
 class TestProfileWiring(unittest.TestCase):
     def test_spawn_hooks_attached_to_profile(self):
         self.assertIs(duckov_game.PROFILE.spawn_item, duckov_game.spawn_item)
         self.assertIs(duckov_game.PROFILE.spawn_item_targets, duckov_game.spawn_item_targets)
+
+    def test_inventory_hooks_attached_to_profile(self):
+        self.assertIs(duckov_game.PROFILE.inventory_state, duckov_game.inventory_state)
+        self.assertIs(duckov_game.PROFILE.remove_inventory_item, duckov_game.remove_inventory_item)
 
     def test_spawned_item_survives_profile_dump_load_round_trip(self):
         data = fixture()

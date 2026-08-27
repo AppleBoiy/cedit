@@ -142,17 +142,27 @@ Escape from Duckov
   Plain-JSON Unity Easy Save 3 format, fully editable through the generic
   tree editor - including inventory (Item/MainCharacterItemData for the
   backpack/equipped items, Inventory/PlayerStorage and
-  Inventory/Inventory_Safe for base storage). Edit > Spawn Item... adds a
-  brand-new item by numeric type id into the backpack, player storage, or
-  the safe - it handles this format's own item-tree linking (unique
-  instanceIDs, equipment slotContents, inventory position lists,
-  capacity limits on storage containers) so you don't have to construct
-  that structure by hand through the generic tree. There's no bundled
-  item name catalog (none is published for this game), so look up type
-  ids via a wiki/datamine first. Each unit of a spawned quantity is its
-  own separate item entry rather than one entry with a fabricated "Count"
-  - whether an item type is actually stackable, and under which field,
-  is something only the game's own catalog would know for certain.
+  Inventory/Inventory_Safe for base storage). Edit > Inventory Editor...
+  opens a dedicated full window (like DREDGE's own inventory window) for
+  the backpack, player storage, and the safe: a visual grid colored by
+  occupied/free slot, a side list of what's in each slot (position, type
+  id, instance id), and Spawn/Remove buttons. Spawning adds a brand-new
+  item by numeric type id - it handles this format's own item-tree
+  linking (unique instanceIDs, equipment slotContents, inventory position
+  lists, capacity limits on storage containers) so you don't have to
+  construct that structure by hand through the generic tree. There's no
+  bundled item name catalog (none is published for this game), so look up
+  type ids via a wiki/datamine first. Each unit of a spawned quantity is
+  its own separate item entry rather than one entry with a fabricated
+  "Count" - whether an item type is actually stackable, and under which
+  field, is something only the game's own catalog would know for certain.
+  Removing an item also removes anything nested inside it (e.g. a stored
+  container's contents); only the top-level slots this window shows are
+  removable this way - a stored item that's itself a container needs the
+  generic tree editor for its own nested contents. Backpack capacity
+  isn't recorded anywhere in the save (it depends on whichever backpack
+  item is equipped), so that grid only shows what's occupied plus a
+  handful of empty slots to spawn into, rather than a real total.
 
 Octopath Traveler / II
   Unreal Engine 4.27 GVAS binary saves, parsed by byte-offset scanning
