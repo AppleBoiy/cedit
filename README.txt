@@ -18,6 +18,7 @@ Currently supported:
   - Octopath Traveler / II   (games/octopath.py + lib/octopath_lib.py)
   - DREDGE                   (games/dredge.py + lib/dredge_client.py)
   - Dave the Diver           (games/dave.py + data/dave/)
+  - BlazBlue Entropy Effect  (games/bbee.py + lib/bbee_lib.py)
 
 
 RUNNING IT
@@ -176,6 +177,22 @@ Dave the Diver (Steam / macOS)
   silently overwrite your edit otherwise) - quit the game fully first,
   and give Steam Cloud sync a moment before relaunching. Ported from your
   own standalone AppleBoiy/dave-editor project.
+
+BlazBlue Entropy Effect (Steam)
+  A save slot (named just a digit, "1".."9", no extension) is an
+  LZ4-framed schema-less protobuf message. Deliberately narrow scope,
+  matching the source project's own README exactly: only persistent
+  Analysis Points (AP) is ever read or written (wired up as a Quick Edit
+  field); everything else in the save has no field names in this format
+  (a schema-less protobuf message only has numbered fields), so it isn't
+  parsed or exposed at all - not even read-only. Needs the `lz4`
+  command-line tool on PATH (`brew install lz4` on macOS) - set BBEE_LZ4
+  if it's installed somewhere unusual. Every save re-decompresses the
+  original file fresh, edits only the nested containers on the path to
+  AP (everything else keeps its original bytes and order), then
+  re-decompresses and re-parses the freshly-written bytes to confirm AP
+  actually reads back correctly before cedit ever touches the real file.
+  Ported from your own standalone AppleBoiy/bbee-se project.
 
 DREDGE
   DREDGE saves are .NET BinaryFormatter blobs that only the game's own

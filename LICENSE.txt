@@ -39,6 +39,16 @@ PROVENANCE OF EACH PIECE
    project's own copy, which it in turn generated from the MIT-licensed
    FNGarvin/DaveSaveEd project - see data/dave/README.md.
 
+6. lib/bbee_wire.py and lib/bbee_lib.py
+   Ported from your own AppleBoiy/bbee-se project
+   (https://github.com/AppleBoiy/bbee-se, MIT licensed) - lib/bbee_wire.py
+   is that project's own schema-less protobuf reader/writer
+   (bbee_editor/wire.py) essentially unchanged; lib/bbee_lib.py adapts its
+   currency locator/editor (bbee_editor/save_format.py) to cedit's
+   bytes-in/bytes-out GameProfile.loads/dumps contract instead of that
+   project's own file-path-based one. games/bbee.py's narrow read/write
+   scope (only Analysis Points) matches that project's own README exactly.
+
 Everything else (cedit.py, lib/base.py, lib/dredge_client.py, the rest of
 games/*.py, and the data/*.json config files) was written from scratch for
 this project.

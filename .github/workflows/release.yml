@@ -21,6 +21,12 @@ jobs:
         with:
           python-version: "3.12"
 
+      # macos-latest usually ships lz4 already, but make it explicit
+      # rather than relying on the runner image's default toolset -
+      # needed for games/bbee.py's tests and for the app itself.
+      - name: Ensure lz4 is installed
+        run: brew list lz4 &>/dev/null || brew install lz4
+
       - name: Run unit tests
         run: python3 -m unittest discover -s tests -v
 
