@@ -10,26 +10,34 @@ Traveler (Steam app 921570) and Octopath Traveler II (Steam app 1971870),
 including the OT1/OT2 property-name differences and the backpack layout
 difference, belongs entirely to that project.
 
-What's kept here: read-only parsing (parse_save and everything it needs)
-so cedit can browse a save's full contents - money, both games' character
-rosters (stats, stat bonuses, jobs, equipment), inventory, and (OT1) the
-tame-monster "Capture" roster.
+What's kept here: parsing (parse_save and everything it needs) so cedit
+can browse a save's full contents - money, both games' character rosters
+(stats, stat bonuses, jobs, equipment), inventory, and (OT1) the
+tame-monster "Capture" roster - plus the offset/catalog bookkeeping
+(_offsets, _inventory_slots, _inventory_empty, equipment slots' _offset,
+capture slots' _offsets) games/octopath.py's writer needs to safely patch
+scalar fields back in place, ported from the same ideas as upstream's own
+normalize_edits/apply_edits (item/monster catalog validation, equipment
+category matching, count bounds, empty-slot allocation for a new
+inventory item) but adapted to cedit's "mutate the parsed dict, dumps()
+diffs it against a fresh reparse of the pristine bytes" editing model
+instead of upstream's key-path edits-dict model. See games/octopath.py's
+own module docstring for exactly what is and isn't editable, and why.
 
-What's intentionally left out: the upstream project's dotted-path
-edits-dict validation (normalize_edits) and its item-catalog-aware,
-slot-allocating writer (apply_edits) - cedit/games/octopath.py instead
-writes back only the fixed-offset numeric fields whose position never
-depends on other data (money, starting traveler, and each character's
-core stats/bonuses), which needs no catalog validation and can't corrupt
-inventory/equipment slot bookkeeping. See that file's module docstring for
-exactly what is and isn't editable here, and why.
+What's intentionally left out: second-job assignment, and adding a
+brand-new Capture slot (the save always has a fixed number of them) -
+upstream itself notes the former needs more validation than a plain id
+swap, and the latter has no equivalent to inventory's "empty slot" concept
+to allocate into.
 
 The two JSON catalogs this module reads (item names/categories, and OT1's
-tame-monster names) ship here as empty stubs (data/octopath/*.json) so
-parsing never crashes even without them - items/monsters just show up as
-"Unknown item/monster <id>" instead of their real names. Drop the real
-catalogs from the upstream repo's static/ folder into data/octopath/ (same
-filenames) to get real names.
+tame-monster names) ship here as real data copied from the upstream
+project's static/ folder (data/octopath/*.json) - see that folder's
+README.md if they're ever missing or accidentally swapped for a
+similarly-named but differently-shaped file. Without them, items/monsters
+would just show up as "Unknown item/monster <id>" instead of their real
+names, and any item/monster id wouldn't be recognized as writable data
+(dumps() validates catalog membership before writing).
 """
 
 from __future__ import annotations
@@ -65,6 +73,9 @@ OT1_JOB_NAMES = {
 }
 
 NO_SECOND_JOB = EMPTY_U32
+
+CAPTURE_COUNT_LIMIT = (0, 9_999)  # matches the community editor's own bound
+INVENTORY_COUNT_LIMIT = (0, 99)
 
 EQUIPMENT_SLOTS = [
     ("Sword", "Sword"), ("Lance", "Lance"), ("Dagger", "Dagger"), ("Axe", "Axe"),
@@ -488,4 +499,13 @@ def parse_save(data, profile: "OctoGameProfile | None" = None) -> dict:
         "inventory_capacity": len(inventory_records),
         "inventory_empty_slots": len(empty_slots),
         "_offsets": {"money": money.value_offset, "hero": hero.value_offset},
+        # Bookkeeping for games/octopath.py's writer, same idea as each
+        # character row's own "_offsets": item_id -> its slot's raw
+        # id_offset/count_offset (existing items), and the still-empty
+        # slots' own offsets (for writing a brand new item into the live
+        # inventory) - never trusted at face value, dumps() always
+        # re-derives these fresh from the pristine save bytes rather than
+        # carrying them forward from a possibly-stale parse.
+        "_inventory_slots": inventory_slots,
+        "_inventory_empty": empty_slots,
     }

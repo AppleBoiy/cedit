@@ -53,15 +53,18 @@ Escape from Duckov
 
 Octopath Traveler / II
   Unreal Engine 4.27 GVAS binary saves, parsed by byte-offset scanning
-  (see lib/octopath_lib.py). Only money, starting traveler, and a
-  character's own stat fields are safely writable in-place; everything
-  else (equipment, inventory, capture roster, job IDs) is browsable but
-  read-only, because those fields aren't simple fixed-width values that
-  can be patched without risking corruption. Item/monster names need the
-  catalogs in data/octopath/ - see data/octopath/README.md if they ever
-  go missing or get swapped for the wrong file (items.json and
-  item-details.json in your own octopath-save-editor repo have similar
-  names but different schemas - easy to mix up).
+  (see lib/octopath_lib.py). Writable: money, starting traveler, each
+  character's stat fields, which item occupies an equipment slot (checked
+  against the item catalog's category), an inventory item's count (only
+  for items the catalog marks non-progression-linked - also works to add a
+  brand-new item into any still-empty inventory slot), and (OT1) each
+  Capture slot's monster/count/caught flag. Not supported: second-job
+  assignment, and adding entirely new Capture slots (the save always has a
+  fixed number of them). Item/monster names need the catalogs in
+  data/octopath/ - see data/octopath/README.md if they ever go missing or
+  get swapped for the wrong file (items.json and item-details.json in your
+  own octopath-save-editor repo have similar names but different schemas -
+  easy to mix up).
 
 DREDGE
   DREDGE saves are .NET BinaryFormatter blobs that only the game's own
@@ -86,6 +89,18 @@ Every write path (generic text/binary writer in cedit.py, and the DREDGE
 bridge's own edit command) makes a timestamped backup of the original file
 before touching it, and verifies the newly written file re-parses cleanly
 before replacing the original. Nothing is overwritten silently.
+
+
+TESTS
+-----
+    python3 -m unittest discover -s tests -v
+
+Covers the toolkit-agnostic logic in lib/base.py and lib/dredge_client.py
+(value coercion, path get/set, packed-value codecs, GameProfile config
+loading and save discovery, DREDGE grid/cell validation and inventory-op
+validation). No PySide6/display needed to run these. The PySide6 UI itself
+(cedit.py, games/dredge.py) has no automated test coverage - it needs a
+real display to exercise, so verify it by running the app.
 
 
 BUILD ARTIFACTS
