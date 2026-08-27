@@ -97,6 +97,26 @@ Not handled by packaging: DREDGE saves still need a local DREDGE install
 bundle - those aren't things a Python bundle can carry for you.
 
 
+RELEASING (automated cedit.app builds)
+----------------------------------------
+Push a version tag and GitHub Actions builds cedit.app on macOS and
+attaches it to a new GitHub Release automatically - no local build needed
+to hand someone a copy:
+
+    git tag v1.0.0
+    git push origin v1.0.0
+
+That triggers .github/workflows/release.yml, which runs the test suite,
+builds packaging/cedit.spec on a macos-latest runner, zips dist/cedit.app,
+and publishes it as a release asset (cedit-macos.zip) with auto-generated
+release notes. Bump the tag (v1.0.1, v1.1.0, ...) for each new release.
+
+The built app is unsigned and not notarized (that needs a paid Apple
+Developer account), so macOS Gatekeeper will warn on first launch -
+right-click cedit.app > Open once to get past it, or:
+    xattr -dr com.apple.quarantine cedit.app
+
+
 FOLDER LAYOUT
 -------------
     cedit.py    - the generic editor: menus, tree view, quick-edit panel,

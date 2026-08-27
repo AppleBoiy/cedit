@@ -1,0 +1,45 @@
+name: Release
+
+# Push a tag like "v1.0.0" to build cedit.app on macOS and attach it to a
+# new GitHub Release as a zip. See README.txt's RELEASING section.
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-macos-app:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run unit tests
+        run: python3 -m unittest discover -s tests -v
+
+      - name: Install runtime + build requirements
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r packaging/requirements.txt
+
+      - name: Build cedit.app
+        run: pyinstaller packaging/cedit.spec --noconfirm
+
+      - name: Zip cedit.app
+        run: |
+          cd dist
+          ditto -c -k --sequesterRsrc --keepParent cedit.app cedit-macos.zip
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/cedit-macos.zip
+          generate_release_notes: true
