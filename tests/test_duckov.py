@@ -345,6 +345,18 @@ class TestItemNames(unittest.TestCase):
         self.assertIsNone(duckov_game._describe_entry(None, "instanceID", 252))
         self.assertIsNone(duckov_game._describe_entry(None, "typeID", "252"))  # must be an int, not str
 
+    def test_item_catalog_covers_the_full_catalog_sorted_by_name(self):
+        rows = duckov_game.item_catalog(fixture())
+        self.assertEqual(len(rows), len(duckov_game._ITEM_NAMES))
+        names = [name for name, _id in rows]
+        self.assertEqual(names, sorted(names, key=str.lower))
+
+    def test_item_catalog_ids_are_strings_and_resolve_back_to_their_name(self):
+        rows = duckov_game.item_catalog(fixture())
+        name, item_id = rows[0]
+        self.assertIsInstance(item_id, str)
+        self.assertEqual(duckov_game.item_name(item_id), name)
+
 
 class TestProfileWiring(unittest.TestCase):
     def test_spawn_hooks_attached_to_profile(self):
@@ -357,6 +369,9 @@ class TestProfileWiring(unittest.TestCase):
 
     def test_describe_entry_attached_to_profile(self):
         self.assertIs(duckov_game.PROFILE.describe_entry, duckov_game._describe_entry)
+
+    def test_item_catalog_attached_to_profile(self):
+        self.assertIs(duckov_game.PROFILE.item_catalog, duckov_game.item_catalog)
 
     def test_spawned_item_survives_profile_dump_load_round_trip(self):
         data = fixture()

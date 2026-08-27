@@ -60,6 +60,14 @@ def _describe_entry(container, key, value):
     return None
 
 
+def item_catalog(data):
+    """Every catalog entry, as [(name, id_str), ...] sorted by name - feeds
+    the Inventory Editor window's "Browse Catalog..." picker. `data` isn't
+    actually used (this catalog doesn't depend on the save file), but the
+    signature matches spawn_item_targets(data)'s for consistency."""
+    return sorted(((name, type_id) for type_id, name in _ITEM_NAMES.items()), key=lambda row: row[0].lower())
+
+
 # --------------------------------------------------------------- item tree
 #
 # Two related container shapes recur throughout a Duckov save:
@@ -392,3 +400,4 @@ PROFILE.spawn_item = spawn_item
 PROFILE.inventory_state = inventory_state
 PROFILE.remove_inventory_item = remove_inventory_item
 PROFILE.describe_entry = _describe_entry
+PROFILE.item_catalog = item_catalog

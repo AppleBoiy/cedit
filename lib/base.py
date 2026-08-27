@@ -454,6 +454,16 @@ class GameProfile:
     # See games/duckov.py, whose save format has no name catalog to
     # validate an item id against, so this only checks structural things
     # (a real positive id, room in a capacity-bounded container).
+    item_catalog: Optional[Callable[[Any], List[Tuple[str, str]]]] = None
+    # item_catalog(data) -> [(display_name, item_id_str), ...], every item
+    # this profile has a known name for. Purely a convenience for cedit's
+    # Inventory Editor window's "Browse Catalog..." picker (a searchable
+    # list instead of typing a raw id from memory) - set this alongside
+    # spawn_item/spawn_item_targets when a real catalog exists (see
+    # games/duckov.py's item_catalog(), built from data/duckov/
+    # item_names.json). A game with a catalog but no known item ids for
+    # *browsing* purposes (or none at all) just leaves this None; the
+    # window falls back to a plain id text field with no browse button.
     inventory_state: Optional[Callable[[Any, str], dict]] = None
     # inventory_state(data, target_key) -> {"capacity": int or None,
     # "capacity_note": str or None, "slots": [{"position", "instance_id",

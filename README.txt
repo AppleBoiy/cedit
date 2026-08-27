@@ -156,7 +156,10 @@ Escape from Duckov
   install's own game files (see data/duckov/README.md), covering 1568
   items. Both the generic tree and the Inventory Editor window show a
   looked-up name next to a typeID wherever this catalog covers it; ids it
-  doesn't cover just show as a bare number. Each unit of a spawned
+  doesn't cover just show as a bare number. The Inventory Editor's
+  "Browse Catalog..." button opens a searchable name/id picker over the
+  whole catalog, so spawning an item doesn't require already knowing its
+  numeric id. Each unit of a spawned
   quantity is its own separate item entry rather than one entry with a
   fabricated "Count" - whether an item type is actually stackable, and
   under which field, is something only the game's own catalog would know

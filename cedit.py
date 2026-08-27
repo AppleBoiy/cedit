@@ -441,6 +441,62 @@ class SearchResultsDialog(QDialog):
         self.main_window.tree.scrollToItem(node)
 
 
+class ItemCatalogPickerDialog(QDialog):
+    """A searchable picker over a GameProfile's item_catalog() (see
+    lib/base.py), so the Inventory Editor window's "Browse Catalog..."
+    button doesn't ask for a raw item id typed from memory. Same pattern as
+    games/dredge.py's own _CatalogPickerDialog, generalized here since it's
+    not tied to DREDGE's own footprint/size columns."""
+
+    def __init__(self, parent, rows, title="Choose an item"):
+        super().__init__(parent)
+        self.setWindowTitle(title)
+        self.resize(420, 480)
+        self._rows = rows  # [(name, id_str), ...]
+        self.chosen_id = None
+
+        layout = QVBoxLayout(self)
+        layout.addWidget(QLabel("Search:"))
+        self.search_edit = QLineEdit()
+        self.search_edit.textChanged.connect(self._populate)
+        layout.addWidget(self.search_edit)
+
+        self.tree = QTreeWidget()
+        self.tree.setColumnCount(2)
+        self.tree.setHeaderLabels(["Name", "ID"])
+        self.tree.setColumnWidth(0, 280)
+        self.tree.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.tree.itemDoubleClicked.connect(lambda *a: self._confirm())
+        layout.addWidget(self.tree, 1)
+
+        button_row = QHBoxLayout()
+        button_row.addStretch(1)
+        cancel_btn = QPushButton("Cancel")
+        cancel_btn.clicked.connect(self.reject)
+        button_row.addWidget(cancel_btn)
+        choose_btn = QPushButton("Choose")
+        choose_btn.clicked.connect(self._confirm)
+        button_row.addWidget(choose_btn)
+        layout.addLayout(button_row)
+
+        self._populate("")
+        self.search_edit.setFocus()
+
+    def _populate(self, filter_text):
+        self.tree.clear()
+        needle = filter_text.strip().lower()
+        for name, item_id in self._rows:
+            if needle and needle not in name.lower() and needle not in item_id.lower():
+                continue
+            self.tree.addTopLevelItem(QTreeWidgetItem([name, item_id]))
+
+    def _confirm(self):
+        item = self.tree.currentItem()
+        if item is not None:
+            self.chosen_id = item.text(1)
+            self.accept()
+
+
 class InventoryEditorWindow(QMainWindow):
     """Edit > Inventory Editor... - a dedicated full window (matching the
     visual weight of games/dredge.py's own window) for any game profile
@@ -457,9 +513,13 @@ class InventoryEditorWindow(QMainWindow):
     describe_entry hook (see lib/base.py) recognizes one - grid cells show
     the bare id (a name usually won't fit in one small cell) with the name
     in a hover tooltip, the occupied-slots list has its own Name column,
-    and typing an id into the spawn field previews its name live. A game
-    with no such catalog just shows ids everywhere instead - nothing here
-    ever fabricates or guesses a name.
+    and typing an id into the spawn field previews its name live. If the
+    profile also sets item_catalog, a "Browse Catalog..." button opens a
+    searchable picker (ItemCatalogPickerDialog) over every named item
+    instead of requiring an id typed from memory - that button just stays
+    hidden for a profile without one. A game with no catalog at all just
+    shows raw ids everywhere - nothing here ever fabricates or guesses a
+    name.
     """
 
     GRID_COLUMNS = 10
@@ -545,6 +605,10 @@ class InventoryEditorWindow(QMainWindow):
         self.item_id_edit.setFixedWidth(140)
         self.item_id_edit.textChanged.connect(self._update_item_id_preview)
         form_row.addWidget(self.item_id_edit)
+        self.browse_catalog_btn = QPushButton("Browse Catalog...")
+        self.browse_catalog_btn.clicked.connect(self._browse_catalog)
+        self.browse_catalog_btn.setVisible(self.main_window.profile.item_catalog is not None)
+        form_row.addWidget(self.browse_catalog_btn)
         self.item_id_preview_label = QLabel("")
         self.item_id_preview_label.setStyleSheet("color: palette(mid);")
         form_row.addWidget(self.item_id_preview_label, 1)
@@ -697,6 +761,22 @@ class InventoryEditorWindow(QMainWindow):
             return profile.describe_entry(None, "typeID", type_id)
         except Exception:
             return None
+
+    def _browse_catalog(self):
+        profile = self.main_window.profile
+        if profile.item_catalog is None:
+            return
+        try:
+            rows = profile.item_catalog(self.main_window.data)
+        except Exception as e:
+            QMessageBox.critical(self, "Inventory Editor", f"Couldn't load the item catalog:\n{e}")
+            return
+        if not rows:
+            QMessageBox.information(self, "Inventory Editor", "The item catalog is empty.")
+            return
+        dialog = ItemCatalogPickerDialog(self, rows, title="Choose an item to spawn")
+        if dialog.exec() == QDialog.Accepted and dialog.chosen_id is not None:
+            self.item_id_edit.setText(str(dialog.chosen_id))
 
     def _update_item_id_preview(self, text):
         text = text.strip()
