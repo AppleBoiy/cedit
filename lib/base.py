@@ -34,11 +34,20 @@ loaded with `GameProfile.from_config(...)`:
 
 and a two-line games/<name>.py that just points at it:
 
-    import os
+    from pathlib import Path
     from lib.base import GameProfile
     PROFILE = GameProfile.from_config(
-        os.path.join(os.path.dirname(__file__), "..", "data", "yourgame.json")
+        Path(__file__).resolve().parent.parent / "data" / "yourgame.json"
     )
+
+(Use Path(...).resolve() rather than os.path.join(os.path.dirname(__file__),
+"..", ...) - under a PyInstaller bundle, games/<name>.py is embedded
+straight into the frozen archive, so its __file__ points at a "games"
+directory that never actually exists on disk. A literal ".."-containing
+path then fails to open even though "data" itself is really there, because
+the OS has to actually enter "games" before applying "..". Path.resolve()
+collapses ".." lexically instead, so it doesn't care whether "games" is a
+real directory.)
 
 Only a genuinely unusual save format (real encryption, a bespoke binary
 layout, a checksum that must be recalculated) needs actual Python - pass a
