@@ -85,13 +85,57 @@ GAME_WINDOW_MIN = (800, 520)
 
 # ---------------------------------------------------------------- file IO
 
-def backup_file(path):
-    """Write a timestamped backup next to the original file. Returns the
-    backup path."""
-    ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+DEFAULT_BACKUP_RETENTION = 10  # how many .bak files backup_file() keeps per save file
+
+
+def backup_file(path, keep=DEFAULT_BACKUP_RETENTION):
+    """Write a timestamped backup next to the original file, then prune
+    older backups of this same file beyond `keep` (oldest first) so a
+    file you open/save a lot doesn't quietly accumulate hundreds of .bak
+    files over time. Pass keep=None to disable pruning entirely. Returns
+    the new backup's path - pruning is best-effort and never allowed to
+    fail the backup/save itself (a stale .bak that can't be removed, e.g.
+    because something else has it open, is just left behind)."""
+    # Microsecond precision, not just seconds - two backups of the same
+    # file within the same second (easy to hit: Open re-backs-up on load,
+    # a quick Save right after backs up again) would otherwise collide on
+    # an identical filename and silently overwrite each other instead of
+    # both existing.
+    ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S_%f")
     backup_path = f"{path}.{ts}.bak"
+    # Even microseconds could theoretically collide (coarse clocks, fast
+    # loops) - fall back to a counter suffix rather than ever silently
+    # clobbering an existing backup.
+    counter = 1
+    while os.path.exists(backup_path):
+        backup_path = f"{path}.{ts}_{counter}.bak"
+        counter += 1
     shutil.copy2(path, backup_path)
+    if keep is not None:
+        _prune_backups(path, keep)
     return backup_path
+
+
+def _prune_backups(path, keep):
+    directory = os.path.dirname(path) or "."
+    prefix = os.path.basename(path) + "."
+    try:
+        candidates = [
+            os.path.join(directory, name) for name in os.listdir(directory)
+            if name.startswith(prefix) and name.endswith(".bak")
+        ]
+    except OSError:
+        return
+    # Sort by filename, not mtime: the timestamp is embedded in the name
+    # with fixed-width zero-padded fields, so it sorts lexically in the
+    # same order it was created - and unlike mtime, that's unaffected by
+    # filesystems with coarse (e.g. 1-second) mtime resolution.
+    candidates.sort(reverse=True)  # newest first
+    for stale in candidates[max(keep, 0):]:
+        try:
+            os.remove(stale)
+        except OSError:
+            pass
 
 
 def atomic_write_bytes(path, data):

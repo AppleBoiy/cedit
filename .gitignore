@@ -14,3 +14,7 @@ lib/dredge_bridge/obj/
 
 # OS cruft
 .DS_Store
+build/
+dist/
+.venv-build/
+*.spec.bak

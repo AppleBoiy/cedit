@@ -43,6 +43,60 @@ branches happen to be expanded, so it never misses a match hidden under a
 collapsed node.
 
 
+RECENT FILES
+------------
+File > Open Recent lists the last 10 files you've opened (across all
+games), newest first, each labeled with which game it belongs to.
+Choosing one switches to that game first if needed, then opens it -
+same confirm-before-discarding-changes prompt as switching games
+manually. Persisted via Qt's native per-OS settings storage, so it
+survives restarts without cedit managing its own config file. DREDGE
+saves never appear here (its window doesn't go through this path).
+
+
+UNDO / REDO
+-----------
+Edit > Undo (Ctrl+Z) and Redo cover every mutating action in the generic
+editor - quick-edit apply, tree double-click edits, Add Key/Delete
+Selected, Apply Raw -> Tree, and edits made through a list's "View as
+Table" dialog. Each is a full snapshot of the save data from just before
+that action, so Undo always cleanly reverts one whole action at a time.
+History is cleared on Open/Reload/switching games (there's nothing
+meaningful to undo back into a different file). DREDGE's own window
+doesn't use this - it has its own pending-changes-until-Apply model
+instead.
+
+
+PACKAGING (build a real cedit.app)
+-----------------------------------
+So you don't have to keep lining up the right Python/pip every time (this
+is what bit you once already, with a conda/Homebrew mismatch), you can
+build cedit into a real double-clickable cedit.app with PySide6 baked in:
+
+    ./packaging/build_app.sh
+
+This creates a throwaway build venv (.venv-build), installs PySide6 +
+PyInstaller into it, and produces dist/cedit.app. Drag that into
+/Applications and launch it like any other Mac app - no terminal, no
+Python environment to get right, ever again.
+
+Must be run on macOS (PyInstaller bundles are platform-specific, and this
+one was only ever built/tested there - it can't be built or verified from
+a Linux CI runner). Rebuild it any time you pull new changes.
+
+What's bundled: cedit.py, everything under games/ and lib/, the data/
+folder (item/monster catalogs, DREDGE manifest if you've generated one),
+and lib/dredge_bridge/'s C# *source* (not its bin/obj build output - the
+bridge still builds itself with your local .NET SDK the first time you
+open a DREDGE save inside the bundled app, exactly like running from
+source). packaging/cedit.spec is the PyInstaller spec if you want to
+tweak what's included; packaging/cedit.icns is the app icon.
+
+Not handled by packaging: DREDGE saves still need a local DREDGE install
+(for its Assembly-CSharp.dll) and a .NET SDK on the machine running the
+bundle - those aren't things a Python bundle can carry for you.
+
+
 FOLDER LAYOUT
 -------------
     cedit.py    - the generic editor: menus, tree view, quick-edit panel,
@@ -55,6 +109,8 @@ FOLDER LAYOUT
     data/       - per-game config/data files a games/<name>.py loads at
                   import time (data/duckov.json, data/octopath/*.json,
                   data/dredge/*.json).
+    packaging/  - PyInstaller spec, build script, and app icon for
+                  building a real cedit.app - see PACKAGING above.
 
 
 PER-GAME NOTES

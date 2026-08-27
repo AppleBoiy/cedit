@@ -20,6 +20,7 @@ from lib.base import (
     make_base64_packed_node, GameProfile, SpecialNode,
     backup_file, atomic_write_text, atomic_write_bytes,
 )
+import glob
 
 
 class TestValueTypes(unittest.TestCase):
@@ -252,6 +253,32 @@ class TestFileIO(unittest.TestCase):
             self.assertTrue(os.path.exists(backup_path))
             with open(backup_path) as f:
                 self.assertEqual(f.read(), "original")
+
+    def test_backup_file_prunes_beyond_keep(self):
+        with tempfile.TemporaryDirectory() as d:
+            path = os.path.join(d, "save.json")
+            with open(path, "w") as f:
+                f.write("v0")
+            backups = []
+            for i in range(5):
+                with open(path, "w") as f:
+                    f.write(f"v{i}")
+                backups.append(backup_file(path, keep=3))
+            remaining = sorted(glob.glob(f"{path}.*.bak"))
+            self.assertEqual(len(remaining), 3)
+            # the most recent 3 backups made should be the ones still present
+            self.assertEqual(set(remaining), set(backups[-3:]))
+
+    def test_backup_file_keep_none_disables_pruning(self):
+        with tempfile.TemporaryDirectory() as d:
+            path = os.path.join(d, "save.json")
+            with open(path, "w") as f:
+                f.write("v0")
+            for i in range(5):
+                with open(path, "w") as f:
+                    f.write(f"v{i}")
+                backup_file(path, keep=None)
+            self.assertEqual(len(glob.glob(f"{path}.*.bak")), 5)
 
     def test_atomic_write_text_and_bytes(self):
         with tempfile.TemporaryDirectory() as d:

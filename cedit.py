@@ -44,10 +44,11 @@ Run:
 import os
 import sys
 import json
+import copy
 import argparse
 
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QAction, QKeySequence
+from PySide6.QtCore import Qt, QSettings
+from PySide6.QtGui import QAction, QKeySequence, QIcon
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QLineEdit, QPushButton, QComboBox, QTreeWidget, QTreeWidgetItem,
@@ -72,6 +73,13 @@ from lib.base import (
 )
 
 APP_TITLE = "cedit"
+
+# QSettings organization/app name pair - identifies where recent-files
+# (and any future preferences) get stored via Qt's native per-OS
+# mechanism (e.g. ~/Library/Preferences/... plist on macOS).
+_SETTINGS_ORG = "cedit"
+_SETTINGS_APP = "cedit"
+_RECENT_FILES_LIMIT = 10
 
 # QTreeWidgetItem data role used to mark a still-unexpanded lazy placeholder
 # child (see the "tree building" section below).
@@ -445,6 +453,19 @@ class SaveEditorWindow(QMainWindow):
         self.node_lookup = {}
         self.quick_rows = {}  # name -> (QLineEdit, QPushButton)
 
+        # Snapshot-based undo/redo: each entry is a full deepcopy of
+        # self.data from just before one mutating action. Simple rather
+        # than a proper command pattern, but edits happen through many
+        # different code paths (quick-edit, tree double-click, add/delete
+        # key, raw-JSON apply, table-dialog edits) and a snapshot-per-action
+        # covers all of them uniformly instead of needing bespoke undo
+        # logic duplicated in each one. Save files aren't huge enough for
+        # the deepcopy cost to matter, and the stack is capped so memory
+        # use can't grow unbounded across a long editing session.
+        self._undo_stack = []
+        self._redo_stack = []
+        self._UNDO_LIMIT = 25
+
         self.setWindowTitle(APP_TITLE)
         self.resize(*MAIN_WINDOW_SIZE)
         self.setMinimumSize(*MAIN_WINDOW_MIN)
@@ -453,6 +474,7 @@ class SaveEditorWindow(QMainWindow):
         self._build_central_widget()
         self._set_dirty(False)
         self._apply_profile_to_ui()
+        self._refresh_recent_menu()
 
     # ---------------------------------------------------------- UI setup
 
@@ -469,6 +491,8 @@ class SaveEditorWindow(QMainWindow):
         discover_action = QAction("Discover Saves...", self)
         discover_action.triggered.connect(self.discover_saves)
         file_menu.addAction(discover_action)
+        self.recent_menu = QMenu("Open Recent", self)
+        file_menu.addMenu(self.recent_menu)
         file_menu.addSeparator()
         save_action = QAction("Save", self, shortcut=QKeySequence.Save)
         save_action.triggered.connect(self.save_file)
@@ -486,6 +510,15 @@ class SaveEditorWindow(QMainWindow):
         file_menu.addAction(quit_action)
 
         edit_menu = menubar.addMenu("&Edit")
+        self.undo_action = QAction("Undo", self, shortcut=QKeySequence.Undo)
+        self.undo_action.triggered.connect(self.undo)
+        self.undo_action.setEnabled(False)
+        edit_menu.addAction(self.undo_action)
+        self.redo_action = QAction("Redo", self, shortcut=QKeySequence.Redo)
+        self.redo_action.triggered.connect(self.redo)
+        self.redo_action.setEnabled(False)
+        edit_menu.addAction(self.redo_action)
+        edit_menu.addSeparator()
         add_key_action = QAction("Add Key to Selected...", self)
         add_key_action.triggered.connect(self.add_key_to_selected)
         edit_menu.addAction(add_key_action)
@@ -629,6 +662,7 @@ class SaveEditorWindow(QMainWindow):
         except ValueError as e:
             QMessageBox.critical(self, APP_TITLE, f"Couldn't apply {name}:\n{e}")
             return
+        self._push_undo(self._snapshot())
         set_by_path(self.data, path, new_value)
         # Update just this one row (lazily materializing only the nodes
         # along its path, not the whole tree) instead of tearing down and
@@ -706,6 +740,62 @@ class SaveEditorWindow(QMainWindow):
             title += " *"
         self.setWindowTitle(title)
 
+    # ------------------------------------------------------------- undo/redo
+
+    def _snapshot(self):
+        return copy.deepcopy(self.data)
+
+    def _push_undo(self, snapshot):
+        """Records `snapshot` (the state from just BEFORE the mutation the
+        caller is about to make/just made) onto the undo stack. Call this
+        once a mutation is known to actually be happening - not before
+        validation that might still bail out, or every failed/no-op edit
+        would pollute the undo history."""
+        self._undo_stack.append(snapshot)
+        del self._undo_stack[:-self._UNDO_LIMIT]  # keep only the most recent N
+        self._redo_stack.clear()
+        self._update_undo_redo_actions()
+
+    def _update_undo_redo_actions(self):
+        self.undo_action.setEnabled(bool(self._undo_stack))
+        self.redo_action.setEnabled(bool(self._redo_stack))
+
+    def _reset_undo_history(self):
+        self._undo_stack.clear()
+        self._redo_stack.clear()
+        self._update_undo_redo_actions()
+
+    def _after_data_replaced(self, dirty):
+        """Common refresh after self.data itself was swapped out from
+        under the tree (by undo/redo) - full rebuild, since there's no
+        cheap way to know just which nodes changed."""
+        self.rebuild_tree()
+        self.refresh_raw_from_tree()
+        self.refresh_quick_edit()
+        self._set_dirty(dirty)
+
+    def undo(self):
+        if not self._undo_stack:
+            return
+        self._redo_stack.append(self._snapshot())
+        self.data = self._undo_stack.pop()
+        self._update_undo_redo_actions()
+        # Once the undo stack is empty, we're back to exactly what was
+        # loaded from disk (or last saved) - anything left in it means
+        # there's still at least one un-reverted change.
+        self._after_data_replaced(dirty=bool(self._undo_stack))
+        self._set_status("Undid last change.")
+
+    def redo(self):
+        if not self._redo_stack:
+            return
+        self._undo_stack.append(self._snapshot())
+        del self._undo_stack[:-self._UNDO_LIMIT]
+        self.data = self._redo_stack.pop()
+        self._update_undo_redo_actions()
+        self._after_data_replaced(dirty=True)  # redo always moves away from the on-disk state
+        self._set_status("Redid change.")
+
     def _apply_profile_to_ui(self):
         self.game_combo.blockSignals(True)
         self.game_combo.setCurrentText(self.profile.display_name)
@@ -742,6 +832,7 @@ class SaveEditorWindow(QMainWindow):
         self.profile = profile
         self.file_path = None
         self.data = None
+        self._reset_undo_history()
         self.path_label.setText("No file loaded")
         self.rebuild_tree()
         self.refresh_raw_from_tree()
@@ -830,6 +921,7 @@ class SaveEditorWindow(QMainWindow):
 
         self.file_path = path
         self.data = data
+        self._reset_undo_history()
         self._set_dirty(False)
         self.rebuild_tree()
         self.refresh_raw_from_tree()
@@ -840,6 +932,81 @@ class SaveEditorWindow(QMainWindow):
         if backup_path:
             msg += f"  (backup: {os.path.basename(backup_path)})"
         self._set_status(msg)
+        self._add_recent_file(self.profile.key, path)
+
+    # ------------------------------------------------------------ recent files
+    #
+    # Persisted via QSettings (Qt's native per-OS preferences mechanism -
+    # a plist under ~/Library/Preferences on macOS), not a config file of
+    # our own, so it needs no extra path-management code. Each entry
+    # records which game profile the file was opened under (not just the
+    # path) so reopening a recent file also switches to the right game
+    # first if it isn't already selected - DREDGE never appears here since
+    # its custom_launcher window doesn't go through load_path() at all.
+
+    def _load_recent_entries(self):
+        settings = QSettings(_SETTINGS_ORG, _SETTINGS_APP)
+        raw = settings.value("recent_files", [])
+        if isinstance(raw, str):  # Qt collapses a single-item list to a bare string on some backends
+            raw = [raw]
+        entries = []
+        for item in raw or []:
+            if isinstance(item, str) and "|" in item:
+                key, path = item.split("|", 1)
+                entries.append((key, path))
+        return entries
+
+    def _save_recent_entries(self, entries):
+        settings = QSettings(_SETTINGS_ORG, _SETTINGS_APP)
+        settings.setValue("recent_files", [f"{key}|{path}" for key, path in entries])
+
+    def _add_recent_file(self, profile_key, path):
+        entries = [e for e in self._load_recent_entries() if e[1] != path]
+        entries.insert(0, (profile_key, path))
+        del entries[_RECENT_FILES_LIMIT:]
+        self._save_recent_entries(entries)
+        self._refresh_recent_menu()
+
+    def _refresh_recent_menu(self):
+        self.recent_menu.clear()
+        entries = self._load_recent_entries()
+        if not entries:
+            empty_action = QAction("(no recent files)", self)
+            empty_action.setEnabled(False)
+            self.recent_menu.addAction(empty_action)
+            return
+        for profile_key, path in entries:
+            try:
+                display_name = get_game(profile_key).display_name
+            except KeyError:
+                display_name = profile_key
+            action = QAction(f"{os.path.basename(path)}  —  {display_name}", self)
+            action.setToolTip(path)
+            action.triggered.connect(lambda checked=False, k=profile_key, p=path: self._open_recent(k, p))
+            self.recent_menu.addAction(action)
+        self.recent_menu.addSeparator()
+        clear_action = QAction("Clear Recent", self)
+        clear_action.triggered.connect(self._clear_recent_files)
+        self.recent_menu.addAction(clear_action)
+
+    def _open_recent(self, profile_key, path):
+        if not os.path.isfile(path):
+            QMessageBox.warning(self, APP_TITLE, f"This file no longer exists:\n{path}")
+            return
+        if profile_key != self.profile.key:
+            try:
+                target_profile = get_game(profile_key)
+            except KeyError:
+                QMessageBox.warning(self, APP_TITLE, f"Unknown game profile '{profile_key}' for this entry.")
+                return
+            self.switch_game(target_profile)
+            if self.profile.key != profile_key:
+                return  # switch was cancelled (e.g. unsaved changes prompt)
+        self.load_path(path)
+
+    def _clear_recent_files(self):
+        self._save_recent_entries([])
+        self._refresh_recent_menu()
 
     def reload_file(self):
         if not self.file_path:
@@ -1043,10 +1210,17 @@ class SaveEditorWindow(QMainWindow):
         menu.exec(self.tree.viewport().mapToGlobal(pos))
 
     def _open_list_table(self, item, value):
+        # Taken before exec(), not after - the table dialog mutates
+        # `value` (part of self.data) live as the user edits cells, so by
+        # the time exec() returns and dialog.dirty is known, the change has
+        # already happened; this is the last point where "before" is safe
+        # to capture.
+        pre_edit_snapshot = self._snapshot()
         dialog = ListTableDialog(self, value, self.profile, title=f"{item.text(0)} ({len(value)} items)")
         dialog.exec()
         if not dialog.dirty:
             return
+        self._push_undo(pre_edit_snapshot)
         # Rows may have been added/removed as well as edited - drop this
         # branch's already-materialized children (if any) and let it
         # re-lazy-populate the next time it's expanded, and refresh its own
@@ -1095,6 +1269,7 @@ class SaveEditorWindow(QMainWindow):
             except ValueError as e:
                 QMessageBox.critical(self, APP_TITLE, f"Couldn't apply that value:\n{e}")
                 return
+            self._push_undo(self._snapshot())
             container[key] = new_raw
             try:
                 redecoded = special.decode(container, key, new_raw)
@@ -1132,6 +1307,7 @@ class SaveEditorWindow(QMainWindow):
             QMessageBox.critical(self, APP_TITLE, f"Couldn't apply that value:\n{e}")
             return
 
+        self._push_undo(self._snapshot())
         container[key] = new_value
         item.setText(1, self._short_repr(new_value))
         self._set_dirty(True)
@@ -1165,11 +1341,13 @@ class SaveEditorWindow(QMainWindow):
             new_val_text, ok = QInputDialog.getText(self, "Add key", f"Value for '{new_key}':")
             if not ok:
                 return
+            self._push_undo(self._snapshot())
             target[new_key] = smart_parse(new_val_text)
         elif isinstance(target, list):
             new_val_text, ok = QInputDialog.getText(self, "Add item", "Value to append to the list:")
             if not ok:
                 return
+            self._push_undo(self._snapshot())
             target.append(smart_parse(new_val_text))
         else:
             QMessageBox.information(self, APP_TITLE, "Select a dict or list node to add into.")
@@ -1195,9 +1373,10 @@ class SaveEditorWindow(QMainWindow):
             QMessageBox.information(self, APP_TITLE, "You can't delete the root.")
             return
         if QMessageBox.question(
-            self, APP_TITLE, f"Delete '{key}'? This cannot be undone (but you have a .bak file)."
+            self, APP_TITLE, f"Delete '{key}'? (You can Undo this, or restore from a .bak file.)"
         ) != QMessageBox.Yes:
             return
+        self._push_undo(self._snapshot())
         try:
             if isinstance(container, dict):
                 del container[key]
@@ -1314,6 +1493,7 @@ class SaveEditorWindow(QMainWindow):
         except (json.JSONDecodeError, ValueError) as e:
             QMessageBox.critical(self, APP_TITLE, f"Raw data is invalid, not applied:\n{e}")
             return
+        self._push_undo(self._snapshot())
         self.data = new_data
         self.rebuild_tree()
         self.refresh_quick_edit()
@@ -1331,6 +1511,14 @@ class SaveEditorWindow(QMainWindow):
         event.accept()
 
 
+def _resource_path(*parts):
+    """Resolve a path that works both running from source and from a
+    PyInstaller-built app bundle (which unpacks bundled data under
+    sys._MEIPASS instead of next to this script)."""
+    base = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base, *parts)
+
+
 def main():
     parser = argparse.ArgumentParser(description=APP_TITLE)
     parser.add_argument("save_file", nargs="?", help="Save file to open immediately")
@@ -1341,6 +1529,10 @@ def main():
     args = parser.parse_args()
 
     app = QApplication(sys.argv)
+
+    icon_path = _resource_path("packaging", "icon.png")
+    if os.path.isfile(icon_path):
+        app.setWindowIcon(QIcon(icon_path))
 
     profile = get_game(args.game)
     window = SaveEditorWindow(profile)

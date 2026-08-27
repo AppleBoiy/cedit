@@ -1,0 +1,2 @@
+# Extra requirements for building cedit.app - not needed to just run cedit.
+pyinstaller

@@ -1,0 +1,28 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  unittest:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # Only lib/base.py, lib/dredge_client.py, lib/octopath_lib.py, and
+      # games/octopath.py are covered here - they're pure Python with no
+      # PySide6/display dependency. cedit.py and games/dredge.py (the
+      # PySide6 UI) have no automated coverage: a GUI test would need a
+      # real (or virtual) display, which is a bigger lift than this
+      # workflow's scope - see README.txt's TESTS section.
+      - name: Run unit tests
+        run: python3 -m unittest discover -s tests -v
