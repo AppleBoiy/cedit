@@ -430,6 +430,13 @@ class GameProfile:
     # in the tree (double-click shows a message instead). Use this when a
     # format's full parsed structure is worth browsing but only a narrow,
     # well-understood subset of it is safe to write back (see games/octopath.py).
+    pre_save_check: Optional[Callable[[str], Optional[str]]] = None
+    # pre_save_check(path) -> a block-reason string, or None to allow the
+    # save. Called by cedit.py right before it backs up/writes `path` -
+    # use this for an external-state check that has nothing to do with the
+    # data itself (e.g. games/dave.py refuses to save while the game
+    # process is running, since its next autosave would silently overwrite
+    # the edit). Most games don't need this; leave it None.
     custom_launcher: Optional[Callable[[Any], None]] = None
     # custom_launcher(parent) -> None. Set this instead of loads/dumps when a
     # game's save model genuinely doesn't fit "read whole file -> edit tree

@@ -31,6 +31,14 @@ PROVENANCE OF EACH PIECE
    Produced locally by running your dredge-se's tools/extract_game_assets.py
    against your own licensed copy of DREDGE's game files.
 
+5. games/dave.py's XOR codec, and data/dave/item_names.json
+   The codec (and the overall approach - which files to touch, what to
+   quick-edit, the process-running save guard) is ported from your own
+   AppleBoiy/dave-editor project (https://github.com/AppleBoiy/dave-editor,
+   MIT licensed). item_names.json is vendored unmodified from that
+   project's own copy, which it in turn generated from the MIT-licensed
+   FNGarvin/DaveSaveEd project - see data/dave/README.md.
+
 Everything else (cedit.py, lib/base.py, lib/dredge_client.py, the rest of
 games/*.py, and the data/*.json config files) was written from scratch for
 this project.

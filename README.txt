@@ -17,6 +17,7 @@ Currently supported:
   - Escape from Duckov       (games/duckov.py + data/duckov.json)
   - Octopath Traveler / II   (games/octopath.py + lib/octopath_lib.py)
   - DREDGE                   (games/dredge.py + lib/dredge_client.py)
+  - Dave the Diver           (games/dave.py + data/dave/)
 
 
 RUNNING IT
@@ -154,6 +155,26 @@ Octopath Traveler / II
   get swapped for the wrong file (items.json and item-details.json in your
   own octopath-save-editor repo have similar names but different schemas -
   easy to mix up).
+
+Dave the Diver (Steam / macOS)
+  *_GD.sav files are JSON obfuscated with a repeating XOR cipher keyed on
+  the ASCII string "GameData" (applied per UTF-16 code unit, not per byte
+  - the same scheme the game itself uses), decoded/encoded automatically
+  by games/dave.py. Once decoded it's plain JSON, so - like Duckov -
+  everything in it is freely editable through the generic tree editor;
+  Gold/Bei/Artisan's Flame/research-trust-fake points/Jungle DLC currency
+  are wired up as Quick Edit fields. Materials (Ingredients) and Items
+  (InventoryItemSlot) are dicts keyed by ingredient id / item GUID rather
+  than lists, so they show as an expandable tree node instead of a table
+  - edit an entry's count directly, or use Add Key to Selected for a new
+  item id. Names for those ids aren't shown inline; cross-reference
+  data/dave/item_names.json (coverage is complete for materials, partial
+  for general items - see data/dave/README.md) or a wiki/datamine.
+  Saving is blocked outright while the game process appears to be
+  running or the file is held open elsewhere (its next autosave would
+  silently overwrite your edit otherwise) - quit the game fully first,
+  and give Steam Cloud sync a moment before relaunching. Ported from your
+  own standalone AppleBoiy/dave-editor project.
 
 DREDGE
   DREDGE saves are .NET BinaryFormatter blobs that only the game's own

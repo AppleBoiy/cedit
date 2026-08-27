@@ -1039,6 +1039,15 @@ class SaveEditorWindow(QMainWindow):
             self.path_label.setText(path)
 
     def _write_to(self, path):
+        if self.profile.pre_save_check:
+            try:
+                block_reason = self.profile.pre_save_check(path)
+            except Exception:
+                block_reason = None
+            if block_reason:
+                QMessageBox.warning(self, APP_TITLE, block_reason)
+                return
+
         try:
             payload = self.profile.dump(self.data)
         except (TypeError, ValueError) as e:

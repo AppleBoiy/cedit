@@ -13,11 +13,13 @@ That's it - cedit.py itself never needs to change.
 from .duckov import PROFILE as DUCKOV_PROFILE
 from .octopath import PROFILE as OCTOPATH_PROFILE
 from .dredge import PROFILE as DREDGE_PROFILE
+from .dave import PROFILE as DAVE_PROFILE
 
 _REGISTRY = {
     DUCKOV_PROFILE.key: DUCKOV_PROFILE,
     OCTOPATH_PROFILE.key: OCTOPATH_PROFILE,
     DREDGE_PROFILE.key: DREDGE_PROFILE,
+    DAVE_PROFILE.key: DAVE_PROFILE,
 }
 
 
