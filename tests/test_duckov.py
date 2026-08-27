@@ -321,6 +321,31 @@ class TestRemoveInventoryItem(unittest.TestCase):
             duckov_game.remove_inventory_item(data, "nonexistent_target", -200)
 
 
+class TestItemNames(unittest.TestCase):
+    def test_catalog_loaded_and_nonempty(self):
+        # A real catalog ships in data/duckov/item_names.json (see its
+        # README for provenance) - this isn't a synthetic fixture like the
+        # rest of this test module, it's asserting the actual bundled file
+        # loaded successfully.
+        self.assertGreater(len(duckov_game._ITEM_NAMES), 1000)
+
+    def test_known_id_resolves_to_known_name(self):
+        # typeID 252 is used as the fixture's equipped PrimaryWeapon above -
+        # picked because it's also a real id in the bundled catalog.
+        self.assertEqual(duckov_game.item_name(252), "S_AK74_Lv_2")
+
+    def test_accepts_str_or_int_id(self):
+        self.assertEqual(duckov_game.item_name("252"), duckov_game.item_name(252))
+
+    def test_unknown_id_returns_none(self):
+        self.assertIsNone(duckov_game.item_name(-999999))
+
+    def test_describe_entry_only_fires_on_typeid_key(self):
+        self.assertEqual(duckov_game._describe_entry(None, "typeID", 252), "S_AK74_Lv_2")
+        self.assertIsNone(duckov_game._describe_entry(None, "instanceID", 252))
+        self.assertIsNone(duckov_game._describe_entry(None, "typeID", "252"))  # must be an int, not str
+
+
 class TestProfileWiring(unittest.TestCase):
     def test_spawn_hooks_attached_to_profile(self):
         self.assertIs(duckov_game.PROFILE.spawn_item, duckov_game.spawn_item)
@@ -329,6 +354,9 @@ class TestProfileWiring(unittest.TestCase):
     def test_inventory_hooks_attached_to_profile(self):
         self.assertIs(duckov_game.PROFILE.inventory_state, duckov_game.inventory_state)
         self.assertIs(duckov_game.PROFILE.remove_inventory_item, duckov_game.remove_inventory_item)
+
+    def test_describe_entry_attached_to_profile(self):
+        self.assertIs(duckov_game.PROFILE.describe_entry, duckov_game._describe_entry)
 
     def test_spawned_item_survives_profile_dump_load_round_trip(self):
         data = fixture()

@@ -151,11 +151,16 @@ Escape from Duckov
   linking (unique instanceIDs, equipment slotContents, inventory position
   lists, capacity limits on storage containers) so you don't have to
   construct that structure by hand through the generic tree. There's no
-  bundled item name catalog (none is published for this game), so look up
-  type ids via a wiki/datamine first. Each unit of a spawned quantity is
-  its own separate item entry rather than one entry with a fabricated
-  "Count" - whether an item type is actually stackable, and under which
-  field, is something only the game's own catalog would know for certain.
+  publicly published item name catalog for this game, but data/duckov/
+  item_names.json has a real one anyway - extracted directly from a local
+  install's own game files (see data/duckov/README.md), covering 1568
+  items. Both the generic tree and the Inventory Editor window show a
+  looked-up name next to a typeID wherever this catalog covers it; ids it
+  doesn't cover just show as a bare number. Each unit of a spawned
+  quantity is its own separate item entry rather than one entry with a
+  fabricated "Count" - whether an item type is actually stackable, and
+  under which field, is something only the game's own catalog would know
+  for certain.
   Removing an item also removes anything nested inside it (e.g. a stored
   container's contents); only the top-level slots this window shows are
   removable this way - a stored item that's itself a container needs the

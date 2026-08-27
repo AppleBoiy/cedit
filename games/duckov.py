@@ -13,12 +13,14 @@ engineered directly from a real save file (Item/MainCharacterItemData,
 Inventory/PlayerStorage, Inventory/Inventory_Safe), not from any
 published schema - Escape from Duckov doesn't have one.
 
-There is deliberately no item name catalog here (unlike Dave/Octopath/
-DREDGE): no such catalog exists publicly for Duckov, so spawn_item takes
-a raw numeric item type id (find one via a wiki/datamine) rather than a
-name. See _spawn_item's docstring for what "quantity" actually does and
-why.
+There's no published item name catalog for Duckov, but data/duckov/
+item_names.json has a real one anyway - extracted directly from a local
+install's own game files (see data/duckov/README.md for exactly how), not
+from a wiki. spawn_item still takes a raw numeric item type id (that's
+all the save format itself uses), but the tree view and Inventory Editor
+window both show the looked-up name next to it wherever one's known.
 """
+import json
 from pathlib import Path
 
 from lib.base import GameProfile
@@ -33,6 +35,29 @@ from lib.base import GameProfile
 # strict by default) collapses ".." lexically instead, so it works whether
 # or not the intermediate directory is real.
 _CONFIG_PATH = Path(__file__).resolve().parent.parent / "data" / "duckov.json"
+
+# data/duckov/item_names.json: typeID -> display name, extracted from a
+# local install's own item prefabs (see data/duckov/README.md for
+# provenance). Loaded once at import time; missing/corrupt just means no
+# names show, not a crash - same convention as games/dave.py's own catalog.
+_ITEM_NAMES_PATH = Path(__file__).resolve().parent.parent / "data" / "duckov" / "item_names.json"
+try:
+    _ITEM_NAMES = json.loads(_ITEM_NAMES_PATH.read_text(encoding="utf-8"))
+except (FileNotFoundError, json.JSONDecodeError):
+    _ITEM_NAMES = {}
+
+
+def item_name(type_id):
+    """typeID (int or str) -> looked-up display name, or None if this
+    catalog doesn't cover it. Used by both the generic tree's describe_entry
+    hook and the Inventory Editor window."""
+    return _ITEM_NAMES.get(str(type_id))
+
+
+def _describe_entry(container, key, value):
+    if key == "typeID" and isinstance(value, int):
+        return item_name(value)
+    return None
 
 
 # --------------------------------------------------------------- item tree
@@ -366,3 +391,4 @@ PROFILE.spawn_item_targets = spawn_item_targets
 PROFILE.spawn_item = spawn_item
 PROFILE.inventory_state = inventory_state
 PROFILE.remove_inventory_item = remove_inventory_item
+PROFILE.describe_entry = _describe_entry

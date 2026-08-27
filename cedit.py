@@ -510,8 +510,8 @@ class InventoryEditorWindow(QMainWindow):
         list_box = QGroupBox("Occupied slots")
         list_layout = QVBoxLayout(list_box)
         self.item_table = QTableWidget()
-        self.item_table.setColumnCount(3)
-        self.item_table.setHorizontalHeaderLabels(["Position", "Type ID", "Instance ID"])
+        self.item_table.setColumnCount(4)
+        self.item_table.setHorizontalHeaderLabels(["Position", "Type ID", "Name", "Instance ID"])
         self.item_table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.item_table.setSelectionMode(QAbstractItemView.SingleSelection)
         self.item_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
@@ -524,7 +524,7 @@ class InventoryEditorWindow(QMainWindow):
         form_row = QHBoxLayout()
         form_row.addWidget(QLabel("Item type id:"))
         self.item_id_edit = QLineEdit()
-        self.item_id_edit.setPlaceholderText("e.g. 594 - find ids via a wiki/datamine")
+        self.item_id_edit.setPlaceholderText("e.g. 594 - shows a looked-up name below where known")
         form_row.addWidget(self.item_id_edit)
         form_row.addWidget(QLabel("Quantity:"))
         self.quantity_edit = QLineEdit("1")
@@ -627,7 +627,10 @@ class InventoryEditorWindow(QMainWindow):
             cell = QTableWidgetItem()
             cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)
             if slot is not None:
-                cell.setText(str(slot.get("type_id", "?")))
+                type_id = slot.get("type_id")
+                name = self._type_name(type_id)
+                cell.setText(name if name else str(type_id if type_id is not None else "?"))
+                cell.setToolTip(f"type {type_id}" + (f" - {name}" if name else ""))
                 cell.setBackground(QColor("#5a8f5a"))
                 cell.setData(Qt.UserRole, position)
                 self._slots_by_position[position] = slot
@@ -640,10 +643,27 @@ class InventoryEditorWindow(QMainWindow):
     def _render_item_list(self, slots):
         self.item_table.setRowCount(len(slots))
         for row, slot in enumerate(slots):
+            type_id = slot.get("type_id")
             self.item_table.setItem(row, 0, QTableWidgetItem(str(slot.get("position"))))
-            self.item_table.setItem(row, 1, QTableWidgetItem(str(slot.get("type_id"))))
-            self.item_table.setItem(row, 2, QTableWidgetItem(str(slot.get("instance_id"))))
+            self.item_table.setItem(row, 1, QTableWidgetItem(str(type_id)))
+            self.item_table.setItem(row, 2, QTableWidgetItem(self._type_name(type_id) or ""))
+            self.item_table.setItem(row, 3, QTableWidgetItem(str(slot.get("instance_id"))))
             self.item_table.item(row, 0).setData(Qt.UserRole, slot.get("instance_id"))
+
+    def _type_name(self, type_id):
+        """Looked-up display name for a type id via the profile's generic
+        describe_entry hook (see lib/base.py) - reused here rather than a
+        separate name-lookup hook, since it's exactly the same
+        "typeID -> optional name" lookup describe_entry already does for
+        the tree view. None if the profile has no such hook, or it doesn't
+        know this id."""
+        profile = self.main_window.profile
+        if profile.describe_entry is None or type_id is None:
+            return None
+        try:
+            return profile.describe_entry(None, "typeID", type_id)
+        except Exception:
+            return None
 
     # ----------------------------------------------------------- selection
 

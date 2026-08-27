@@ -49,6 +49,17 @@ PROVENANCE OF EACH PIECE
    project's own file-path-based one. games/bbee.py's narrow read/write
    scope (only Analysis Points) matches that project's own README exactly.
 
+7. data/duckov/item_names.json
+   Not vendored from anywhere - generated from your own local, legally
+   purchased install of Escape from Duckov, by exporting its Unity project
+   with the third-party tool AssetRipper (GPL-3.0,
+   https://github.com/AssetRipper/AssetRipper) and regex-scanning the
+   resulting item prefabs for their typeID + name fields (a mechanical,
+   non-creative extraction of facts - numeric ids and internal object
+   names - not a copy of any copyrightable game code or asset). See
+   data/duckov/README.md for exactly how and how to regenerate it.
+   AssetRipper itself isn't bundled with or distributed by cedit.
+
 Everything else (cedit.py, lib/base.py, lib/dredge_client.py, the rest of
 games/*.py, and the data/*.json config files) was written from scratch for
 this project.
