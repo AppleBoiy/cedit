@@ -69,6 +69,34 @@ DEFAULT_SAVE_DIRS = [
 # per-field bounds), just documented so a value typed in stays sane.
 _INT32_MAX = 2_147_483_647
 
+# ------------------------------------------------------------ item names
+#
+# data/dave/item_names.json: raw item id -> display name, vendored from
+# AppleBoiy/dave-editor (data/dave/README.md has the provenance/coverage
+# details - notably, weapon/gear ids mostly aren't covered). Loaded once
+# at import time; missing/corrupt just means no names show, not a crash.
+
+_ITEM_NAMES_PATH = Path(__file__).resolve().parent.parent / "data" / "dave" / "item_names.json"
+try:
+    _ITEM_NAMES = json.loads(_ITEM_NAMES_PATH.read_text(encoding="utf-8"))
+except (FileNotFoundError, json.JSONDecodeError):
+    _ITEM_NAMES = {}
+
+# Which field holds the item id, per storage dict this shows up in
+# (Ingredients entries use "ingredientsID", InventoryItemSlot entries use
+# "itemID" - see dave-editor's own dave_inventory.py StorageSpec).
+_ID_FIELDS = ("ingredientsID", "itemID")
+
+
+def _describe_entry(container, key, value):
+    if not isinstance(value, dict):
+        return None
+    for field in _ID_FIELDS:
+        if field in value:
+            return _ITEM_NAMES.get(str(value[field]))
+    return None
+
+
 QUICK_FIELDS = {
     "Gold": ["PlayerInfo", "m_Gold"],
     "Bei": ["PlayerInfo", "m_Bei"],
@@ -141,6 +169,7 @@ PROFILE = GameProfile(
     dumps=_dumps,
     binary=True,
     pre_save_check=_pre_save_check,
+    describe_entry=_describe_entry,
     notes=(
         "Currency/point fields are C# Int32 in the game's own save structs, "
         "so keep them under 2,147,483,647. Materials (save key: "
@@ -149,11 +178,11 @@ PROFILE = GameProfile(
         "list-of-dicts, so they show as an expandable tree node rather "
         "than a table - edit an entry's count field directly, or add a "
         "new key/entry for a brand-new item id via Add Key to Selected. "
-        "Item/ingredient names for the id you're looking at aren't shown "
-        "inline; cross-reference against data/dave/item_names.json (see "
-        "data/dave/README.md - coverage is complete for cooking "
-        "materials but incomplete for weapon/gear item ids) or a "
-        "wiki/datamine. Saving is blocked outright while the game process "
+        "Each entry's row shows a looked-up item name next to it when "
+        "data/dave/item_names.json has one (coverage is complete for "
+        "cooking materials but incomplete for weapon/gear item ids - "
+        "those show with no name, cross-reference a wiki/datamine "
+        "instead). Saving is blocked outright while the game process "
         "appears to be running, or while the save file is held open by "
         "another process - fully quit the game (⌘Q) first, since its "
         "next autosave would otherwise silently overwrite your edit. "

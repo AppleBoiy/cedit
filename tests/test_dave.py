@@ -135,5 +135,29 @@ class TestItemNamesCatalog(unittest.TestCase):
         self.assertEqual(catalog.get("41010113"), "Gold")
 
 
+class TestDescribeEntry(unittest.TestCase):
+    def test_materials_entry_gets_a_name(self):
+        entry = {"ingredientsID": 41010113, "count": 3}
+        self.assertEqual(dave_game._describe_entry({}, "41010113", entry), "Gold")
+
+    def test_items_entry_gets_a_name(self):
+        entry = {"itemID": 41010113, "totalCount": 1}
+        self.assertEqual(dave_game._describe_entry({}, "some-guid", entry), "Gold")
+
+    def test_unknown_id_returns_none_not_a_crash(self):
+        entry = {"itemID": 999999999, "totalCount": 1}
+        self.assertIsNone(dave_game._describe_entry({}, "some-guid", entry))
+
+    def test_non_item_dict_returns_none(self):
+        entry = {"m_Gold": 5}
+        self.assertIsNone(dave_game._describe_entry({}, "PlayerInfo", entry))
+
+    def test_non_dict_value_returns_none(self):
+        self.assertIsNone(dave_game._describe_entry({}, "count", 3))
+
+    def test_wired_into_profile(self):
+        self.assertIs(dave_game.PROFILE.describe_entry, dave_game._describe_entry)
+
+
 if __name__ == "__main__":
     unittest.main()

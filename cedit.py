@@ -1148,7 +1148,15 @@ class SaveEditorWindow(QMainWindow):
                 summary = f"{{{len(value)} keys}}"
             elif vtype == "list":
                 summary = f"[{len(value)} items]"
-            child = QTreeWidgetItem([str(key), display_value or summary, vtype])
+            text1 = display_value or summary
+            if self.profile.describe_entry:
+                try:
+                    hint = self.profile.describe_entry(container, key, value)
+                except Exception:
+                    hint = None
+                if hint:
+                    text1 = f"{text1}  —  {hint}" if text1 else hint
+            child = QTreeWidgetItem([str(key), text1, vtype])
             parent_item.addChild(child)
             self.node_lookup[child] = (container, key)
             if vtype in ("dict", "list") and len(value) > 0:

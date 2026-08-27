@@ -167,9 +167,10 @@ Dave the Diver (Steam / macOS)
   (InventoryItemSlot) are dicts keyed by ingredient id / item GUID rather
   than lists, so they show as an expandable tree node instead of a table
   - edit an entry's count directly, or use Add Key to Selected for a new
-  item id. Names for those ids aren't shown inline; cross-reference
+  item id. Each entry's row shows a looked-up item name next to it via
   data/dave/item_names.json (coverage is complete for materials, partial
-  for general items - see data/dave/README.md) or a wiki/datamine.
+  for general items - see data/dave/README.md); an id with no match just
+  shows with no name, cross-reference a wiki/datamine for those.
   Saving is blocked outright while the game process appears to be
   running or the file is held open elsewhere (its next autosave would
   silently overwrite your edit otherwise) - quit the game fully first,

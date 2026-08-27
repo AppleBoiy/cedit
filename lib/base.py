@@ -430,6 +430,15 @@ class GameProfile:
     # in the tree (double-click shows a message instead). Use this when a
     # format's full parsed structure is worth browsing but only a narrow,
     # well-understood subset of it is safe to write back (see games/octopath.py).
+    describe_entry: Optional[Callable[[Any, Any, Any], Optional[str]]] = None
+    # describe_entry(container, key, value) -> a short human-readable hint
+    # to show next to this entry in the tree's value column (e.g. an item
+    # name looked up from that entry's id field), or None for no hint.
+    # Purely cosmetic - never affects what gets read or written. Use this
+    # instead of a SpecialNode when a dict/list entry's raw value should
+    # still show and edit normally, just with an extra label alongside it
+    # (see games/dave.py, which looks up item names for Materials/Items
+    # entries this way).
     pre_save_check: Optional[Callable[[str], Optional[str]]] = None
     # pre_save_check(path) -> a block-reason string, or None to allow the
     # save. Called by cedit.py right before it backs up/writes `path` -
