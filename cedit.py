@@ -46,8 +46,8 @@ import sys
 import json
 import argparse
 
-from PySide6.QtCore import Qt, QEvent
-from PySide6.QtGui import QAction, QKeySequence, QBrush, QColor, QPen, QFont, QPainter, QCursor
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QAction, QKeySequence
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QLineEdit, QPushButton, QComboBox, QTreeWidget, QTreeWidgetItem,
@@ -55,7 +55,6 @@ from PySide6.QtWidgets import (
     QGroupBox, QAbstractItemView, QMenu,
     QTableWidget, QTableWidgetItem, QDialog, QCheckBox,
     QListWidget, QListWidgetItem,
-    QGraphicsView, QGraphicsScene, QGraphicsRectItem, QGraphicsSimpleTextItem,
 )
 
 from games import list_games, get_game
@@ -371,359 +370,67 @@ class _DiscoveredSavesDialog(QDialog):
             self.accept()
 
 
-_GRAPH_NODE_W = 190
-_GRAPH_NODE_H = 46
-_GRAPH_X_GAP = 30
-_GRAPH_Y_GAP = 70
-
-
-class _GraphNodeItem(QGraphicsRectItem):
-    """One box in the graph view. Click toggles expand/collapse for a
-    dict/list node; double-click edits a leaf's value (mirrors the main
-    tree's own on_double_click rules - read-only/special-node/type
-    handling all reused as-is)."""
-
-    def __init__(self, vis_node, dialog):
-        super().__init__(0, 0, _GRAPH_NODE_W, _GRAPH_NODE_H)
-        self.vis_node = vis_node
-        self.dialog = dialog
-        self.setAcceptedMouseButtons(Qt.LeftButton)
-        self.setCursor(QCursor(Qt.PointingHandCursor))
-        self._paint_style()
-
-        text = QGraphicsSimpleTextItem(self._label_text(), self)
-        font = QFont()
-        font.setPointSize(9)
-        text.setFont(font)
-        text.setPos(8, 6)
-
-    def _label_text(self):
-        vn = self.vis_node
-        arrow = "" if vn.is_leaf else ("▾ " if vn.expanded else "▸ ")
-        key_line = f"{arrow}{vn.key_text}"
-        value_line = vn.value_text
-        if len(key_line) > 26:
-            key_line = key_line[:24] + "…"
-        if len(value_line) > 26:
-            value_line = value_line[:24] + "…"
-        return f"{key_line}\n{value_line}" if value_line else key_line
-
-    def _paint_style(self):
-        vn = self.vis_node
-        if vn is self.dialog.highlighted_node:
-            fill, outline = QColor("#ffe58a"), QPen(QColor("#8a6d00"), 2)
-        elif vn.is_leaf:
-            fill, outline = QColor("#eef3fb"), QPen(QColor("#7c93b8"), 1)
-        else:
-            fill, outline = QColor("#dceeda"), QPen(QColor("#5a8a57"), 1)
-        self.setBrush(QBrush(fill))
-        self.setPen(outline)
-
-    def mousePressEvent(self, event):
-        if not self.vis_node.is_leaf:
-            self.dialog.toggle_node(self.vis_node)
-        event.accept()
-
-    def mouseDoubleClickEvent(self, event):
-        if self.vis_node.is_leaf:
-            self.dialog.edit_leaf(self.vis_node)
-        event.accept()
-
-
-class _VisNode:
-    """One node of the graph view's own lazily-built shadow tree - mirrors
-    cedit.py's lazy QTreeWidget design (placeholder-until-expanded) but as
-    plain Python objects instead of QTreeWidgetItems, since the graph needs
-    to re-layout (and fully redraw) whenever the set of visible nodes
-    changes, which is simplest done by rebuilding from a plain tree rather
-    than mutating QGraphicsItems incrementally."""
-
-    def __init__(self, key_text, value_text, type_text, container, key, is_leaf):
-        self.key_text = key_text
-        self.value_text = value_text
-        self.type_text = type_text
-        self.container = container
-        self.key = key
-        self.is_leaf = is_leaf
-        self.expanded = False
-        self.children = None  # populated lazily on first expand
-        self.x = 0.0
-        self.y = 0.0
-
-
-class GraphViewDialog(QDialog):
-    """A node-graph explorer for the save data: click a dict/list node to
-    expand/collapse its children as connected boxes, double-click a leaf to
-    edit it, search to expand+jump straight to a match anywhere in the
-    file. Deliberately lazy (nothing beyond the root is ever built until
-    expanded) - a save can have thousands of nodes, and laying out all of
-    them as a single force-directed/tree graph at once would be both slow
-    and unreadable. This is a navigable explorer, not a full-file map."""
+class SearchResultsDialog(QDialog):
+    """Every match for a search query, listed at once, instead of stepping
+    through them one "Find Next" click at a time - useful the moment a
+    query has more than a couple of hits (which key had that value again?
+    how many places mention this id?). Non-modal and reused across
+    searches: stays open so you can jump to one result, look at it in the
+    tree, then come back and try another."""
 
     def __init__(self, main_window):
         super().__init__(main_window)
         self.main_window = main_window
-        self.setWindowTitle("Graph View")
-        self.resize(1000, 700)
-        self.highlighted_node = None
-        self.root = None
+        self.setWindowTitle("Search Results")
+        self.resize(760, 420)
 
         layout = QVBoxLayout(self)
-        top = QHBoxLayout()
-        top.addWidget(QLabel("Search:"))
-        self.search_edit = QLineEdit()
-        self.search_edit.returnPressed.connect(self.search)
-        top.addWidget(self.search_edit)
-        search_btn = QPushButton("Find")
-        search_btn.clicked.connect(self.search)
-        top.addWidget(search_btn)
-        top.addStretch(1)
-        collapse_btn = QPushButton("Collapse All")
-        collapse_btn.clicked.connect(self.collapse_all)
-        top.addWidget(collapse_btn)
-        refresh_btn = QPushButton("Refresh")
-        refresh_btn.clicked.connect(self.refresh)
-        top.addWidget(refresh_btn)
-        layout.addLayout(top)
+        self.summary_label = QLabel("")
+        layout.addWidget(self.summary_label)
 
-        self.scene = QGraphicsScene()
-        self.view = QGraphicsView(self.scene)
-        self.view.setRenderHint(QPainter.Antialiasing)
-        self.view.setDragMode(QGraphicsView.ScrollHandDrag)
-        layout.addWidget(self.view, stretch=1)
+        self.results = QTreeWidget()
+        self.results.setColumnCount(2)
+        self.results.setHeaderLabels(["Key", "Value"])
+        self.results.setColumnWidth(0, 320)
+        self.results.itemDoubleClicked.connect(self._jump_to_current)
+        layout.addWidget(self.results, stretch=1)
 
-        hint = QLabel("Click a green box to expand/collapse. Double-click a blue leaf to edit it. Scroll to zoom, drag to pan.")
-        hint.setStyleSheet("color: #888;")
-        layout.addWidget(hint)
+        button_row = QHBoxLayout()
+        button_row.addStretch(1)
+        jump_btn = QPushButton("Jump to Selected")
+        jump_btn.clicked.connect(self._jump_to_current)
+        button_row.addWidget(jump_btn)
+        close_btn = QPushButton("Close")
+        close_btn.clicked.connect(self.accept)
+        button_row.addWidget(close_btn)
+        layout.addLayout(button_row)
 
-        self.refresh()
+    def show_results(self, query, matches):
+        """matches: list of (path, key_text, value_text)."""
+        self.results.clear()
+        for path, key_text, value_text in matches:
+            item = QTreeWidgetItem([key_text, value_text])
+            item.setData(0, Qt.UserRole, path)
+            self.results.addTopLevelItem(item)
+        count = len(matches)
+        self.summary_label.setText(
+            f"{count} match{'es' if count != 1 else ''} for '{query}'" if count
+            else f"No matches for '{query}'"
+        )
+        if count:
+            self.results.setCurrentItem(self.results.topLevelItem(0))
 
-    def wheelEvent(self, event):
-        # QDialog itself doesn't zoom; this only matters if the event
-        # reaches here unhandled, so the real zoom lives on the view.
-        super().wheelEvent(event)
-
-    def showEvent(self, event):
-        super().showEvent(event)
-        self.view.viewport().installEventFilter(self)
-
-    def eventFilter(self, obj, event):
-        if obj is self.view.viewport() and event.type() == QEvent.Type.Wheel:
-            factor = 1.15 if event.angleDelta().y() > 0 else 1 / 1.15
-            self.view.scale(factor, factor)
-            return True
-        return super().eventFilter(obj, event)
-
-    # ------------------------------------------------------------- data
-
-    def refresh(self):
-        """(Re)builds the graph from main_window.data, keeping only the
-        root expanded initially - use this after data changes elsewhere
-        (e.g. a fresh Open/Reload) since this dialog doesn't auto-sync."""
-        self.highlighted_node = None
-        data = self.main_window.data
-        self.root = _VisNode("(root)", "", guess_type(data) if data is not None else "null", None, None, is_leaf=False)
-        if data is not None:
-            self.root.expanded = True
-            self.root.children = self._build_children(self.root)
-        self._relayout_and_draw()
-
-    def collapse_all(self):
-        if self.root is None:
+    def _jump_to_current(self):
+        item = self.results.currentItem()
+        if item is None:
             return
-        self.root.children = None
-        self.root.expanded = bool(self.main_window.data is not None)
-        if self.root.expanded:
-            self.root.children = self._build_children(self.root)
-        self.highlighted_node = None
-        self._relayout_and_draw()
-
-    def _resolve_value(self, vis_node):
-        if vis_node.container is None and vis_node.key is None:
-            return self.main_window.data
-        return vis_node.container[vis_node.key]
-
-    def _build_children(self, vis_node):
-        """Builds (but does not further expand) the immediate children of
-        vis_node - mirrors SaveEditorWindow._populate_children's exact
-        display conventions (special-node leaves, {N keys}/[N items]
-        summaries) so the graph shows the same thing the tree would."""
-        value = self._resolve_value(vis_node)
-        profile = self.main_window.profile
-        if isinstance(value, dict):
-            items = list(value.items())
-        elif isinstance(value, list):
-            items = list(enumerate(value))
-        else:
-            return []
-
-        children = []
-        for key, child_value in items:
-            special = profile.find_special_node(value, key, child_value)
-            if special is not None:
-                try:
-                    decoded = special.decode(value, key, child_value)
-                    children.append(_VisNode(
-                        str(key), self.main_window._short_repr(decoded),
-                        special.label_for(value, key, child_value), value, key, is_leaf=True,
-                    ))
-                    continue
-                except Exception:
-                    pass
-            vtype = guess_type(child_value)
-            if vtype == "dict":
-                children.append(_VisNode(str(key), f"{{{len(child_value)} keys}}", vtype, value, key, is_leaf=(len(child_value) == 0)))
-            elif vtype == "list":
-                children.append(_VisNode(str(key), f"[{len(child_value)} items]", vtype, value, key, is_leaf=(len(child_value) == 0)))
-            else:
-                children.append(_VisNode(str(key), self.main_window._short_repr(child_value), vtype, value, key, is_leaf=True))
-        return children
-
-    def toggle_node(self, vis_node):
-        if vis_node.expanded:
-            vis_node.expanded = False
-        else:
-            vis_node.expanded = True
-            if vis_node.children is None:
-                vis_node.children = self._build_children(vis_node)
-        self._relayout_and_draw()
-
-    def edit_leaf(self, vis_node):
-        container, key = vis_node.container, vis_node.key
-        if container is None:
+        path = item.data(0, Qt.UserRole)
+        node = self.main_window._ensure_node_for_path(path)
+        if node is None:
             return
-        value = container[key]
-        profile = self.main_window.profile
-        if profile.is_read_only(container, key, value):
-            QMessageBox.information(self, APP_TITLE, f"'{key}' is read-only for {profile.display_name}.")
-            return
-        special = profile.find_special_node(container, key, value)
-        if special is not None:
-            try:
-                decoded = special.decode(container, key, value)
-            except Exception as e:
-                QMessageBox.critical(self, APP_TITLE, f"Couldn't decode this value:\n{e}")
-                return
-            new_text, ok = QInputDialog.getText(self, "Edit value", f"Key: {key}\n\nNew value:", text=str(decoded))
-            if not ok:
-                return
-            try:
-                new_raw = special.encode(container, key, new_text)
-            except ValueError as e:
-                QMessageBox.critical(self, APP_TITLE, f"Couldn't apply that value:\n{e}")
-                return
-            container[key] = new_raw
-            try:
-                redecoded = special.decode(container, key, new_raw)
-            except Exception:
-                redecoded = new_text
-            vis_node.value_text = self.main_window._short_repr(redecoded)
-        else:
-            vtype = guess_type(value)
-            if vtype in ("dict", "list"):
-                QMessageBox.information(self, APP_TITLE, f"'{key}' has nested data - expand it instead of editing it directly.")
-                return
-            current_text = "" if value is None else str(value)
-            new_text, ok = QInputDialog.getText(self, "Edit value", f"Key: {key}\nCurrent type: {vtype}\n\nNew value:", text=current_text)
-            if not ok:
-                return
-            try:
-                new_value = coerce_value(new_text, value)
-            except ValueError as e:
-                QMessageBox.critical(self, APP_TITLE, f"Couldn't apply that value:\n{e}")
-                return
-            container[key] = new_value
-            vis_node.value_text = self.main_window._short_repr(new_value)
-
-        self.main_window._set_dirty(True)
-        self.main_window.refresh_raw_from_tree()
-        self._relayout_and_draw()
-
-    # ------------------------------------------------------------ search
-
-    def search(self):
-        query = self.search_edit.text().strip().lower()
-        if not query or self.main_window.data is None:
-            return
-        for path, container, key, value in self.main_window._iter_data_paths(self.main_window.data):
-            key_text, value_text = self.main_window._match_text(container, key, value)
-            if query in key_text.lower() or query in value_text.lower():
-                self._reveal_path(path)
-                return
-        QMessageBox.information(self, APP_TITLE, f"No match found for '{query}'.")
-
-    def _reveal_path(self, path):
-        """Expands (materializing as needed) every ancestor along `path`
-        and marks its final node highlighted, then redraws and centers the
-        view on it."""
-        node = self.root
-        node.expanded = True
-        if node.children is None:
-            node.children = self._build_children(node)
-        target = node
-        for key in path:
-            match = None
-            for child in node.children or []:
-                if child.key == key:
-                    match = child
-                    break
-            if match is None:
-                return  # shouldn't happen - path came from the same data
-            target = match
-            if not match.is_leaf:
-                match.expanded = True
-                if match.children is None:
-                    match.children = self._build_children(match)
-            node = match
-        self.highlighted_node = target
-        self._relayout_and_draw(center_on=target)
-
-    # ------------------------------------------------------------ layout
-
-    def _relayout_and_draw(self, center_on=None):
-        self.scene.clear()
-        if self.root is None:
-            return
-        counter = [0]
-        self._assign_x(self.root, 0, counter)
-
-        items_by_node = {}
-        self._draw(self.root, items_by_node)
-
-        if center_on is not None and center_on in items_by_node:
-            self.view.centerOn(items_by_node[center_on])
-
-    def _assign_x(self, vis_node, depth, counter):
-        vis_node.y = depth
-        if not vis_node.expanded or not vis_node.children:
-            vis_node.x = counter[0]
-            counter[0] += 1
-            return
-        start = counter[0]
-        for child in vis_node.children:
-            self._assign_x(child, depth + 1, counter)
-        end = counter[0] - 1
-        vis_node.x = (start + end) / 2.0
-
-    def _draw(self, vis_node, items_by_node, parent_item=None):
-        px = vis_node.x * (_GRAPH_NODE_W + _GRAPH_X_GAP)
-        py = vis_node.y * (_GRAPH_NODE_H + _GRAPH_Y_GAP)
-        item = _GraphNodeItem(vis_node, self)
-        item.setPos(px, py)
-        self.scene.addItem(item)
-        items_by_node[vis_node] = item
-
-        if parent_item is not None:
-            line = self.scene.addLine(
-                parent_item.x() + _GRAPH_NODE_W / 2, parent_item.y() + _GRAPH_NODE_H,
-                px + _GRAPH_NODE_W / 2, py,
-                QPen(QColor("#aaaaaa"), 1),
-            )
-            line.setZValue(-1)
-
-        if vis_node.expanded and vis_node.children:
-            for child in vis_node.children:
-                self._draw(child, items_by_node, item)
+        self.main_window._reveal(node)
+        self.main_window.tree.setCurrentItem(node)
+        self.main_window.tree.scrollToItem(node)
 
 
 class SaveEditorWindow(QMainWindow):
@@ -797,10 +504,6 @@ class SaveEditorWindow(QMainWindow):
         collapse_action = QAction("Collapse All", self)
         collapse_action.triggered.connect(lambda: self._expand_all(False))
         view_menu.addAction(collapse_action)
-        view_menu.addSeparator()
-        graph_action = QAction("Graph View...", self)
-        graph_action.triggered.connect(self.open_graph_view)
-        view_menu.addAction(graph_action)
 
         game_menu = menubar.addMenu("&Game")
         for prof in list_games():
@@ -858,12 +561,9 @@ class SaveEditorWindow(QMainWindow):
         self.search_edit.setMinimumWidth(100)
         self.search_edit.returnPressed.connect(self.run_search)
         row.addWidget(self.search_edit)
-        find_btn = QPushButton("Find Next")
+        find_btn = QPushButton("Search")
         find_btn.clicked.connect(self.run_search)
         row.addWidget(find_btn)
-        graph_btn = QPushButton("Graph View...")
-        graph_btn.clicked.connect(self.open_graph_view)
-        row.addWidget(graph_btn)
 
         row.addStretch(1)
         self.path_label = QLabel("No file loaded")
@@ -1325,18 +1025,6 @@ class SaveEditorWindow(QMainWindow):
         for i in range(self.tree.topLevelItemCount()):
             recurse(self.tree.topLevelItem(i))
 
-    def open_graph_view(self):
-        if self.data is None:
-            QMessageBox.information(self, APP_TITLE, "Open a save file first.")
-            return
-        if getattr(self, "_graph_dialog", None) is None:
-            self._graph_dialog = GraphViewDialog(self)
-        else:
-            self._graph_dialog.refresh()
-        self._graph_dialog.show()
-        self._graph_dialog.raise_()
-        self._graph_dialog.activateWindow()
-
     # -------------------------------------------------------------- editing
 
     def _show_tree_context_menu(self, pos):
@@ -1536,33 +1224,21 @@ class SaveEditorWindow(QMainWindow):
         query = self.search_edit.text().strip().lower()
         if not query or self.data is None:
             return
-        entries = list(self._iter_data_paths(self.data))
-        if not entries:
-            return
-
-        current_item = self.tree.currentItem()
-        current_path = self._path_for_node(current_item) if current_item else None
-        start_index = 0
-        if current_path is not None:
-            paths = [entry[0] for entry in entries]
-            try:
-                start_index = paths.index(current_path) + 1
-            except ValueError:
-                start_index = 0
-
-        ordered = entries[start_index:] + entries[:start_index]
-        for path, container, key, value in ordered:
+        matches = []
+        for path, container, key, value in self._iter_data_paths(self.data):
             key_text, value_text = self._match_text(container, key, value)
             if query in key_text.lower() or query in value_text.lower():
-                item = self._ensure_node_for_path(path)
-                if item is None:
-                    continue
-                self._reveal(item)
-                self.tree.setCurrentItem(item)
-                self.tree.scrollToItem(item)
-                self._set_status(f"Found match: {key_text}")
-                return
-        self._set_status(f"No match found for '{query}'.")
+                matches.append((path, key_text, value_text))
+
+        if getattr(self, "_search_dialog", None) is None:
+            self._search_dialog = SearchResultsDialog(self)
+        self._search_dialog.show_results(query, matches)
+        self._search_dialog.show()
+        self._search_dialog.raise_()
+        self._search_dialog.activateWindow()
+        self._set_status(
+            f"{len(matches)} match(es) for '{query}'." if matches else f"No match found for '{query}'."
+        )
 
     def _iter_data_paths(self, container, prefix=()):
         """Yields (path, container, key, value) for every node in the save
@@ -1603,18 +1279,6 @@ class SaveEditorWindow(QMainWindow):
         if vtype == "list":
             return str(key), f"[{len(value)} items]"
         return str(key), self._short_repr(value)
-
-    def _path_for_node(self, item):
-        """The reverse of _ensure_node_for_path: walks a tree item back up
-        to the root, returning its full key path."""
-        path = []
-        while item is not None:
-            container, key = self.node_lookup.get(item, (None, None))
-            if container is None and key is None:
-                break
-            path.append(key)
-            item = item.parent()
-        return tuple(reversed(path))
 
     def _reveal(self, item):
         parent = item.parent()
