@@ -14,6 +14,23 @@ block_cipher = None
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(SPEC)), ".."))
 
 
+def collect_dir(rel_path):
+    """Recursively collect every file under REPO_ROOT/rel_path as an
+    explicit (source_file, dest_dir) pair. More reliable across
+    PyInstaller versions than passing a bare directory as a datas source
+    (some versions silently drop directory-form datas entries)."""
+    pairs = []
+    src_dir = os.path.join(REPO_ROOT, rel_path)
+    if not os.path.isdir(src_dir):
+        return pairs
+    for root, dirs, files in os.walk(src_dir):
+        for name in files:
+            full = os.path.join(root, name)
+            rel_dir = os.path.relpath(root, REPO_ROOT)
+            pairs.append((full, rel_dir))
+    return pairs
+
+
 def collect_dredge_bridge_sources():
     """lib/dredge_bridge/ contains vendored C# source (.cs/.csproj) that the
     app builds itself on first use of a DREDGE save - bundle the source,
@@ -33,9 +50,9 @@ def collect_dredge_bridge_sources():
 
 
 datas = [
-    (os.path.join(REPO_ROOT, "data"), "data"),
     (os.path.join(REPO_ROOT, "packaging", "icon.png"), "packaging"),
 ]
+datas += collect_dir("data")
 datas += collect_dredge_bridge_sources()
 
 a = Analysis(
