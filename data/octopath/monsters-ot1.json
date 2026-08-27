@@ -1,0 +1,3696 @@
+[
+  {
+    "id": 0,
+    "name": "Linde",
+    "types": [
+      "Sword",
+      "Spear"
+    ],
+    "strength": 4,
+    "skills": [
+      "Sweep",
+      "Pounce"
+    ]
+  },
+  {
+    "id": 1,
+    "name": "Highland Ratkin I",
+    "types": [
+      "Sword"
+    ],
+    "strength": 1,
+    "skills": [
+      "Attack"
+    ]
+  },
+  {
+    "id": 2,
+    "name": "Highland Ratkin II",
+    "types": [
+      "Sword"
+    ],
+    "strength": 2,
+    "skills": [
+      "Attack All"
+    ]
+  },
+  {
+    "id": 3,
+    "name": "Highland Ratkin III",
+    "types": [
+      "Sword"
+    ],
+    "strength": 3,
+    "skills": [
+      "Double Strike"
+    ]
+  },
+  {
+    "id": 4,
+    "name": "Highland Ratkin IV",
+    "types": [
+      "Sword"
+    ],
+    "strength": 4,
+    "skills": [
+      "Double Strike"
+    ]
+  },
+  {
+    "id": 5,
+    "name": "Highland Ratkin V",
+    "types": [
+      "Sword"
+    ],
+    "strength": 4,
+    "skills": [
+      "Double Attack All"
+    ]
+  },
+  {
+    "id": 6,
+    "name": "Highland Ratkin VI",
+    "types": [
+      "Sword"
+    ],
+    "strength": 5,
+    "skills": [
+      "Triple Strike"
+    ]
+  },
+  {
+    "id": 7,
+    "name": "Highland Ratking I",
+    "types": [
+      "Axe"
+    ],
+    "strength": 5,
+    "skills": [
+      "Triple Attack"
+    ]
+  },
+  {
+    "id": 8,
+    "name": "Highland Ratking II",
+    "types": [
+      "Axe"
+    ],
+    "strength": 6,
+    "skills": [
+      "Triple Attack All"
+    ]
+  },
+  {
+    "id": 9,
+    "name": "Highland Ratking III",
+    "types": [
+      "Axe"
+    ],
+    "strength": 8,
+    "skills": [
+      "Retaliative Axe"
+    ]
+  },
+  {
+    "id": 10,
+    "name": "Rockadillo",
+    "types": [
+      "Spear"
+    ],
+    "strength": 2,
+    "skills": [
+      "Lunge"
+    ]
+  },
+  {
+    "id": 11,
+    "name": "Giant Falcon",
+    "types": [
+      "Wind"
+    ],
+    "strength": 2,
+    "skills": [
+      "Wind Slash"
+    ]
+  },
+  {
+    "id": 12,
+    "name": "Highland Goat",
+    "types": [
+      "Spear"
+    ],
+    "strength": 5,
+    "skills": [
+      "Mighty Charge (All)"
+    ]
+  },
+  {
+    "id": 13,
+    "name": "Army Ant",
+    "types": [
+      "Dagger"
+    ],
+    "strength": 1,
+    "skills": [
+      "Stab"
+    ]
+  },
+  {
+    "id": 14,
+    "name": "Shaggy Aurochs",
+    "types": [
+      "Spear"
+    ],
+    "strength": 4,
+    "skills": [
+      "Mighty Lunge"
+    ]
+  },
+  {
+    "id": 15,
+    "name": "Wild Weasel",
+    "types": [
+      "Staff"
+    ],
+    "strength": 7,
+    "skills": [
+      "Convincing Blow"
+    ]
+  },
+  {
+    "id": 17,
+    "name": "Lightning Elemental",
+    "types": [
+      "Thunder"
+    ],
+    "strength": 6,
+    "skills": [
+      "Electrocute(All)"
+    ]
+  },
+  {
+    "id": 18,
+    "name": "Winged Serpent",
+    "types": [
+      "Wind"
+    ],
+    "strength": 6,
+    "skills": [
+      "Toxic Wind"
+    ]
+  },
+  {
+    "id": 19,
+    "name": "Devourer of Dreams",
+    "types": [
+      "----------"
+    ],
+    "strength": 10,
+    "skills": [
+      "Vorpal Claw (All)"
+    ],
+    "special": "Chance to instantly kill enemy at their current health."
+  },
+  {
+    "id": 20,
+    "name": "Dread Falcon",
+    "types": [
+      "Wind"
+    ],
+    "strength": 4,
+    "skills": [
+      "Wind Slash"
+    ]
+  },
+  {
+    "id": 21,
+    "name": "Dread Viper",
+    "types": [
+      "Dagger"
+    ],
+    "strength": 4,
+    "skills": [
+      "Venomous Fang"
+    ]
+  },
+  {
+    "id": 22,
+    "name": "Mountain Goat",
+    "types": [
+      "Spear"
+    ],
+    "strength": 6,
+    "skills": [
+      "Mighty Charge (All)"
+    ]
+  },
+  {
+    "id": 24,
+    "name": "Blood Remnant",
+    "types": [
+      "Fire"
+    ],
+    "strength": 4,
+    "skills": [
+      "Incinerate"
+    ]
+  },
+  {
+    "id": 25,
+    "name": "Dark Remnant",
+    "types": [
+      "Dark"
+    ],
+    "strength": 4,
+    "skills": [
+      "Enshadow"
+    ]
+  },
+  {
+    "id": 26,
+    "name": "Shadow Raven",
+    "types": [
+      "Dark"
+    ],
+    "strength": 6,
+    "skills": [
+      "Shadow"
+    ]
+  },
+  {
+    "id": 27,
+    "name": "Demon Goat",
+    "types": [
+      "Spear"
+    ],
+    "strength": 7,
+    "skills": [
+      "Soporific Strike (All)"
+    ]
+  },
+  {
+    "id": 28,
+    "name": "Dire Army Ant",
+    "types": [
+      "----------"
+    ],
+    "strength": 4,
+    "skills": [
+      "Acid Blue"
+    ],
+    "special": "Enemy Armor down"
+  },
+  {
+    "id": 29,
+    "name": "Forest Ratkin I",
+    "types": [
+      "Bow"
+    ],
+    "strength": 1,
+    "skills": [
+      "Attack"
+    ]
+  },
+  {
+    "id": 30,
+    "name": "Forest Ratkin II",
+    "types": [
+      "Bow"
+    ],
+    "strength": 2,
+    "skills": [
+      "Attack All"
+    ]
+  },
+  {
+    "id": 31,
+    "name": "Forest Ratkin III",
+    "types": [
+      "Bow"
+    ],
+    "strength": 3,
+    "skills": [
+      "Double Strike"
+    ]
+  },
+  {
+    "id": 32,
+    "name": "Forest Ratkin IV",
+    "types": [
+      "Bow"
+    ],
+    "strength": 4,
+    "skills": [
+      "Double Strike"
+    ]
+  },
+  {
+    "id": 33,
+    "name": "Forest Ratkin V",
+    "types": [
+      "Bow"
+    ],
+    "strength": 4,
+    "skills": [
+      "Double Attack All"
+    ]
+  },
+  {
+    "id": 34,
+    "name": "Forest Ratkin VI",
+    "types": [
+      "Bow"
+    ],
+    "strength": 5,
+    "skills": [
+      "Triple Strike"
+    ]
+  },
+  {
+    "id": 35,
+    "name": "Forest Ratking I",
+    "types": [
+      "Spear"
+    ],
+    "strength": 5,
+    "skills": [
+      "Triple Attack"
+    ]
+  },
+  {
+    "id": 36,
+    "name": "Forest Ratking II",
+    "types": [
+      "Spear"
+    ],
+    "strength": 6,
+    "skills": [
+      "Triple Attack All"
+    ]
+  },
+  {
+    "id": 37,
+    "name": "Forest Ratking III",
+    "types": [
+      "Spear"
+    ],
+    "strength": 7,
+    "skills": [
+      "Double Blessed-Spear"
+    ]
+  },
+  {
+    "id": 38,
+    "name": "Marmot",
+    "types": [
+      "Sword"
+    ],
+    "strength": 2,
+    "skills": [
+      "Slash"
+    ]
+  },
+  {
+    "id": 39,
+    "name": "Shambling Weed",
+    "types": [
+      "Spear"
+    ],
+    "strength": 4,
+    "skills": [
+      "Mighty Lunge"
+    ]
+  },
+  {
+    "id": 40,
+    "name": "Giant Boar",
+    "types": [
+      "Spear"
+    ],
+    "strength": 5,
+    "skills": [
+      "Mighty Charge (All)"
+    ]
+  },
+  {
+    "id": 41,
+    "name": "Howler",
+    "types": [
+      "Wind"
+    ],
+    "strength": 4,
+    "skills": [
+      "Wind Slash"
+    ]
+  },
+  {
+    "id": 42,
+    "name": "Mutant Mushroom",
+    "types": [
+      "-----------"
+    ],
+    "strength": 7,
+    "skills": [
+      "Milennial Frond"
+    ]
+  },
+  {
+    "id": 43,
+    "name": "Demon Deer",
+    "types": [
+      "Spear"
+    ],
+    "strength": 5,
+    "skills": [
+      "Mighty Lunge"
+    ]
+  },
+  {
+    "id": 45,
+    "name": "Peek-a-Boo",
+    "types": [
+      "Bow"
+    ],
+    "strength": 9,
+    "skills": [
+      "Endanger Life"
+    ]
+  },
+  {
+    "id": 47,
+    "name": "Carnivorous Plant",
+    "types": [
+      "-----------"
+    ],
+    "strength": 10,
+    "skills": [
+      "Continual Light(SP) (All)"
+    ]
+  },
+  {
+    "id": 48,
+    "name": "Majestic Marmot",
+    "types": [
+      "Sword"
+    ],
+    "strength": 4,
+    "skills": [
+      "Slash"
+    ]
+  },
+  {
+    "id": 49,
+    "name": "Mossy Meep",
+    "types": [
+      "-----------"
+    ],
+    "strength": 2,
+    "skills": [
+      "Restore Health"
+    ]
+  },
+  {
+    "id": 50,
+    "name": "Gabbrodillo",
+    "types": [
+      "Spear"
+    ],
+    "strength": 2,
+    "skills": [
+      "Mighty Lunge"
+    ]
+  },
+  {
+    "id": 51,
+    "name": "Red Fox",
+    "types": [
+      "Sword"
+    ],
+    "strength": 4,
+    "skills": [
+      "Blinding Claw"
+    ]
+  },
+  {
+    "id": 52,
+    "name": "Rampant Weed",
+    "types": [
+      "------------"
+    ],
+    "strength": 6,
+    "skills": [
+      "Great Healing Mist"
+    ]
+  },
+  {
+    "id": 53,
+    "name": "Horned Howler",
+    "types": [
+      "Wind"
+    ],
+    "strength": 4,
+    "skills": [
+      "Wind Slash"
+    ]
+  },
+  {
+    "id": 54,
+    "name": "Gargantuan Boar",
+    "types": [
+      "Spear"
+    ],
+    "strength": 6,
+    "skills": [
+      "Mighty Charge (All)"
+    ]
+  },
+  {
+    "id": 55,
+    "name": "Green Scissors",
+    "types": [
+      "------------"
+    ],
+    "strength": 4,
+    "skills": [
+      "Toxic Mist (All)"
+    ]
+  },
+  {
+    "id": 56,
+    "name": "Sea Scorpion",
+    "types": [
+      "------------"
+    ],
+    "strength": 5,
+    "skills": [
+      "Steel Defense"
+    ],
+    "special": "Def up buff"
+  },
+  {
+    "id": 57,
+    "name": "Ettin Serpent",
+    "types": [
+      "Dagger"
+    ],
+    "strength": 6,
+    "skills": [
+      "Befuddling Fang (All)"
+    ]
+  },
+  {
+    "id": 58,
+    "name": "Buccaneer Bones",
+    "types": [
+      "Sword"
+    ],
+    "strength": 4,
+    "skills": [
+      "Befuddling Claw"
+    ]
+  },
+  {
+    "id": 59,
+    "name": "Davy Bones",
+    "types": [
+      "Sword"
+    ],
+    "strength": 5,
+    "skills": [
+      "Befuddling Claw"
+    ]
+  },
+  {
+    "id": 60,
+    "name": "Black Howler",
+    "types": [
+      "Wind"
+    ],
+    "strength": 6,
+    "skills": [
+      "Soporific Wind"
+    ]
+  },
+  {
+    "id": 61,
+    "name": "Raging Treant",
+    "types": [
+      "Bow"
+    ],
+    "strength": 7,
+    "skills": [
+      "Blinding Shot"
+    ]
+  },
+  {
+    "id": 62,
+    "name": "Sand Lizardman I",
+    "types": [
+      "Staff"
+    ],
+    "strength": 1,
+    "skills": [
+      "Attack"
+    ]
+  },
+  {
+    "id": 63,
+    "name": "Sand Lizardman II",
+    "types": [
+      "Staff"
+    ],
+    "strength": 2,
+    "skills": [
+      "Attack All"
+    ]
+  },
+  {
+    "id": 64,
+    "name": "Sand Lizardman III",
+    "types": [
+      "Staff"
+    ],
+    "strength": 3,
+    "skills": [
+      "Double Strike"
+    ]
+  },
+  {
+    "id": 65,
+    "name": "Sand Lizardman IV",
+    "types": [
+      "Staff"
+    ],
+    "strength": 4,
+    "skills": [
+      "Double Strike"
+    ]
+  },
+  {
+    "id": 66,
+    "name": "Sand Lizardman V",
+    "types": [
+      "Staff"
+    ],
+    "strength": 4,
+    "skills": [
+      "Double Attack All"
+    ]
+  },
+  {
+    "id": 67,
+    "name": "Sand Lizardman VI",
+    "types": [
+      "Staff"
+    ],
+    "strength": 5,
+    "skills": [
+      "Triple Strike"
+    ]
+  },
+  {
+    "id": 68,
+    "name": "Sand Lizardking I",
+    "types": [
+      "Staff"
+    ],
+    "strength": 5,
+    "skills": [
+      "Triple Attack"
+    ]
+  },
+  {
+    "id": 69,
+    "name": "Sand Lizardking II",
+    "types": [
+      "Staff"
+    ],
+    "strength": 6,
+    "skills": [
+      "Triple Attack All"
+    ]
+  },
+  {
+    "id": 70,
+    "name": "Sand Lizardking III",
+    "types": [
+      "Staff"
+    ],
+    "strength": 7,
+    "skills": [
+      "Double Rapid Staff Dance"
+    ]
+  },
+  {
+    "id": 71,
+    "name": "Cactus Roller",
+    "types": [
+      "Spear"
+    ],
+    "strength": 2,
+    "skills": [
+      "Lunge"
+    ]
+  },
+  {
+    "id": 72,
+    "name": "Light Wisp",
+    "types": [
+      "Light"
+    ],
+    "strength": 3,
+    "skills": [
+      "Luminescence"
+    ]
+  },
+  {
+    "id": 73,
+    "name": "Sandworm",
+    "types": [
+      "Staff"
+    ],
+    "strength": 5,
+    "skills": [
+      "Sand Strike (All)"
+    ]
+  },
+  {
+    "id": 74,
+    "name": "Giant Scorpion",
+    "types": [
+      "Sword"
+    ],
+    "strength": 4,
+    "skills": [
+      "Venomous Claw (All)"
+    ]
+  },
+  {
+    "id": 75,
+    "name": "Wanderweed",
+    "types": [
+      "Bow"
+    ],
+    "strength": 6,
+    "skills": [
+      "Befuddling Shot (All)"
+    ]
+  },
+  {
+    "id": 76,
+    "name": "Spiked Skink",
+    "types": [
+      "Spear"
+    ],
+    "strength": 7,
+    "skills": [
+      "Hurricane Lunge (All)"
+    ]
+  },
+  {
+    "id": 78,
+    "name": "Kartikeya",
+    "types": [
+      "---------"
+    ],
+    "strength": 6,
+    "skills": [
+      "Rainbow Flash (All)"
+    ]
+  },
+  {
+    "id": 80,
+    "name": "Lord of the Sands",
+    "types": [
+      "Staff"
+    ],
+    "strength": 10,
+    "skills": [
+      "Sandstorm Slash (All)"
+    ]
+  },
+  {
+    "id": 81,
+    "name": "Killer Bug",
+    "types": [
+      "Spear"
+    ],
+    "strength": 4,
+    "skills": [
+      "Lunge"
+    ]
+  },
+  {
+    "id": 82,
+    "name": "Skull Roller",
+    "types": [
+      "Spear"
+    ],
+    "strength": 4,
+    "skills": [
+      "Poison Strike"
+    ]
+  },
+  {
+    "id": 83,
+    "name": "Dark Roller",
+    "types": [
+      "Spear"
+    ],
+    "strength": 4,
+    "skills": [
+      "Poison Strike"
+    ]
+  },
+  {
+    "id": 84,
+    "name": "Savage Scorpion",
+    "types": [
+      "Sword"
+    ],
+    "strength": 6,
+    "skills": [
+      "Venomous Claw (All)"
+    ]
+  },
+  {
+    "id": 85,
+    "name": "Desert Worm",
+    "types": [
+      "Staff"
+    ],
+    "strength": 6,
+    "skills": [
+      "Sand Strike (All)"
+    ]
+  },
+  {
+    "id": 86,
+    "name": "Withered Wanderweed",
+    "types": [
+      "Bow"
+    ],
+    "strength": 6,
+    "skills": [
+      "Soporific Shot (All)"
+    ]
+  },
+  {
+    "id": 87,
+    "name": "Soporific Fang",
+    "types": [
+      "Dagger"
+    ],
+    "strength": 4,
+    "skills": [
+      "Soporific Fang"
+    ]
+  },
+  {
+    "id": 88,
+    "name": "Slayer Bug",
+    "types": [
+      "Spear"
+    ],
+    "strength": 4,
+    "skills": [
+      "Lunge"
+    ]
+  },
+  {
+    "id": 89,
+    "name": "Carmine Eagle",
+    "types": [
+      "Wind"
+    ],
+    "strength": 4,
+    "skills": [
+      "Wind Slash"
+    ]
+  },
+  {
+    "id": 90,
+    "name": "Warrior Bones",
+    "types": [
+      "Sword"
+    ],
+    "strength": 4,
+    "skills": [
+      "Slash"
+    ]
+  },
+  {
+    "id": 91,
+    "name": "Brawler Bones",
+    "types": [
+      "Sword"
+    ],
+    "strength": 4,
+    "skills": [
+      "Mighty Slash"
+    ]
+  },
+  {
+    "id": 92,
+    "name": "Venomous Scorpion",
+    "types": [
+      "Sword"
+    ],
+    "strength": 8,
+    "skills": [
+      "Venomous Claw (All)"
+    ]
+  },
+  {
+    "id": 93,
+    "name": "Brigand Bones",
+    "types": [
+      "Sword"
+    ],
+    "strength": 8,
+    "skills": [
+      "Slash"
+    ]
+  },
+  {
+    "id": 94,
+    "name": "Stone Bug",
+    "types": [
+      "Sword"
+    ],
+    "strength": 7,
+    "skills": [
+      "Blinding Claw"
+    ]
+  },
+  {
+    "id": 95,
+    "name": "Stone Serpent",
+    "types": [
+      "Dagger"
+    ],
+    "strength": 7,
+    "skills": [
+      "Double Stab"
+    ]
+  },
+  {
+    "id": 96,
+    "name": "Stone Lizard",
+    "types": [
+      "Spear"
+    ],
+    "strength": 9,
+    "skills": [
+      "Hurricane Lunge (All)"
+    ]
+  },
+  {
+    "id": 97,
+    "name": "Poison Strike",
+    "types": [
+      "Spear"
+    ],
+    "strength": 5,
+    "skills": [
+      "Poison Strike"
+    ]
+  },
+  {
+    "id": 98,
+    "name": "Ice Lizardman I",
+    "types": [
+      "Spear"
+    ],
+    "strength": 1,
+    "skills": [
+      "Attack"
+    ]
+  },
+  {
+    "id": 99,
+    "name": "Ice Lizardman II",
+    "types": [
+      "Spear"
+    ],
+    "strength": 2,
+    "skills": [
+      "Attack All"
+    ]
+  },
+  {
+    "id": 100,
+    "name": "Ice Lizardman III",
+    "types": [
+      "Spear"
+    ],
+    "strength": 3,
+    "skills": [
+      "Double Strike"
+    ]
+  },
+  {
+    "id": 101,
+    "name": "Ice Lizardman IV",
+    "types": [
+      "Spear"
+    ],
+    "strength": 4,
+    "skills": [
+      "Double Strike"
+    ]
+  },
+  {
+    "id": 102,
+    "name": "Ice Lizardman V",
+    "types": [
+      "Spear"
+    ],
+    "strength": 4,
+    "skills": [
+      "Double Attack All"
+    ]
+  },
+  {
+    "id": 103,
+    "name": "Ice Lizardman VI",
+    "types": [
+      "Spear"
+    ],
+    "strength": 5,
+    "skills": [
+      "Triple Strike"
+    ]
+  },
+  {
+    "id": 104,
+    "name": "Ice Lizardking I",
+    "types": [
+      "Sword"
+    ],
+    "strength": 5,
+    "skills": [
+      "Triple Attack"
+    ]
+  },
+  {
+    "id": 105,
+    "name": "Ice Lizardking II",
+    "types": [
+      "Sword"
+    ],
+    "strength": 6,
+    "skills": [
+      "Triple Attack All"
+    ]
+  },
+  {
+    "id": 106,
+    "name": "Ice Lizardking III",
+    "types": [
+      "Sword"
+    ],
+    "strength": 7,
+    "skills": [
+      "Swordwall Dance"
+    ]
+  },
+  {
+    "id": 107,
+    "name": "Wolf",
+    "types": [
+      "Dagger"
+    ],
+    "strength": 2,
+    "skills": [
+      "Stab"
+    ]
+  },
+  {
+    "id": 108,
+    "name": "Shadow Wisp",
+    "types": [
+      "Dark"
+    ],
+    "strength": 3,
+    "skills": [
+      "Enshadow"
+    ]
+  },
+  {
+    "id": 109,
+    "name": "Frost Bear",
+    "types": [
+      "Staff"
+    ],
+    "strength": 5,
+    "skills": [
+      "Enraged Bash (All)"
+    ]
+  },
+  {
+    "id": 110,
+    "name": "Forest Fox",
+    "types": [
+      "Sword"
+    ],
+    "strength": 2,
+    "skills": [
+      "Blinding Claw"
+    ]
+  },
+  {
+    "id": 111,
+    "name": "Portly Penguin",
+    "types": [
+      "Staff"
+    ],
+    "strength": 7,
+    "skills": [
+      "Double Body Press"
+    ]
+  },
+  {
+    "id": 112,
+    "name": "Snow Leopard",
+    "types": [
+      "Sword"
+    ],
+    "strength": 7,
+    "skills": [
+      "Double Soporific Claw"
+    ]
+  },
+  {
+    "id": 114,
+    "name": "Animated Armor",
+    "types": [
+      "Sword"
+    ],
+    "strength": 9,
+    "skills": [
+      "Invincible Cleave"
+    ]
+  },
+  {
+    "id": 115,
+    "name": "Plains Drake",
+    "types": [
+      "Wind"
+    ],
+    "strength": 9,
+    "skills": [
+      "Crushing Wing (All)"
+    ]
+  },
+  {
+    "id": 116,
+    "name": "Dreadwolf",
+    "types": [
+      "Sword"
+    ],
+    "strength": 10,
+    "skills": [
+      "Wild Scratch (All)"
+    ]
+  },
+  {
+    "id": 117,
+    "name": "Snow Marmot",
+    "types": [
+      "Sword"
+    ],
+    "strength": 2,
+    "skills": [
+      "Slash"
+    ]
+  },
+  {
+    "id": 118,
+    "name": "High Wolf",
+    "types": [
+      "Sword"
+    ],
+    "strength": 4,
+    "skills": [
+      "Soporific Claw"
+    ]
+  },
+  {
+    "id": 119,
+    "name": "Snow Fox",
+    "types": [
+      "Ice"
+    ],
+    "strength": 2,
+    "skills": [
+      "Freeze"
+    ]
+  },
+  {
+    "id": 120,
+    "name": "Frost Fox",
+    "types": [
+      "Ice"
+    ],
+    "strength": 4,
+    "skills": [
+      "Freeze"
+    ]
+  },
+  {
+    "id": 121,
+    "name": "White Bat",
+    "types": [
+      "Dagger"
+    ],
+    "strength": 2,
+    "skills": [
+      "Stab"
+    ]
+  },
+  {
+    "id": 122,
+    "name": "Albino Bat",
+    "types": [
+      "Dagger"
+    ],
+    "strength": 4,
+    "skills": [
+      "Soporific Fang"
+    ]
+  },
+  {
+    "id": 123,
+    "name": "White Howler",
+    "types": [
+      "Dagger"
+    ],
+    "strength": 4,
+    "skills": [
+      "Mighty Stab"
+    ]
+  },
+  {
+    "id": 124,
+    "name": "Hoary Howler",
+    "types": [
+      "Dagger"
+    ],
+    "strength": 6,
+    "skills": [
+      "Mighty Stab"
+    ]
+  },
+  {
+    "id": 125,
+    "name": "Majestic Snow Marmot",
+    "types": [
+      "Sword"
+    ],
+    "strength": 4,
+    "skills": [
+      "Mighty Slash"
+    ]
+  },
+  {
+    "id": 126,
+    "name": "Hoary Bear",
+    "types": [
+      "Staff"
+    ],
+    "strength": 6,
+    "skills": [
+      "Enraged Bash (All)"
+    ]
+  },
+  {
+    "id": 127,
+    "name": "Snow Yak",
+    "types": [
+      "Spear"
+    ],
+    "strength": 4,
+    "skills": [
+      "Lunge"
+    ]
+  },
+  {
+    "id": 128,
+    "name": "Ash Raven",
+    "types": [
+      "Dark"
+    ],
+    "strength": 4,
+    "skills": [
+      "Enshadow"
+    ]
+  },
+  {
+    "id": 129,
+    "name": "Frostwing Serpent",
+    "types": [
+      "Wind"
+    ],
+    "strength": 4,
+    "skills": [
+      "Wind Slash"
+    ]
+  },
+  {
+    "id": 130,
+    "name": "Avalanche Mushroom",
+    "types": [
+      "---------"
+    ],
+    "strength": 4,
+    "skills": [
+      "Restore Great Health"
+    ]
+  },
+  {
+    "id": 131,
+    "name": "Winter Wanderweed",
+    "types": [
+      "Bow"
+    ],
+    "strength": 4,
+    "skills": [
+      "Shoot"
+    ]
+  },
+  {
+    "id": 132,
+    "name": "Snow Lizard",
+    "types": [
+      "Spear"
+    ],
+    "strength": 4,
+    "skills": [
+      "Lunge"
+    ]
+  },
+  {
+    "id": 133,
+    "name": "War Wolf",
+    "types": [
+      "Dagger"
+    ],
+    "strength": 8,
+    "skills": [
+      "Double Stab"
+    ]
+  },
+  {
+    "id": 134,
+    "name": "Accursed Armor",
+    "types": [
+      "Sword"
+    ],
+    "strength": 9,
+    "skills": [
+      "Armor Break (All)"
+    ],
+    "special": "Enemy Def Down"
+  },
+  {
+    "id": 135,
+    "name": "Reptalios",
+    "types": [
+      "Sword"
+    ],
+    "strength": 8,
+    "skills": [
+      "Enfettering Slash (All)"
+    ]
+  },
+  {
+    "id": 136,
+    "name": "Carnivorous Bat",
+    "types": [
+      "Dagger"
+    ],
+    "strength": 6,
+    "skills": [
+      "Soporific Fang (All)"
+    ]
+  },
+  {
+    "id": 137,
+    "name": "Bandit Bones",
+    "types": [
+      "Sword"
+    ],
+    "strength": 7,
+    "skills": [
+      "Mighty Slash"
+    ]
+  },
+  {
+    "id": 138,
+    "name": "Flatlands Froggen I",
+    "types": [
+      "Spear"
+    ],
+    "strength": 1,
+    "skills": [
+      "Attack"
+    ]
+  },
+  {
+    "id": 139,
+    "name": "Flatlands Froggen II",
+    "types": [
+      "Spear"
+    ],
+    "strength": 2,
+    "skills": [
+      "Attack All"
+    ]
+  },
+  {
+    "id": 140,
+    "name": "Flatlands Froggen III",
+    "types": [
+      "Spear"
+    ],
+    "strength": 3,
+    "skills": [
+      "Double Strike"
+    ]
+  },
+  {
+    "id": 141,
+    "name": "Flatlands Froggen IV",
+    "types": [
+      "Spear"
+    ],
+    "strength": 4,
+    "skills": [
+      "Double Strike"
+    ]
+  },
+  {
+    "id": 142,
+    "name": "Flatlands Froggen V",
+    "types": [
+      "Spear"
+    ],
+    "strength": 4,
+    "skills": [
+      "Double Attack All"
+    ]
+  },
+  {
+    "id": 143,
+    "name": "Flatlands Froggen VI",
+    "types": [
+      "Spear"
+    ],
+    "strength": 5,
+    "skills": [
+      "Triple Strike"
+    ]
+  },
+  {
+    "id": 144,
+    "name": "Flatlands Frogking I",
+    "types": [
+      "Axe"
+    ],
+    "strength": 5,
+    "skills": [
+      "Triple Attack"
+    ]
+  },
+  {
+    "id": 145,
+    "name": "Flatlands Frogking II",
+    "types": [
+      "Axe"
+    ],
+    "strength": 6,
+    "skills": [
+      "Triple Attack All"
+    ]
+  },
+  {
+    "id": 146,
+    "name": "Flatlands Frogking III",
+    "types": [
+      "Axe"
+    ],
+    "strength": 7,
+    "skills": [
+      "Double Guard Break"
+    ]
+  },
+  {
+    "id": 147,
+    "name": "Meep",
+    "types": [
+      "Spear"
+    ],
+    "strength": 2,
+    "skills": [
+      "Lunge"
+    ]
+  },
+  {
+    "id": 148,
+    "name": "Wind Wish",
+    "types": [
+      "Wind"
+    ],
+    "strength": 4,
+    "skills": [
+      "Wind Slash"
+    ]
+  },
+  {
+    "id": 149,
+    "name": "Giant Sheep",
+    "types": [
+      "-----------"
+    ],
+    "strength": 5,
+    "skills": [
+      "Grooming(All)"
+    ]
+  },
+  {
+    "id": 150,
+    "name": "Night Raven",
+    "types": [
+      "Sword"
+    ],
+    "strength": 4,
+    "skills": [
+      "Slash"
+    ]
+  },
+  {
+    "id": 151,
+    "name": "Bloody Bull",
+    "types": [
+      "Spear"
+    ],
+    "strength": 7,
+    "skills": [
+      "Repeated Thrust"
+    ]
+  },
+  {
+    "id": 152,
+    "name": "Skullking Fungoid",
+    "types": [
+      "----------"
+    ],
+    "strength": 7,
+    "skills": [
+      "Continual Light (HP)"
+    ]
+  },
+  {
+    "id": 154,
+    "name": "Raging Rhino",
+    "types": [
+      "Spear"
+    ],
+    "strength": 6,
+    "skills": [
+      "Lunge"
+    ]
+  },
+  {
+    "id": 155,
+    "name": "Snow Drake",
+    "types": [
+      "Ice"
+    ],
+    "strength": 9,
+    "skills": [
+      "Blizzard Breath(All)"
+    ]
+  },
+  {
+    "id": 156,
+    "name": "Behemoth",
+    "types": [
+      "---------"
+    ],
+    "strength": 10,
+    "skills": [
+      "Incredible Heal"
+    ]
+  },
+  {
+    "id": 157,
+    "name": "Aggressive Ant",
+    "types": [
+      "Spear"
+    ],
+    "strength": 1,
+    "skills": [
+      "Lunge"
+    ]
+  },
+  {
+    "id": 158,
+    "name": "Shaggy Meep",
+    "types": [
+      "Spear"
+    ],
+    "strength": 4,
+    "skills": [
+      "Lunge"
+    ],
+    "special": "1"
+  },
+  {
+    "id": 159,
+    "name": "Dire Night Raven",
+    "types": [
+      "Sword"
+    ],
+    "strength": 4,
+    "skills": [
+      "Slash"
+    ]
+  },
+  {
+    "id": 160,
+    "name": "Antagonistic Ant",
+    "types": [
+      "Spear"
+    ],
+    "strength": 4,
+    "skills": [
+      "Lunge"
+    ]
+  },
+  {
+    "id": 161,
+    "name": "Mammoth Sheep",
+    "types": [],
+    "strength": 6,
+    "skills": [
+      "Great Healing Mist"
+    ]
+  },
+  {
+    "id": 162,
+    "name": "Dire Ash Raven",
+    "types": [
+      "Dark"
+    ],
+    "strength": 4,
+    "skills": [
+      "Enshadow"
+    ]
+  },
+  {
+    "id": 163,
+    "name": "Icky Slug",
+    "types": [
+      "------"
+    ],
+    "strength": 6,
+    "skills": [
+      "Black Bile"
+    ]
+  },
+  {
+    "id": 164,
+    "name": "Shaggy Spider",
+    "types": [
+      "Sword"
+    ],
+    "strength": 4,
+    "skills": [
+      "Soporific Claw"
+    ]
+  },
+  {
+    "id": 165,
+    "name": "Mortal Mushroom",
+    "types": [
+      "-----"
+    ],
+    "strength": 7,
+    "skills": [
+      "Crimson Powder"
+    ]
+  },
+  {
+    "id": 166,
+    "name": "Furious Fungoid",
+    "types": [
+      "-----"
+    ],
+    "strength": 8,
+    "skills": [
+      "Continual Light (HP)"
+    ]
+  },
+  {
+    "id": 167,
+    "name": "River Froggen I",
+    "types": [
+      "Dagger"
+    ],
+    "strength": 1,
+    "skills": [
+      "Attack"
+    ]
+  },
+  {
+    "id": 168,
+    "name": "River Froggen II",
+    "types": [
+      "Dagger"
+    ],
+    "strength": 2,
+    "skills": [
+      "Attack All"
+    ]
+  },
+  {
+    "id": 169,
+    "name": "River Froggen III",
+    "types": [
+      "Dagger"
+    ],
+    "strength": 3,
+    "skills": [
+      "Double Strike"
+    ]
+  },
+  {
+    "id": 170,
+    "name": "River Froggen IV",
+    "types": [
+      "Dagger"
+    ],
+    "strength": 4,
+    "skills": [
+      "Double Strike"
+    ]
+  },
+  {
+    "id": 171,
+    "name": "River Froggen V",
+    "types": [
+      "Dagger"
+    ],
+    "strength": 4,
+    "skills": [
+      "Double Attack All"
+    ]
+  },
+  {
+    "id": 172,
+    "name": "River Froggen VI",
+    "types": [
+      "Dagger"
+    ],
+    "strength": 5,
+    "skills": [
+      "Triple Strike"
+    ]
+  },
+  {
+    "id": 173,
+    "name": "River Frogking I",
+    "types": [
+      "Axe"
+    ],
+    "strength": 5,
+    "skills": [
+      "Triple Attack"
+    ]
+  },
+  {
+    "id": 174,
+    "name": "River Frogking II",
+    "types": [
+      "Axe"
+    ],
+    "strength": 6,
+    "skills": [
+      "Triple Attack All"
+    ]
+  },
+  {
+    "id": 175,
+    "name": "River Frogking III",
+    "types": [
+      "Axe"
+    ],
+    "strength": 7,
+    "skills": [
+      "Double Armor Crush"
+    ]
+  },
+  {
+    "id": 176,
+    "name": "River Wasp",
+    "types": [
+      "Bow"
+    ],
+    "strength": 1,
+    "skills": [
+      "Poison Shot"
+    ]
+  },
+  {
+    "id": 177,
+    "name": "Giant Slug",
+    "types": [
+      "Spear"
+    ],
+    "strength": 1,
+    "skills": [
+      "Lunge"
+    ]
+  },
+  {
+    "id": 178,
+    "name": "Salamander",
+    "types": [
+      "Spear"
+    ],
+    "strength": 5,
+    "skills": [
+      "Blinding Charge"
+    ]
+  },
+  {
+    "id": 179,
+    "name": "River Fly",
+    "types": [
+      "Dagger"
+    ],
+    "strength": 4,
+    "skills": [
+      "Befuddling Claw"
+    ]
+  },
+  {
+    "id": 180,
+    "name": "Retalion",
+    "types": [
+      "Sword"
+    ],
+    "strength": 7,
+    "skills": [
+      "Great Sweep (All)"
+    ]
+  },
+  {
+    "id": 181,
+    "name": "Lord of the Flies",
+    "types": [
+      "Sword"
+    ],
+    "strength": 7,
+    "skills": [
+      "Offensive Claw"
+    ]
+  },
+  {
+    "id": 183,
+    "name": "Dreadwing",
+    "types": [
+      "Ice"
+    ],
+    "strength": 9,
+    "skills": [
+      "Icy Breath(All)"
+    ]
+  },
+  {
+    "id": 184,
+    "name": "Giant Gator",
+    "types": [
+      "Dagger"
+    ],
+    "strength": 9,
+    "skills": [
+      "Wreak Havoc (All)"
+    ]
+  },
+  {
+    "id": 185,
+    "name": "Gigantes",
+    "types": [
+      "Spear"
+    ],
+    "strength": 10,
+    "skills": [
+      "Fell Swoop (All)"
+    ]
+  },
+  {
+    "id": 186,
+    "name": "Warrior Wisp",
+    "types": [
+      "Bow"
+    ],
+    "strength": 2,
+    "skills": [
+      "Poison Shot"
+    ]
+  },
+  {
+    "id": 187,
+    "name": "Molley Slug",
+    "types": [
+      "---------"
+    ],
+    "strength": 3,
+    "skills": [
+      "Restore Health"
+    ]
+  },
+  {
+    "id": 188,
+    "name": "Red Viper",
+    "types": [
+      "Fire"
+    ],
+    "strength": 2,
+    "skills": [
+      "Incinerate"
+    ]
+  },
+  {
+    "id": 189,
+    "name": "Blood Viper",
+    "types": [
+      "Fire"
+    ],
+    "strength": 3,
+    "skills": [
+      "Incinerate"
+    ]
+  },
+  {
+    "id": 190,
+    "name": "Horse Fly",
+    "types": [
+      "Sword"
+    ],
+    "strength": 5,
+    "skills": [
+      "Befuddling Claw"
+    ]
+  },
+  {
+    "id": 191,
+    "name": "River Bug",
+    "types": [
+      "Sword"
+    ],
+    "strength": 6,
+    "skills": [
+      "Mighty Slash"
+    ]
+  },
+  {
+    "id": 192,
+    "name": "Collared Salamander",
+    "types": [
+      "Spear"
+    ],
+    "strength": 6,
+    "skills": [
+      "Blinding Charge"
+    ]
+  },
+  {
+    "id": 193,
+    "name": "Horned Fly",
+    "types": [
+      "Sword"
+    ],
+    "strength": 6,
+    "skills": [
+      "Befuddling Claw"
+    ]
+  },
+  {
+    "id": 194,
+    "name": "Mad Ratkin",
+    "types": [
+      "Sword"
+    ],
+    "strength": 6,
+    "skills": [
+      "Attack"
+    ]
+  },
+  {
+    "id": 195,
+    "name": "Blue Bull",
+    "types": [
+      "Spear"
+    ],
+    "strength": 8,
+    "skills": [
+      "Repeated Thrust"
+    ]
+  },
+  {
+    "id": 196,
+    "name": "Sea Birdian I",
+    "types": [
+      "Bow"
+    ],
+    "strength": 1,
+    "skills": [
+      "Attack"
+    ]
+  },
+  {
+    "id": 197,
+    "name": "Sea Birdian II",
+    "types": [
+      "Bow"
+    ],
+    "strength": 2,
+    "skills": [
+      "Attack All"
+    ]
+  },
+  {
+    "id": 198,
+    "name": "Sea Birdian III",
+    "types": [
+      "Bow"
+    ],
+    "strength": 3,
+    "skills": [
+      "Double Strike"
+    ]
+  },
+  {
+    "id": 199,
+    "name": "Sea Birdian IV",
+    "types": [
+      "Bow"
+    ],
+    "strength": 4,
+    "skills": [
+      "Double Strike"
+    ]
+  },
+  {
+    "id": 200,
+    "name": "Sea Birdian V",
+    "types": [
+      "Bow"
+    ],
+    "strength": 4,
+    "skills": [
+      "Double Attack All"
+    ]
+  },
+  {
+    "id": 201,
+    "name": "Sea Birdian VI",
+    "types": [
+      "Bow"
+    ],
+    "strength": 5,
+    "skills": [
+      "Triple Strike"
+    ]
+  },
+  {
+    "id": 202,
+    "name": "Sea Birdking I",
+    "types": [
+      "Sword"
+    ],
+    "strength": 5,
+    "skills": [
+      "Triple Attack"
+    ]
+  },
+  {
+    "id": 203,
+    "name": "Sea Birdking II",
+    "types": [
+      "Sword"
+    ],
+    "strength": 6,
+    "skills": [
+      "Triple Attack All"
+    ]
+  },
+  {
+    "id": 204,
+    "name": "Sea Birdking III",
+    "types": [
+      "Sword"
+    ],
+    "strength": 7,
+    "skills": [
+      "Striking Sword Dance"
+    ]
+  },
+  {
+    "id": 205,
+    "name": "Hermit Conch",
+    "types": [
+      "Spear"
+    ],
+    "strength": 2,
+    "skills": [
+      "Lunge"
+    ]
+  },
+  {
+    "id": 206,
+    "name": "Flying Fish",
+    "types": [
+      "Spear"
+    ],
+    "strength": 2,
+    "skills": [
+      "Lunge"
+    ]
+  },
+  {
+    "id": 207,
+    "name": "Rock Tortoise",
+    "types": [
+      "Thunder"
+    ],
+    "strength": 5,
+    "skills": [
+      "Warding Thunder"
+    ]
+  },
+  {
+    "id": 208,
+    "name": "Scissor Crab",
+    "types": [
+      "Ice"
+    ],
+    "strength": 4,
+    "skills": [
+      "Freeze"
+    ]
+  },
+  {
+    "id": 209,
+    "name": "Kingfisher",
+    "types": [
+      "Ice"
+    ],
+    "strength": 7,
+    "skills": [
+      "Ice Floe"
+    ]
+  },
+  {
+    "id": 210,
+    "name": "Sea Anemone",
+    "types": [
+      "Bow"
+    ],
+    "strength": 6,
+    "skills": [
+      "Poison Shot"
+    ]
+  },
+  {
+    "id": 212,
+    "name": "Cetus Maximus",
+    "types": [
+      "---------"
+    ],
+    "strength": 6,
+    "skills": [
+      "Soporific Mist (All)"
+    ]
+  },
+  {
+    "id": 213,
+    "name": "Reaper Crab",
+    "types": [
+      "Ice"
+    ],
+    "strength": 9,
+    "skills": [
+      "Freeze (All)"
+    ]
+  },
+  {
+    "id": 214,
+    "name": "Deep One",
+    "types": [
+      "Ice"
+    ],
+    "strength": 10,
+    "skills": [
+      "Ice Floe (All)"
+    ]
+  },
+  {
+    "id": 215,
+    "name": "Sailfish",
+    "types": [
+      "Spear"
+    ],
+    "strength": 4,
+    "skills": [
+      "Lunge"
+    ]
+  },
+  {
+    "id": 216,
+    "name": "Sea Snake",
+    "types": [
+      "Dagger"
+    ],
+    "strength": 4,
+    "skills": [
+      "Venomous Fang"
+    ]
+  },
+  {
+    "id": 217,
+    "name": "Scythe Crab",
+    "types": [
+      "Ice"
+    ],
+    "strength": 6,
+    "skills": [
+      "Freeze"
+    ]
+  },
+  {
+    "id": 218,
+    "name": "Mossy Tortoise",
+    "types": [
+      "Thunder"
+    ],
+    "strength": 6,
+    "skills": [
+      "Warding Thunder"
+    ]
+  },
+  {
+    "id": 219,
+    "name": "Barnacle Bat",
+    "types": [],
+    "strength": 4,
+    "skills": [
+      "Slumber Wave (All)"
+    ]
+  },
+  {
+    "id": 220,
+    "name": "Sea Slug",
+    "types": [],
+    "strength": 4,
+    "skills": [
+      "Blinding Mist (All)"
+    ]
+  },
+  {
+    "id": 221,
+    "name": "Barnacle Crab",
+    "types": [],
+    "strength": 5,
+    "skills": [
+      "Toxic Mist (All)"
+    ]
+  },
+  {
+    "id": 222,
+    "name": "Barnacle Tortoise",
+    "types": [],
+    "strength": 6,
+    "skills": [
+      "Befuddling Spark(All)"
+    ]
+  },
+  {
+    "id": 223,
+    "name": "Azure Urchin",
+    "types": [],
+    "strength": 4,
+    "skills": [
+      "Physical Boost"
+    ]
+  },
+  {
+    "id": 224,
+    "name": "Black Scissors",
+    "types": [
+      "Ice"
+    ],
+    "strength": 8,
+    "skills": [
+      "Toxic Ice"
+    ]
+  },
+  {
+    "id": 225,
+    "name": "Greater Kingfisher",
+    "types": [
+      "Ice"
+    ],
+    "strength": 8,
+    "skills": [
+      "Ice Floe"
+    ]
+  },
+  {
+    "id": 226,
+    "name": "Cliff Birdian I",
+    "types": [
+      "Dagger"
+    ],
+    "strength": 1,
+    "skills": [
+      "Attack"
+    ]
+  },
+  {
+    "id": 227,
+    "name": "Cliff Birdian II",
+    "types": [
+      "Dagger"
+    ],
+    "strength": 2,
+    "skills": [
+      "Attack All"
+    ]
+  },
+  {
+    "id": 228,
+    "name": "Cliff Birdian III",
+    "types": [
+      "Dagger"
+    ],
+    "strength": 3,
+    "skills": [
+      "Double Strike"
+    ]
+  },
+  {
+    "id": 229,
+    "name": "Cliff Birdian IV",
+    "types": [
+      "Dagger"
+    ],
+    "strength": 4,
+    "skills": [
+      "Double Strike"
+    ]
+  },
+  {
+    "id": 230,
+    "name": "Cliff Birdian V",
+    "types": [
+      "Dagger"
+    ],
+    "strength": 4,
+    "skills": [
+      "Double Attack All"
+    ]
+  },
+  {
+    "id": 231,
+    "name": "Cliff Birdian VI",
+    "types": [
+      "Dagger"
+    ],
+    "strength": 5,
+    "skills": [
+      "Triple Strike"
+    ]
+  },
+  {
+    "id": 232,
+    "name": "Cliff Birdking I",
+    "types": [
+      "Bow"
+    ],
+    "strength": 5,
+    "skills": [
+      "Triple Attack"
+    ]
+  },
+  {
+    "id": 233,
+    "name": "Cliff Birdking II",
+    "types": [
+      "Bow"
+    ],
+    "strength": 6,
+    "skills": [
+      "Triple Attack All"
+    ]
+  },
+  {
+    "id": 234,
+    "name": "Cliff Birdking III",
+    "types": [
+      "Bow"
+    ],
+    "strength": 7,
+    "skills": [
+      "Double Elemental Arrow Dance"
+    ]
+  },
+  {
+    "id": 235,
+    "name": "Eggling",
+    "types": [
+      "Spear"
+    ],
+    "strength": 2,
+    "skills": [
+      "Lunge"
+    ]
+  },
+  {
+    "id": 236,
+    "name": "Laughing Hyaena",
+    "types": [
+      "Dagger"
+    ],
+    "strength": 4,
+    "skills": [
+      "Venomous Fang"
+    ]
+  },
+  {
+    "id": 237,
+    "name": "Great Condor",
+    "types": [
+      "Wind"
+    ],
+    "strength": 5,
+    "skills": [
+      "Thousand Scythes"
+    ]
+  },
+  {
+    "id": 238,
+    "name": "Lloris",
+    "types": [
+      "Sword"
+    ],
+    "strength": 4,
+    "skills": [
+      "Mighty Slash"
+    ]
+  },
+  {
+    "id": 239,
+    "name": "Creeping Treant",
+    "types": [
+      "Bow"
+    ],
+    "strength": 6,
+    "skills": [
+      "Blinding Shot (All)"
+    ]
+  },
+  {
+    "id": 240,
+    "name": "Armor Eater",
+    "types": [],
+    "strength": 7,
+    "skills": [
+      "Retaliative  Figure"
+    ]
+  },
+  {
+    "id": 242,
+    "name": "Wooly Spider",
+    "types": [
+      "Sword"
+    ],
+    "strength": 6,
+    "skills": [
+      "Soporific Claw"
+    ]
+  },
+  {
+    "id": 243,
+    "name": "Giant Eagle",
+    "types": [
+      "Wind"
+    ],
+    "strength": 6,
+    "skills": [
+      "Wind Slash"
+    ]
+  },
+  {
+    "id": 244,
+    "name": "Heavenwing",
+    "types": [
+      "Fire"
+    ],
+    "strength": 10,
+    "skills": [
+      "Crimson Flame (All)"
+    ]
+  },
+  {
+    "id": 245,
+    "name": "Hatchling",
+    "types": [
+      "Spear"
+    ],
+    "strength": 4,
+    "skills": [
+      "Lunge"
+    ]
+  },
+  {
+    "id": 246,
+    "name": "Long-eared Lloris",
+    "types": [
+      "Sword"
+    ],
+    "strength": 6,
+    "skills": [
+      "Mighty Slash"
+    ]
+  },
+  {
+    "id": 247,
+    "name": "Two-Handed Hatchling",
+    "types": [],
+    "strength": 5,
+    "skills": [
+      "Restore Health"
+    ]
+  },
+  {
+    "id": 248,
+    "name": "King Condor",
+    "types": [
+      "Wind"
+    ],
+    "strength": 6,
+    "skills": [
+      "Thousand Scythes"
+    ]
+  },
+  {
+    "id": 249,
+    "name": "Creepy Fledgling",
+    "types": [
+      "Bow"
+    ],
+    "strength": 6,
+    "skills": [
+      "Poison Shot"
+    ]
+  },
+  {
+    "id": 250,
+    "name": "Guard Dog",
+    "types": [
+      "Sword"
+    ],
+    "strength": 3,
+    "skills": [
+      "Slash"
+    ]
+  },
+  {
+    "id": 251,
+    "name": "War Dog",
+    "types": [
+      "Sword"
+    ],
+    "strength": 4,
+    "skills": [
+      "Slash"
+    ]
+  },
+  {
+    "id": 252,
+    "name": "Tempest Falcon",
+    "types": [
+      "Wind"
+    ],
+    "strength": 4,
+    "skills": [
+      "Wind Slash"
+    ]
+  },
+  {
+    "id": 253,
+    "name": "Marionette Bones",
+    "types": [
+      "Sword"
+    ],
+    "strength": 4,
+    "skills": [
+      "Slash"
+    ]
+  },
+  {
+    "id": 254,
+    "name": "Puppet Bones",
+    "types": [
+      "Sword"
+    ],
+    "strength": 6,
+    "skills": [
+      "Mighty Slash"
+    ]
+  },
+  {
+    "id": 255,
+    "name": "Bloody Rhino",
+    "types": [
+      "Spear"
+    ],
+    "strength": 8,
+    "skills": [
+      "Lunge"
+    ]
+  },
+  {
+    "id": 256,
+    "name": "Devil Deer",
+    "types": [
+      "Spear"
+    ],
+    "strength": 6,
+    "skills": [
+      "Mighty Lunge"
+    ]
+  },
+  {
+    "id": 257,
+    "name": "Ettin Snake",
+    "types": [
+      "Dagger"
+    ],
+    "strength": 9,
+    "skills": [
+      "MIghty Double Stab"
+    ]
+  },
+  {
+    "id": 258,
+    "name": "Killer Chameleon",
+    "types": [
+      "Sword"
+    ],
+    "strength": 8,
+    "skills": [
+      "Sharp Scratch (All)"
+    ]
+  },
+  {
+    "id": 259,
+    "name": "Scaled Viper",
+    "types": [
+      "Dagger"
+    ],
+    "strength": 2,
+    "skills": [
+      "Venomous Fang"
+    ]
+  },
+  {
+    "id": 262,
+    "name": "Black Bat",
+    "types": [
+      "Dagger"
+    ],
+    "strength": 2,
+    "skills": [
+      "Stab"
+    ]
+  },
+  {
+    "id": 266,
+    "name": "Ettin Asp",
+    "types": [
+      "Dagger"
+    ],
+    "strength": 6,
+    "skills": [
+      "Double Stab"
+    ]
+  },
+  {
+    "id": 267,
+    "name": "Etting Ophidian",
+    "types": [
+      "Dagger"
+    ],
+    "strength": 8,
+    "skills": [
+      "Double Stab"
+    ]
+  },
+  {
+    "id": 270,
+    "name": "Fire Elemental",
+    "types": [
+      "Fire"
+    ],
+    "strength": 6,
+    "skills": [
+      "Incinerate (All)"
+    ]
+  },
+  {
+    "id": 271,
+    "name": "Light Elemental",
+    "types": [
+      "Light"
+    ],
+    "strength": 6,
+    "skills": [
+      "Luminescence (All)"
+    ]
+  },
+  {
+    "id": 272,
+    "name": "Dark Elemental",
+    "types": [
+      "Dark"
+    ],
+    "strength": 6,
+    "skills": [
+      "Enshadow (All)"
+    ]
+  },
+  {
+    "id": 273,
+    "name": "Tyrannodrake",
+    "types": [
+      "Spear"
+    ],
+    "strength": 10,
+    "skills": [
+      "Double-blind Attack (All)"
+    ]
+  },
+  {
+    "id": 274,
+    "name": "Shadow Bat",
+    "types": [
+      "Dark"
+    ],
+    "strength": 4,
+    "skills": [
+      "Enshadow"
+    ]
+  },
+  {
+    "id": 275,
+    "name": "Ice Elemental",
+    "types": [
+      "Ice"
+    ],
+    "strength": 6,
+    "skills": [
+      "Freeze (All)"
+    ]
+  },
+  {
+    "id": 276,
+    "name": "Wind Elemental",
+    "types": [
+      "Wind"
+    ],
+    "strength": 6,
+    "skills": [
+      "Wind Slash (All)"
+    ]
+  },
+  {
+    "id": 277,
+    "name": "Assassin Bug",
+    "types": [
+      "Spear"
+    ],
+    "strength": 2,
+    "skills": [
+      "Lunge"
+    ]
+  },
+  {
+    "id": 281,
+    "name": "Ambling Bones",
+    "types": [
+      "Sword"
+    ],
+    "strength": 4,
+    "skills": [
+      "Mighty Slash"
+    ]
+  },
+  {
+    "id": 285,
+    "name": "Revenant",
+    "types": [],
+    "strength": 10,
+    "skills": [
+      "Impact Clock"
+    ]
+  },
+  {
+    "id": 286,
+    "name": "Blood Revenant",
+    "types": [
+      "Axe"
+    ],
+    "strength": 7,
+    "skills": [
+      "Guardian Axe"
+    ]
+  },
+  {
+    "id": 287,
+    "name": "Dark Revenant",
+    "types": [
+      "Axe"
+    ],
+    "strength": 7,
+    "skills": [
+      "Bulwark Axe"
+    ]
+  },
+  {
+    "id": 288,
+    "name": "Sticky Slug",
+    "types": [],
+    "strength": 4,
+    "skills": [
+      "Red Bite"
+    ]
+  },
+  {
+    "id": 289,
+    "name": "Gooey Slug",
+    "types": [],
+    "strength": 8,
+    "skills": [
+      "Viscous Bite"
+    ]
+  },
+  {
+    "id": 291,
+    "name": "Flame Revenant",
+    "types": [
+      "Fire"
+    ],
+    "strength": 10,
+    "skills": [
+      "Inferno Clock (All)"
+    ]
+  },
+  {
+    "id": 292,
+    "name": "Dark Revenant",
+    "types": [
+      "Dark"
+    ],
+    "strength": 10,
+    "skills": [
+      "Eclipse Clock (All)"
+    ]
+  },
+  {
+    "id": 293,
+    "name": "Thunder Revenant",
+    "types": [
+      "Thunder"
+    ],
+    "strength": 10,
+    "skills": [
+      "Vortex Clock (All)"
+    ]
+  },
+  {
+    "id": 294,
+    "name": "Flame Remnant Mk.II",
+    "types": [
+      "Fire"
+    ],
+    "strength": 6,
+    "skills": [
+      "Incinerate"
+    ]
+  },
+  {
+    "id": 295,
+    "name": "Dark Remnant Mk.II",
+    "types": [
+      "Dark"
+    ],
+    "strength": 6,
+    "skills": [
+      "Enshadow"
+    ]
+  },
+  {
+    "id": 296,
+    "name": "Thunder Remnant Mk.II",
+    "types": [
+      "Thunder"
+    ],
+    "strength": 6,
+    "skills": [
+      "Electrocute"
+    ]
+  },
+  {
+    "id": 297,
+    "name": "Ice Revenant",
+    "types": [
+      "Ice"
+    ],
+    "strength": 10,
+    "skills": [
+      "Diamond Clock (All)"
+    ]
+  },
+  {
+    "id": 298,
+    "name": "Light Revenant",
+    "types": [
+      "Light"
+    ],
+    "strength": 10,
+    "skills": [
+      "Solar Clock (All)"
+    ]
+  },
+  {
+    "id": 299,
+    "name": "Wind Revenant",
+    "types": [
+      "Wind"
+    ],
+    "strength": 10,
+    "skills": [
+      "Tempest Clock (All)"
+    ]
+  },
+  {
+    "id": 300,
+    "name": "Remnant Mk.II",
+    "types": [
+      "Dagger"
+    ],
+    "strength": 6,
+    "skills": [
+      "Bite"
+    ]
+  },
+  {
+    "id": 301,
+    "name": "Ice Remnant Mk.II",
+    "types": [
+      "Ice"
+    ],
+    "strength": 6,
+    "skills": [
+      "Freeze"
+    ]
+  },
+  {
+    "id": 302,
+    "name": "Light Remnant Mk.II",
+    "types": [
+      "Light"
+    ],
+    "strength": 6,
+    "skills": [
+      "Luminescence"
+    ]
+  },
+  {
+    "id": 303,
+    "name": "Wind Remnant Mk.II",
+    "types": [
+      "Wind"
+    ],
+    "strength": 6,
+    "skills": [
+      "Wind Slash"
+    ]
+  },
+  {
+    "id": 304,
+    "name": "Remnant",
+    "types": [
+      "Dagger"
+    ],
+    "strength": 7,
+    "skills": [
+      "Bite"
+    ]
+  },
+  {
+    "id": 306,
+    "name": "Ice Remnant",
+    "types": [
+      "Ice"
+    ],
+    "strength": 7,
+    "skills": [
+      "Freeze"
+    ]
+  },
+  {
+    "id": 307,
+    "name": "Wind Remnant",
+    "types": [
+      "Wind"
+    ],
+    "strength": 7,
+    "skills": [
+      "Wind Slash"
+    ]
+  },
+  {
+    "id": 308,
+    "name": "Thunder Remnant",
+    "types": [
+      "Thunder"
+    ],
+    "strength": 7,
+    "skills": [
+      "Electrocute"
+    ]
+  },
+  {
+    "id": 309,
+    "name": "Light Remnant",
+    "types": [
+      "Light"
+    ],
+    "strength": 7,
+    "skills": [
+      "Luminescence"
+    ]
+  },
+  {
+    "id": 311,
+    "name": "Manticore",
+    "types": [
+      "Dagger"
+    ],
+    "strength": 3,
+    "skills": [
+      "Mighty Stab"
+    ]
+  },
+  {
+    "id": 312,
+    "name": "Menacing Manticore",
+    "types": [
+      "Sword"
+    ],
+    "strength": 7,
+    "skills": [
+      "Blinding Claw"
+    ]
+  },
+  {
+    "id": 315,
+    "name": "Spud Bug",
+    "types": [
+      "Spear"
+    ],
+    "strength": 7,
+    "skills": [
+      "Lunge"
+    ]
+  },
+  {
+    "id": 319,
+    "name": "Manymaws",
+    "types": [],
+    "strength": 10,
+    "skills": [
+      "Horrible Breath (All)"
+    ]
+  },
+  {
+    "id": 322,
+    "name": "Monarch",
+    "types": [
+      "Wind"
+    ],
+    "strength": 10,
+    "skills": [
+      "Butterfly Effect (All)"
+    ]
+  },
+  {
+    "id": 323,
+    "name": "Crawly Fledgling",
+    "types": [
+      "Bow"
+    ],
+    "strength": 3,
+    "skills": [
+      "Poison Shot"
+    ]
+  },
+  {
+    "id": 324,
+    "name": "Sentinel",
+    "types": [
+      "Axe"
+    ],
+    "strength": 1,
+    "skills": [
+      "Chop"
+    ]
+  },
+  {
+    "id": 325,
+    "name": "Light Sentinel",
+    "types": [
+      "Light"
+    ],
+    "strength": 4,
+    "skills": [
+      "Luminescence"
+    ]
+  },
+  {
+    "id": 326,
+    "name": "Dark Sentinel",
+    "types": [
+      "Dark"
+    ],
+    "strength": 4,
+    "skills": [
+      "Enshadow"
+    ]
+  },
+  {
+    "id": 328,
+    "name": "Guardian",
+    "types": [
+      "Axe"
+    ],
+    "strength": 4,
+    "skills": [
+      "Chop"
+    ]
+  },
+  {
+    "id": 329,
+    "name": "Flame Guardian",
+    "types": [
+      "Fire"
+    ],
+    "strength": 6,
+    "skills": [
+      "Incinerate (All)"
+    ]
+  },
+  {
+    "id": 330,
+    "name": "Ice Guardian",
+    "types": [
+      "Ice"
+    ],
+    "strength": 4,
+    "skills": [
+      "Freeze (All)"
+    ]
+  },
+  {
+    "id": 331,
+    "name": "Wind Guardian",
+    "types": [
+      "Wind"
+    ],
+    "strength": 4,
+    "skills": [
+      "Wind Slash (All)"
+    ]
+  },
+  {
+    "id": 332,
+    "name": "Thunder Guardian",
+    "types": [
+      "Thunder"
+    ],
+    "strength": 7,
+    "skills": [
+      "Shock Stream"
+    ]
+  },
+  {
+    "id": 333,
+    "name": "Light Guardian",
+    "types": [
+      "Light"
+    ],
+    "strength": 7,
+    "skills": [
+      "Light Stream"
+    ]
+  },
+  {
+    "id": 334,
+    "name": "Dark Guardian",
+    "types": [
+      "Dark"
+    ],
+    "strength": 7,
+    "skills": [
+      "Shadow Stream"
+    ]
+  },
+  {
+    "id": 335,
+    "name": "Fire Sentinel",
+    "types": [
+      "Fire"
+    ],
+    "strength": 4,
+    "skills": [
+      "Incinerate"
+    ]
+  },
+  {
+    "id": 336,
+    "name": "Ice Sentinel",
+    "types": [
+      "Ice"
+    ],
+    "strength": 4,
+    "skills": [
+      "Freeze"
+    ]
+  },
+  {
+    "id": 337,
+    "name": "Flame Guardian Mk.II",
+    "types": [
+      "Fire"
+    ],
+    "strength": 8,
+    "skills": [
+      "Incinerate (All)"
+    ]
+  },
+  {
+    "id": 338,
+    "name": "Dark Guardian Mk.II",
+    "types": [
+      "Dark"
+    ],
+    "strength": 8,
+    "skills": [
+      "Enshadow (All)"
+    ]
+  },
+  {
+    "id": 339,
+    "name": "Flame Curator Mk.II",
+    "types": [
+      "Fire"
+    ],
+    "strength": 7,
+    "skills": [
+      "Incinerate"
+    ]
+  },
+  {
+    "id": 340,
+    "name": "Dark Curator Mk.II",
+    "types": [
+      "Dark"
+    ],
+    "strength": 7,
+    "skills": [
+      "Enshadow"
+    ]
+  },
+  {
+    "id": 341,
+    "name": "Wind Sentinel",
+    "types": [
+      "Wind"
+    ],
+    "strength": 4,
+    "skills": [
+      "Wind Slash"
+    ]
+  },
+  {
+    "id": 342,
+    "name": "Thunder Sentinel",
+    "types": [
+      "Thunder"
+    ],
+    "strength": 4,
+    "skills": [
+      "Electrocute"
+    ]
+  },
+  {
+    "id": 343,
+    "name": "Sentinel Mk.II",
+    "types": [
+      "Axe"
+    ],
+    "strength": 6,
+    "skills": [
+      "Chop"
+    ]
+  },
+  {
+    "id": 344,
+    "name": "Flame Sentinel Mk.II",
+    "types": [
+      "Fire"
+    ],
+    "strength": 5,
+    "skills": [
+      "Incinerate"
+    ]
+  },
+  {
+    "id": 345,
+    "name": "Ice Sentinel Mk.II",
+    "types": [
+      "Ice"
+    ],
+    "strength": 6,
+    "skills": [
+      "Freeze"
+    ]
+  },
+  {
+    "id": 346,
+    "name": "Wind Sentinel Mk.II",
+    "types": [
+      "Wind"
+    ],
+    "strength": 6,
+    "skills": [
+      "Wind Slash"
+    ]
+  },
+  {
+    "id": 347,
+    "name": "Thunder Sentinel Mk.II",
+    "types": [
+      "Thunder"
+    ],
+    "strength": 6,
+    "skills": [
+      "Electrocute"
+    ]
+  },
+  {
+    "id": 348,
+    "name": "Light Sentinel Mk.II",
+    "types": [
+      "Light"
+    ],
+    "strength": 5,
+    "skills": [
+      "Luminescence"
+    ]
+  },
+  {
+    "id": 349,
+    "name": "Dark Sentinel Mk.II",
+    "types": [
+      "Dark"
+    ],
+    "strength": 5,
+    "skills": [
+      "Enshadow"
+    ]
+  },
+  {
+    "id": 350,
+    "name": "Curator",
+    "types": [],
+    "strength": 4,
+    "skills": [
+      "Mental Boost"
+    ]
+  },
+  {
+    "id": 351,
+    "name": "Flame Curator",
+    "types": [
+      "Fire"
+    ],
+    "strength": 6,
+    "skills": [
+      "Incinerate"
+    ]
+  },
+  {
+    "id": 352,
+    "name": "Ice Curator",
+    "types": [
+      "Ice"
+    ],
+    "strength": 4,
+    "skills": [
+      "Freeze"
+    ]
+  },
+  {
+    "id": 353,
+    "name": "Wind Curator",
+    "types": [
+      "Wind"
+    ],
+    "strength": 4,
+    "skills": [
+      "Wind Slash"
+    ]
+  },
+  {
+    "id": 354,
+    "name": "Thunder Curator",
+    "types": [
+      "Thunder"
+    ],
+    "strength": 6,
+    "skills": [
+      "Electrocute"
+    ]
+  },
+  {
+    "id": 355,
+    "name": "Light Curator",
+    "types": [
+      "Light"
+    ],
+    "strength": 4,
+    "skills": [
+      "Luminescence"
+    ]
+  },
+  {
+    "id": 356,
+    "name": "Dark Curator",
+    "types": [
+      "Dark"
+    ],
+    "strength": 6,
+    "skills": [
+      "Enshadow"
+    ]
+  },
+  {
+    "id": 357,
+    "name": "Guardian Mk.II",
+    "types": [
+      "Axe"
+    ],
+    "strength": 8,
+    "skills": [
+      "Mighty Chop"
+    ]
+  },
+  {
+    "id": 358,
+    "name": "Ice Guardian Mk.II",
+    "types": [
+      "Ice"
+    ],
+    "strength": 8,
+    "skills": [
+      "Freeze (All)"
+    ]
+  },
+  {
+    "id": 359,
+    "name": "Wind Guardian Mk.II",
+    "types": [
+      "Wind"
+    ],
+    "strength": 8,
+    "skills": [
+      "Wind Slash (All)"
+    ]
+  },
+  {
+    "id": 360,
+    "name": "Thunder Guardian Mk.II",
+    "types": [
+      "Thunder"
+    ],
+    "strength": 8,
+    "skills": [
+      "Electrocute (All)"
+    ]
+  },
+  {
+    "id": 361,
+    "name": "Light Guardian Mk.II",
+    "types": [
+      "Light"
+    ],
+    "strength": 8,
+    "skills": [
+      "Luminescence (All)"
+    ]
+  },
+  {
+    "id": 362,
+    "name": "Curator Mk.II",
+    "types": [],
+    "strength": 9,
+    "skills": [
+      "Mental Boost (All)"
+    ]
+  },
+  {
+    "id": 363,
+    "name": "Ice Curator Mk.II",
+    "types": [
+      "Ice"
+    ],
+    "strength": 7,
+    "skills": [
+      "Freeze"
+    ]
+  },
+  {
+    "id": 364,
+    "name": "Wind Curator Mk.II",
+    "types": [
+      "Wind"
+    ],
+    "strength": 7,
+    "skills": [
+      "Wind Slash"
+    ]
+  },
+  {
+    "id": 365,
+    "name": "Thunder Curator Mk.II",
+    "types": [
+      "Thunder"
+    ],
+    "strength": 7,
+    "skills": [
+      "Electrocute"
+    ]
+  },
+  {
+    "id": 366,
+    "name": "Light Curator Mk.II",
+    "types": [
+      "Light"
+    ],
+    "strength": 7,
+    "skills": [
+      "Luminescence"
+    ]
+  },
+  {
+    "id": 367,
+    "name": "Cait",
+    "types": [],
+    "strength": 5,
+    "skills": [
+      "Luck of the Cait"
+    ],
+    "special": "Random Buff"
+  },
+  {
+    "id": 368,
+    "name": "Cultured Cait",
+    "types": [],
+    "strength": 7,
+    "skills": [
+      "Deluxe Luck of the Cait"
+    ],
+    "special": "More Random Buff"
+  },
+  {
+    "id": 369,
+    "name": "Chubby Cait",
+    "types": [],
+    "strength": 10,
+    "skills": [
+      "Supreme Luck of the Cait"
+    ],
+    "special": "Super Random Buff"
+  },
+  {
+    "id": 370,
+    "name": "Fire Wisp",
+    "types": [
+      "Fire"
+    ],
+    "strength": 3,
+    "skills": [
+      "Incinerate"
+    ]
+  },
+  {
+    "id": 371,
+    "name": "Ice Wisp",
+    "types": [
+      "Ice"
+    ],
+    "strength": 3,
+    "skills": [
+      "Freeze"
+    ]
+  },
+  {
+    "id": 372,
+    "name": "Thunder Wisp",
+    "types": [
+      "Thunder"
+    ],
+    "strength": 4,
+    "skills": [
+      "Electrocute"
+    ]
+  }
+]

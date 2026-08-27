@@ -1,0 +1,53 @@
+{
+  "key": "duckov",
+  "display_name": "Escape from Duckov",
+  "default_save_dirs": [
+    "%APPDATA%/../LocalLow/TeamSoda/Duckov/Saves",
+    "~/Library/Application Support/TeamSoda/Duckov/Saves",
+    "~/Library/Application Support/com.Unity-Technologies.com.unity.template.urp-blank/Saves"
+  ],
+  "file_patterns": [
+    [
+      "Duckov save files",
+      "*.sav *.json *.ES3"
+    ],
+    [
+      "All files",
+      "*.*"
+    ]
+  ],
+  "quick_fields": {
+    "Money": [
+      "EconomyData",
+      "value",
+      "money"
+    ],
+    "EXP": [
+      "EXP_Value",
+      "value"
+    ],
+    "Health": [
+      "MainCharacterHealth",
+      "value"
+    ]
+  },
+  "json_quirks": [
+    {
+      "pattern": "(\"__type\"\\s*:\\s*\"[^\"]*\")\\s*(?=(?:true|false|null|-?\\d|\"))",
+      "replacement": "\\1, \"value\" : "
+    }
+  ],
+  "packed_value_node": {
+    "name": "item",
+    "key_field": "key",
+    "type_field": "dataType",
+    "data_field": "data",
+    "codecs": {
+      "1": "float32le",
+      "2": "int32le",
+      "3": "bool8",
+      "4": "utf8"
+    }
+  },
+  "notes": "Save files: Save_1.sav .. Save_6.sav, Global.json, Options.ES3\nUses Unity's Easy Save 3 format (plain JSON). A quirk where some int/bool fields drop their 'value' key is patched automatically.\nInventory item stats are base64-packed bytes - shown decoded in the tree as 'item:<type>' rows."
+}

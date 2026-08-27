@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Save file backups cedit itself writes (see backup_file() in lib/base.py)
+*.bak
+
+# dotnet build output for the vendored DREDGE bridge - rebuilt
+# automatically on first use, see README.txt's "BUILD ARTIFACTS" section
+lib/dredge_bridge/bin/
+lib/dredge_bridge/obj/
+
+# OS cruft
+.DS_Store

@@ -1,0 +1,4489 @@
+[
+  {
+    "id": 1,
+    "name": "Healing Grape",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 2,
+    "name": "Healing Grape M",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 3,
+    "name": "Healing Grape Bunch",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 4,
+    "name": "Inspiriting Plum",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 5,
+    "name": "Inspiriting Plum M",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 6,
+    "name": "Inspiriting Plum Basket",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 7,
+    "name": "Energizing Pomegrante",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 8,
+    "name": "Energizing Pomegrante M",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 9,
+    "name": "Energizing Pomegrante L",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 10,
+    "name": "Refreshing Jam",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 11,
+    "name": "Revitalizing Jam",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 12,
+    "name": "Olive of Life",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 13,
+    "name": "Olive of Life M",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 14,
+    "name": "Olive of Life L",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 20,
+    "name": "Herb of Healing",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 21,
+    "name": "Herb of Clamor",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 22,
+    "name": "Herb of Light",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 23,
+    "name": "Herb of Clarity",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 24,
+    "name": "Herb of Awakening",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 25,
+    "name": "Herb of Valor",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 26,
+    "name": "Herb of Revival",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 30,
+    "name": "Bottle of Poison Dust",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 31,
+    "name": "Bottle of Blinding Dust",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 32,
+    "name": "Bottle of Befuddling Dust",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 33,
+    "name": "Bottle of Sleeping Dust",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 40,
+    "name": "Fire Soulstone",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 41,
+    "name": "Fire Soulstone M",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 42,
+    "name": "Fire Soulstone L",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 43,
+    "name": "Ice Soulstone",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 44,
+    "name": "Ice Soulstone M",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 45,
+    "name": "Ice Soulstone L",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 46,
+    "name": "Thunder Soulstone",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 47,
+    "name": "Thunder Soulstone M",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 48,
+    "name": "Thunder Soulstone L",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 49,
+    "name": "Wind Soulstone",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 50,
+    "name": "Wind Soulstone M",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 51,
+    "name": "Wind Soulstone L",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 52,
+    "name": "Light Soulstone",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 53,
+    "name": "Light Soulstone M",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 54,
+    "name": "Light Soulstone L",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 55,
+    "name": "Shadow Soulstone",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 56,
+    "name": "Shadow Soulstone M",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 57,
+    "name": "Shadow Soulstone L",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 60,
+    "name": "Nourshing Nut",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 61,
+    "name": "Nourshing Nut M",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 62,
+    "name": "Nourshing Nut L",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 63,
+    "name": "Invigorating Nut",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 64,
+    "name": "Invigorating Nut M",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 65,
+    "name": "Invigorating Nut L",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 66,
+    "name": "Fortifying Nut",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 67,
+    "name": "Fortifying Nut M",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 68,
+    "name": "Fortifying Nut L",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 69,
+    "name": "Tough Nut",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 70,
+    "name": "Tough Nut M",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 71,
+    "name": "Tough Nut L",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 72,
+    "name": "Magic Nut",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 73,
+    "name": "Magic Nut M",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 74,
+    "name": "Magic Nut L",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 75,
+    "name": "Resistant Nut",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 76,
+    "name": "Resistant Nut M",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 77,
+    "name": "Resistant Nut L",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 78,
+    "name": "Sharp Nut",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 79,
+    "name": "Sharp Nut M",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 80,
+    "name": "Sharp Nut L",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 81,
+    "name": "Slippery Nut",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 82,
+    "name": "Slippery Nut M",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 83,
+    "name": "Slippery Nut L",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 84,
+    "name": "Critical Nut",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 85,
+    "name": "Critical Nut M",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 86,
+    "name": "Critical Nut L",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 87,
+    "name": "Light Nut",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 88,
+    "name": "Light Nut M",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 89,
+    "name": "Light Nut L",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 90,
+    "name": "Scrap of Rope",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 91,
+    "name": "Stuffed Toy",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 92,
+    "name": "Candy",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 93,
+    "name": "Glass Marble",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 94,
+    "name": "Handkerchief",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 95,
+    "name": "Hip Flask",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 96,
+    "name": "Myterious Seed",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 97,
+    "name": "Fish Tooth",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 98,
+    "name": "Mysterious Ore",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 99,
+    "name": "Tree Nut",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 100,
+    "name": "Hairbrush",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 101,
+    "name": "Empty Coin Pouch",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 102,
+    "name": "Coin Pouch",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 103,
+    "name": "Odds and Ends",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 104,
+    "name": "Large Feather",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 105,
+    "name": "Dubious Gold Ore",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 106,
+    "name": "Pseudo Gold Ore",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 107,
+    "name": "Fools Gold Ore",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 108,
+    "name": "Copper Lantern",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 109,
+    "name": "Bone",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 110,
+    "name": "Weathered Boots",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 111,
+    "name": "Dirty Ball of cloth",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 113,
+    "name": "Necklace",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 114,
+    "name": "Poysenberry",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 115,
+    "name": "Pseudo Cider",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 116,
+    "name": "Red Apple",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 117,
+    "name": "Bottle Breath",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 119,
+    "name": "Monster Perfume",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 121,
+    "name": "Small Cup",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 122,
+    "name": "Silver Clock",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 123,
+    "name": "Portrait with a Kiss",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 124,
+    "name": "Introduction to Adventuring",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 125,
+    "name": "Rare Stone",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 126,
+    "name": "Heavy Coin Pouch",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 127,
+    "name": "Commemorative Coin",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 128,
+    "name": "Silver filled Pouch",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 130,
+    "name": "Feather Duster",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 131,
+    "name": "Alis Bread",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 132,
+    "name": "Joshuas Poem",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 133,
+    "name": "Cats Eye",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 134,
+    "name": "Tagged Collar",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 135,
+    "name": "Old Coin",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 136,
+    "name": "Copper-filled Pouch",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 137,
+    "name": "Herb-of-grace Potion",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 138,
+    "name": "Curious Antique",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 139,
+    "name": "Dazzling Artwork",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 141,
+    "name": "Rusty Cup",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 142,
+    "name": "Glossy Gold Coin",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 143,
+    "name": "Cloth Map",
+    "type": 1,
+    "category": "Item",
+    "editable": true
+  },
+  {
+    "id": 1001,
+    "name": "Battle tested Blade",
+    "type": 2,
+    "category": "Sword",
+    "editable": true
+  },
+  {
+    "id": 1002,
+    "name": "Haralds Sword",
+    "type": 2,
+    "category": "Sword",
+    "editable": true
+  },
+  {
+    "id": 1003,
+    "name": "Enchanted Sword",
+    "type": 2,
+    "category": "Sword",
+    "editable": true
+  },
+  {
+    "id": 1004,
+    "name": "Forbidden Blade",
+    "type": 2,
+    "category": "Sword",
+    "editable": true
+  },
+  {
+    "id": 1005,
+    "name": "Werners Sword",
+    "type": 2,
+    "category": "Sword",
+    "editable": true
+  },
+  {
+    "id": 1006,
+    "name": "Dragon Saber",
+    "type": 2,
+    "category": "Sword",
+    "editable": true
+  },
+  {
+    "id": 1007,
+    "name": "Emperors Blade",
+    "type": 2,
+    "category": "Sword",
+    "editable": true
+  },
+  {
+    "id": 1008,
+    "name": "Unseen Saber",
+    "type": 2,
+    "category": "Sword",
+    "editable": true
+  },
+  {
+    "id": 1009,
+    "name": "Deathly Blade",
+    "type": 2,
+    "category": "Sword",
+    "editable": true
+  },
+  {
+    "id": 1010,
+    "name": "Trinity Sword",
+    "type": 2,
+    "category": "Sword",
+    "editable": true
+  },
+  {
+    "id": 1011,
+    "name": "Great Blade",
+    "type": 2,
+    "category": "Sword",
+    "editable": true
+  },
+  {
+    "id": 1012,
+    "name": "Blade of Bravery",
+    "type": 2,
+    "category": "Sword",
+    "editable": true
+  },
+  {
+    "id": 1013,
+    "name": "Angel Saber",
+    "type": 2,
+    "category": "Sword",
+    "editable": true
+  },
+  {
+    "id": 1014,
+    "name": "Platinum Sword",
+    "type": 2,
+    "category": "Sword",
+    "editable": true
+  },
+  {
+    "id": 1015,
+    "name": "Divine Blade",
+    "type": 2,
+    "category": "Sword",
+    "editable": true
+  },
+  {
+    "id": 1016,
+    "name": "Carnage Blade",
+    "type": 2,
+    "category": "Sword",
+    "editable": true
+  },
+  {
+    "id": 1017,
+    "name": "Knights Sword",
+    "type": 2,
+    "category": "Sword",
+    "editable": true
+  },
+  {
+    "id": 1018,
+    "name": "Refined Sword",
+    "type": 2,
+    "category": "Sword",
+    "editable": true
+  },
+  {
+    "id": 1019,
+    "name": "Snipe Saber",
+    "type": 2,
+    "category": "Sword",
+    "editable": true
+  },
+  {
+    "id": 1020,
+    "name": "Moonblade",
+    "type": 2,
+    "category": "Sword",
+    "editable": true
+  },
+  {
+    "id": 1021,
+    "name": "Mirage Blade",
+    "type": 2,
+    "category": "Sword",
+    "editable": true
+  },
+  {
+    "id": 1022,
+    "name": "Eagle Saber",
+    "type": 2,
+    "category": "Sword",
+    "editable": true
+  },
+  {
+    "id": 1023,
+    "name": "Bastard Sword",
+    "type": 2,
+    "category": "Sword",
+    "editable": true
+  },
+  {
+    "id": 1024,
+    "name": "Heavy Blade",
+    "type": 2,
+    "category": "Sword",
+    "editable": true
+  },
+  {
+    "id": 1025,
+    "name": "Falcon Saber",
+    "type": 2,
+    "category": "Sword",
+    "editable": true
+  },
+  {
+    "id": 1026,
+    "name": "Spirit Sword",
+    "type": 2,
+    "category": "Sword",
+    "editable": true
+  },
+  {
+    "id": 1027,
+    "name": "Captain Sword",
+    "type": 2,
+    "category": "Sword",
+    "editable": true
+  },
+  {
+    "id": 1028,
+    "name": "Greatsword",
+    "type": 2,
+    "category": "Sword",
+    "editable": true
+  },
+  {
+    "id": 1029,
+    "name": "Silver Sword",
+    "type": 2,
+    "category": "Sword",
+    "editable": true
+  },
+  {
+    "id": 1030,
+    "name": "Feather Saber",
+    "type": 2,
+    "category": "Sword",
+    "editable": true
+  },
+  {
+    "id": 1031,
+    "name": "Broadsword",
+    "type": 2,
+    "category": "Sword",
+    "editable": true
+  },
+  {
+    "id": 1032,
+    "name": "Iron Sword",
+    "type": 2,
+    "category": "Sword",
+    "editable": true
+  },
+  {
+    "id": 1033,
+    "name": "Long Sword",
+    "type": 2,
+    "category": "Sword",
+    "editable": true
+  },
+  {
+    "id": 1101,
+    "name": "Battle tested Spear",
+    "type": 3,
+    "category": "Lance",
+    "editable": true
+  },
+  {
+    "id": 1102,
+    "name": "Tradewinds Spear",
+    "type": 3,
+    "category": "Lance",
+    "editable": true
+  },
+  {
+    "id": 1103,
+    "name": "Masters Spear",
+    "type": 3,
+    "category": "Lance",
+    "editable": true
+  },
+  {
+    "id": 1104,
+    "name": "Rune Glaive",
+    "type": 3,
+    "category": "Lance",
+    "editable": true
+  },
+  {
+    "id": 1105,
+    "name": "Forbidden Spear",
+    "type": 3,
+    "category": "Lance",
+    "editable": true
+  },
+  {
+    "id": 1106,
+    "name": "Seraphim Spear",
+    "type": 3,
+    "category": "Lance",
+    "editable": true
+  },
+  {
+    "id": 1107,
+    "name": "Scourge Lance",
+    "type": 3,
+    "category": "Lance",
+    "editable": true
+  },
+  {
+    "id": 1108,
+    "name": "Soul Glaive",
+    "type": 3,
+    "category": "Lance",
+    "editable": true
+  },
+  {
+    "id": 1109,
+    "name": "Jade Lance",
+    "type": 3,
+    "category": "Lance",
+    "editable": true
+  },
+  {
+    "id": 1110,
+    "name": "Victors Spear",
+    "type": 3,
+    "category": "Lance",
+    "editable": true
+  },
+  {
+    "id": 1111,
+    "name": "Platinum Spear",
+    "type": 3,
+    "category": "Lance",
+    "editable": true
+  },
+  {
+    "id": 1112,
+    "name": "Miguels Spear",
+    "type": 3,
+    "category": "Lance",
+    "editable": true
+  },
+  {
+    "id": 1113,
+    "name": "Imperial Lance",
+    "type": 3,
+    "category": "Lance",
+    "editable": true
+  },
+  {
+    "id": 1114,
+    "name": "Magus Glaive",
+    "type": 3,
+    "category": "Lance",
+    "editable": true
+  },
+  {
+    "id": 1115,
+    "name": "Hedgehog Spear",
+    "type": 3,
+    "category": "Lance",
+    "editable": true
+  },
+  {
+    "id": 1116,
+    "name": "Bridge Lance",
+    "type": 3,
+    "category": "Lance",
+    "editable": true
+  },
+  {
+    "id": 1117,
+    "name": "Elemental Glaive",
+    "type": 3,
+    "category": "Lance",
+    "editable": true
+  },
+  {
+    "id": 1118,
+    "name": "Jaguar Lance",
+    "type": 3,
+    "category": "Lance",
+    "editable": true
+  },
+  {
+    "id": 1119,
+    "name": "Heavy Lance",
+    "type": 3,
+    "category": "Lance",
+    "editable": true
+  },
+  {
+    "id": 1120,
+    "name": "Calamity Spear",
+    "type": 3,
+    "category": "Lance",
+    "editable": true
+  },
+  {
+    "id": 1121,
+    "name": "Bandits Spear",
+    "type": 3,
+    "category": "Lance",
+    "editable": true
+  },
+  {
+    "id": 1122,
+    "name": "Sunlands Spear",
+    "type": 3,
+    "category": "Lance",
+    "editable": true
+  },
+  {
+    "id": 1123,
+    "name": "War Lance",
+    "type": 3,
+    "category": "Lance",
+    "editable": true
+  },
+  {
+    "id": 1124,
+    "name": "Silver Spear",
+    "type": 3,
+    "category": "Lance",
+    "editable": true
+  },
+  {
+    "id": 1125,
+    "name": "Arcane Glaive",
+    "type": 3,
+    "category": "Lance",
+    "editable": true
+  },
+  {
+    "id": 1126,
+    "name": "War Spear",
+    "type": 3,
+    "category": "Lance",
+    "editable": true
+  },
+  {
+    "id": 1127,
+    "name": "Memorial Harpoon",
+    "type": 3,
+    "category": "Lance",
+    "editable": true
+  },
+  {
+    "id": 1128,
+    "name": "Iron Spear",
+    "type": 3,
+    "category": "Lance",
+    "editable": true
+  },
+  {
+    "id": 1129,
+    "name": "Spear",
+    "type": 3,
+    "category": "Lance",
+    "editable": true
+  },
+  {
+    "id": 1201,
+    "name": "Battle tested Dagger",
+    "type": 4,
+    "category": "Dagger",
+    "editable": true
+  },
+  {
+    "id": 1202,
+    "name": "Heathcotes Dagger",
+    "type": 4,
+    "category": "Dagger",
+    "editable": true
+  },
+  {
+    "id": 1203,
+    "name": "Viper Dagger",
+    "type": 4,
+    "category": "Dagger",
+    "editable": true
+  },
+  {
+    "id": 1204,
+    "name": "Adamatine Dagger",
+    "type": 4,
+    "category": "Dagger",
+    "editable": true
+  },
+  {
+    "id": 1205,
+    "name": "Forbidden Dagger",
+    "type": 4,
+    "category": "Dagger",
+    "editable": true
+  },
+  {
+    "id": 1206,
+    "name": "Legion Dagger",
+    "type": 4,
+    "category": "Dagger",
+    "editable": true
+  },
+  {
+    "id": 1207,
+    "name": "Rune Knife",
+    "type": 4,
+    "category": "Dagger",
+    "editable": true
+  },
+  {
+    "id": 1208,
+    "name": "Ultimate Breaker",
+    "type": 4,
+    "category": "Dagger",
+    "editable": true
+  },
+  {
+    "id": 1209,
+    "name": "Doombreaker",
+    "type": 4,
+    "category": "Dagger",
+    "editable": true
+  },
+  {
+    "id": 1210,
+    "name": "Assassins Dagger",
+    "type": 4,
+    "category": "Dagger",
+    "editable": true
+  },
+  {
+    "id": 1211,
+    "name": "Soul Knife",
+    "type": 4,
+    "category": "Dagger",
+    "editable": true
+  },
+  {
+    "id": 1212,
+    "name": "Crimson Dagger",
+    "type": 4,
+    "category": "Dagger",
+    "editable": true
+  },
+  {
+    "id": 1213,
+    "name": "Justice Breaker",
+    "type": 4,
+    "category": "Dagger",
+    "editable": true
+  },
+  {
+    "id": 1214,
+    "name": "Skybreaker",
+    "type": 4,
+    "category": "Dagger",
+    "editable": true
+  },
+  {
+    "id": 1215,
+    "name": "Magus Knife",
+    "type": 4,
+    "category": "Dagger",
+    "editable": true
+  },
+  {
+    "id": 1216,
+    "name": "Gaolbreaker",
+    "type": 4,
+    "category": "Dagger",
+    "editable": true
+  },
+  {
+    "id": 1217,
+    "name": "Gideons Dagger",
+    "type": 4,
+    "category": "Dagger",
+    "editable": true
+  },
+  {
+    "id": 1218,
+    "name": "Tricksters Dagger",
+    "type": 4,
+    "category": "Dagger",
+    "editable": true
+  },
+  {
+    "id": 1219,
+    "name": "Crescent Dagger",
+    "type": 4,
+    "category": "Dagger",
+    "editable": true
+  },
+  {
+    "id": 1220,
+    "name": "Chainbreaker",
+    "type": 4,
+    "category": "Dagger",
+    "editable": true
+  },
+  {
+    "id": 1221,
+    "name": "Swordbreaker",
+    "type": 4,
+    "category": "Dagger",
+    "editable": true
+  },
+  {
+    "id": 1222,
+    "name": "Silver Dagger",
+    "type": 4,
+    "category": "Dagger",
+    "editable": true
+  },
+  {
+    "id": 1223,
+    "name": "Piercing Dagger",
+    "type": 4,
+    "category": "Dagger",
+    "editable": true
+  },
+  {
+    "id": 1224,
+    "name": "Falcon Dagger",
+    "type": 4,
+    "category": "Dagger",
+    "editable": true
+  },
+  {
+    "id": 1225,
+    "name": "Befuddling Dagger",
+    "type": 4,
+    "category": "Dagger",
+    "editable": true
+  },
+  {
+    "id": 1226,
+    "name": "Arcane Knife",
+    "type": 4,
+    "category": "Dagger",
+    "editable": true
+  },
+  {
+    "id": 1227,
+    "name": "Stinging Dagger",
+    "type": 4,
+    "category": "Dagger",
+    "editable": true
+  },
+  {
+    "id": 1228,
+    "name": "Iron Dagger",
+    "type": 4,
+    "category": "Dagger",
+    "editable": true
+  },
+  {
+    "id": 1229,
+    "name": "Dagger",
+    "type": 4,
+    "category": "Dagger",
+    "editable": true
+  },
+  {
+    "id": 1301,
+    "name": "Battle tested Axe",
+    "type": 5,
+    "category": "Axe",
+    "editable": true
+  },
+  {
+    "id": 1302,
+    "name": "Memorial Axe",
+    "type": 5,
+    "category": "Axe",
+    "editable": true
+  },
+  {
+    "id": 1303,
+    "name": "Death Cleaver",
+    "type": 5,
+    "category": "Axe",
+    "editable": true
+  },
+  {
+    "id": 1304,
+    "name": "Double Tomahawk",
+    "type": 5,
+    "category": "Axe",
+    "editable": true
+  },
+  {
+    "id": 1305,
+    "name": "Forbidden Axe",
+    "type": 5,
+    "category": "Axe",
+    "editable": true
+  },
+  {
+    "id": 1306,
+    "name": "Ogre Cleaver",
+    "type": 5,
+    "category": "Axe",
+    "editable": true
+  },
+  {
+    "id": 1307,
+    "name": "Rune Hatchet",
+    "type": 5,
+    "category": "Axe",
+    "editable": true
+  },
+  {
+    "id": 1308,
+    "name": "Golden Axe",
+    "type": 5,
+    "category": "Axe",
+    "editable": true
+  },
+  {
+    "id": 1309,
+    "name": "Gargantuan Axe",
+    "type": 5,
+    "category": "Axe",
+    "editable": true
+  },
+  {
+    "id": 1310,
+    "name": "Adamatine Hatchet",
+    "type": 5,
+    "category": "Axe",
+    "editable": true
+  },
+  {
+    "id": 1311,
+    "name": "Hill Cleaver",
+    "type": 5,
+    "category": "Axe",
+    "editable": true
+  },
+  {
+    "id": 1312,
+    "name": "Spirit Hatchet",
+    "type": 5,
+    "category": "Axe",
+    "editable": true
+  },
+  {
+    "id": 1313,
+    "name": "Elemental Hatchet",
+    "type": 5,
+    "category": "Axe",
+    "editable": true
+  },
+  {
+    "id": 1314,
+    "name": "Inferno Axe",
+    "type": 5,
+    "category": "Axe",
+    "editable": true
+  },
+  {
+    "id": 1315,
+    "name": "Lizardkings Axe",
+    "type": 5,
+    "category": "Axe",
+    "editable": true
+  },
+  {
+    "id": 1316,
+    "name": "Graviton Axe",
+    "type": 5,
+    "category": "Axe",
+    "editable": true
+  },
+  {
+    "id": 1317,
+    "name": "Bear Cleaver",
+    "type": 5,
+    "category": "Axe",
+    "editable": true
+  },
+  {
+    "id": 1318,
+    "name": "Rock Cleaver",
+    "type": 5,
+    "category": "Axe",
+    "editable": true
+  },
+  {
+    "id": 1319,
+    "name": "Soul Hatchet",
+    "type": 5,
+    "category": "Axe",
+    "editable": true
+  },
+  {
+    "id": 1320,
+    "name": "Horn Cleaver",
+    "type": 5,
+    "category": "Axe",
+    "editable": true
+  },
+  {
+    "id": 1321,
+    "name": "Argent Axe",
+    "type": 5,
+    "category": "Axe",
+    "editable": true
+  },
+  {
+    "id": 1322,
+    "name": "Magus Hatchet",
+    "type": 5,
+    "category": "Axe",
+    "editable": true
+  },
+  {
+    "id": 1323,
+    "name": "Viking Axe",
+    "type": 5,
+    "category": "Axe",
+    "editable": true
+  },
+  {
+    "id": 1324,
+    "name": "Omars Axe",
+    "type": 5,
+    "category": "Axe",
+    "editable": true
+  },
+  {
+    "id": 1325,
+    "name": "Steel Axe",
+    "type": 5,
+    "category": "Axe",
+    "editable": true
+  },
+  {
+    "id": 1326,
+    "name": "Cleaver",
+    "type": 5,
+    "category": "Axe",
+    "editable": true
+  },
+  {
+    "id": 1327,
+    "name": "Enchanted Axe",
+    "type": 5,
+    "category": "Axe",
+    "editable": true
+  },
+  {
+    "id": 1328,
+    "name": "Heavy Axe",
+    "type": 5,
+    "category": "Axe",
+    "editable": true
+  },
+  {
+    "id": 1329,
+    "name": "Silver Axe",
+    "type": 5,
+    "category": "Axe",
+    "editable": true
+  },
+  {
+    "id": 1330,
+    "name": "Battle Axe",
+    "type": 5,
+    "category": "Axe",
+    "editable": true
+  },
+  {
+    "id": 1331,
+    "name": "Arcane Hatchet",
+    "type": 5,
+    "category": "Axe",
+    "editable": true
+  },
+  {
+    "id": 1332,
+    "name": "Iron Axe",
+    "type": 5,
+    "category": "Axe",
+    "editable": true
+  },
+  {
+    "id": 1333,
+    "name": "Handaxe",
+    "type": 5,
+    "category": "Axe",
+    "editable": true
+  },
+  {
+    "id": 1401,
+    "name": "Battle tested Bow",
+    "type": 6,
+    "category": "Bow",
+    "editable": true
+  },
+  {
+    "id": 1402,
+    "name": "Primeval Bow of Storms",
+    "type": 6,
+    "category": "Bow",
+    "editable": true
+  },
+  {
+    "id": 1403,
+    "name": "Transcendent Bow of Shadows",
+    "type": 6,
+    "category": "Bow",
+    "editable": true
+  },
+  {
+    "id": 1404,
+    "name": "Improved bow of the Eagle",
+    "type": 6,
+    "category": "Bow",
+    "editable": true
+  },
+  {
+    "id": 1405,
+    "name": "Forbidden Bow",
+    "type": 6,
+    "category": "Bow",
+    "editable": true
+  },
+  {
+    "id": 1406,
+    "name": "Hyperion Bow",
+    "type": 6,
+    "category": "Bow",
+    "editable": true
+  },
+  {
+    "id": 1407,
+    "name": "Holy Longbow",
+    "type": 6,
+    "category": "Bow",
+    "editable": true
+  },
+  {
+    "id": 1408,
+    "name": "Rune Bow",
+    "type": 6,
+    "category": "Bow",
+    "editable": true
+  },
+  {
+    "id": 1409,
+    "name": "Yetis Long Bow",
+    "type": 6,
+    "category": "Bow",
+    "editable": true
+  },
+  {
+    "id": 1410,
+    "name": "Adamatine Bow",
+    "type": 6,
+    "category": "Bow",
+    "editable": true
+  },
+  {
+    "id": 1411,
+    "name": "Augmented Bow of the Falcon",
+    "type": 6,
+    "category": "Bow",
+    "editable": true
+  },
+  {
+    "id": 1412,
+    "name": "Masters Longbow",
+    "type": 6,
+    "category": "Bow",
+    "editable": true
+  },
+  {
+    "id": 1413,
+    "name": "Brilliant Bow",
+    "type": 6,
+    "category": "Bow",
+    "editable": true
+  },
+  {
+    "id": 1414,
+    "name": "Pirates Longbow",
+    "type": 6,
+    "category": "Bow",
+    "editable": true
+  },
+  {
+    "id": 1415,
+    "name": "Spirit Bow",
+    "type": 6,
+    "category": "Bow",
+    "editable": true
+  },
+  {
+    "id": 1416,
+    "name": "Huntresss Longbow",
+    "type": 6,
+    "category": "Bow",
+    "editable": true
+  },
+  {
+    "id": 1417,
+    "name": "Elemental Bow",
+    "type": 6,
+    "category": "Bow",
+    "editable": true
+  },
+  {
+    "id": 1418,
+    "name": "Shadow Bow",
+    "type": 6,
+    "category": "Bow",
+    "editable": true
+  },
+  {
+    "id": 1419,
+    "name": "Tomahawk Bow",
+    "type": 6,
+    "category": "Bow",
+    "editable": true
+  },
+  {
+    "id": 1420,
+    "name": "Marksmans Longbow",
+    "type": 6,
+    "category": "Bow",
+    "editable": true
+  },
+  {
+    "id": 1421,
+    "name": "Soul Bow",
+    "type": 6,
+    "category": "Bow",
+    "editable": true
+  },
+  {
+    "id": 1422,
+    "name": "Soldiers Longbow",
+    "type": 6,
+    "category": "Bow",
+    "editable": true
+  },
+  {
+    "id": 1423,
+    "name": "Heavy Bow",
+    "type": 6,
+    "category": "Bow",
+    "editable": true
+  },
+  {
+    "id": 1424,
+    "name": "Maguss Bow",
+    "type": 6,
+    "category": "Bow",
+    "editable": true
+  },
+  {
+    "id": 1425,
+    "name": "Killer Bow",
+    "type": 6,
+    "category": "Bow",
+    "editable": true
+  },
+  {
+    "id": 1426,
+    "name": "Arcane Bow",
+    "type": 6,
+    "category": "Bow",
+    "editable": true
+  },
+  {
+    "id": 1427,
+    "name": "Wolfs Bow",
+    "type": 6,
+    "category": "Bow",
+    "editable": true
+  },
+  {
+    "id": 1428,
+    "name": "Stone Bow",
+    "type": 6,
+    "category": "Bow",
+    "editable": true
+  },
+  {
+    "id": 1429,
+    "name": "Composite Bow",
+    "type": 6,
+    "category": "Bow",
+    "editable": true
+  },
+  {
+    "id": 1430,
+    "name": "Longbow",
+    "type": 6,
+    "category": "Bow",
+    "editable": true
+  },
+  {
+    "id": 1501,
+    "name": "Battle tested Staff",
+    "type": 7,
+    "category": "Rod",
+    "editable": true
+  },
+  {
+    "id": 1502,
+    "name": "Bishops Staff",
+    "type": 7,
+    "category": "Rod",
+    "editable": true
+  },
+  {
+    "id": 1503,
+    "name": "Knowledge Staff",
+    "type": 7,
+    "category": "Rod",
+    "editable": true
+  },
+  {
+    "id": 1504,
+    "name": "Wizards Rod",
+    "type": 7,
+    "category": "Rod",
+    "editable": true
+  },
+  {
+    "id": 1505,
+    "name": "Absolute Zero Staff",
+    "type": 7,
+    "category": "Rod",
+    "editable": true
+  },
+  {
+    "id": 1506,
+    "name": "Yggdrasil Staff",
+    "type": 7,
+    "category": "Rod",
+    "editable": true
+  },
+  {
+    "id": 1507,
+    "name": "Mattiass Scepter",
+    "type": 7,
+    "category": "Rod",
+    "editable": true
+  },
+  {
+    "id": 1508,
+    "name": "Forbidden Staff",
+    "type": 7,
+    "category": "Rod",
+    "editable": true
+  },
+  {
+    "id": 1509,
+    "name": "Enchanted Rod",
+    "type": 7,
+    "category": "Rod",
+    "editable": true
+  },
+  {
+    "id": 1510,
+    "name": "Giants Club",
+    "type": 7,
+    "category": "Rod",
+    "editable": true
+  },
+  {
+    "id": 1511,
+    "name": "Meteorite Rod",
+    "type": 7,
+    "category": "Rod",
+    "editable": true
+  },
+  {
+    "id": 1512,
+    "name": "Morning Star",
+    "type": 7,
+    "category": "Rod",
+    "editable": true
+  },
+  {
+    "id": 1513,
+    "name": "Wisdom Staff",
+    "type": 7,
+    "category": "Rod",
+    "editable": true
+  },
+  {
+    "id": 1514,
+    "name": "Sturdy Sapphire Rod",
+    "type": 7,
+    "category": "Rod",
+    "editable": true
+  },
+  {
+    "id": 1515,
+    "name": "Sledgehammer",
+    "type": 7,
+    "category": "Rod",
+    "editable": true
+  },
+  {
+    "id": 1516,
+    "name": "Sapphire Rod",
+    "type": 7,
+    "category": "Rod",
+    "editable": true
+  },
+  {
+    "id": 1517,
+    "name": "War Hammer",
+    "type": 7,
+    "category": "Rod",
+    "editable": true
+  },
+  {
+    "id": 1518,
+    "name": "Black Staff",
+    "type": 7,
+    "category": "Rod",
+    "editable": true
+  },
+  {
+    "id": 1519,
+    "name": "Mages Staff",
+    "type": 7,
+    "category": "Rod",
+    "editable": true
+  },
+  {
+    "id": 1520,
+    "name": "Sturdy Quartz Rod",
+    "type": 7,
+    "category": "Rod",
+    "editable": true
+  },
+  {
+    "id": 1521,
+    "name": "Staff of Wonders",
+    "type": 7,
+    "category": "Rod",
+    "editable": true
+  },
+  {
+    "id": 1522,
+    "name": "Pole Mace",
+    "type": 7,
+    "category": "Rod",
+    "editable": true
+  },
+  {
+    "id": 1523,
+    "name": "Oak Staff",
+    "type": 7,
+    "category": "Rod",
+    "editable": true
+  },
+  {
+    "id": 1524,
+    "name": "Flail",
+    "type": 7,
+    "category": "Rod",
+    "editable": true
+  },
+  {
+    "id": 1525,
+    "name": "Psychic Staff",
+    "type": 7,
+    "category": "Rod",
+    "editable": true
+  },
+  {
+    "id": 1526,
+    "name": "Mace",
+    "type": 7,
+    "category": "Rod",
+    "editable": true
+  },
+  {
+    "id": 1527,
+    "name": "Laurel Staff",
+    "type": 7,
+    "category": "Rod",
+    "editable": true
+  },
+  {
+    "id": 1528,
+    "name": "Composite Staff",
+    "type": 7,
+    "category": "Rod",
+    "editable": true
+  },
+  {
+    "id": 1529,
+    "name": "Quartz Rod",
+    "type": 7,
+    "category": "Rod",
+    "editable": true
+  },
+  {
+    "id": 1530,
+    "name": "Light Staff",
+    "type": 7,
+    "category": "Rod",
+    "editable": true
+  },
+  {
+    "id": 1531,
+    "name": "Stone Rod",
+    "type": 7,
+    "category": "Rod",
+    "editable": true
+  },
+  {
+    "id": 1532,
+    "name": "Staff",
+    "type": 7,
+    "category": "Rod",
+    "editable": true
+  },
+  {
+    "id": 1601,
+    "name": "Battle tested Shield",
+    "type": 8,
+    "category": "Shield",
+    "editable": true
+  },
+  {
+    "id": 1602,
+    "name": "Mikk and Makks Shield",
+    "type": 8,
+    "category": "Shield",
+    "editable": true
+  },
+  {
+    "id": 1603,
+    "name": "Forbidden Shield",
+    "type": 8,
+    "category": "Shield",
+    "editable": true
+  },
+  {
+    "id": 1604,
+    "name": "Force Shield",
+    "type": 8,
+    "category": "Shield",
+    "editable": true
+  },
+  {
+    "id": 1605,
+    "name": "Gargantuan Shield",
+    "type": 8,
+    "category": "Shield",
+    "editable": true
+  },
+  {
+    "id": 1606,
+    "name": "Leviathan Shield",
+    "type": 8,
+    "category": "Shield",
+    "editable": true
+  },
+  {
+    "id": 1607,
+    "name": "Knights Shield",
+    "type": 8,
+    "category": "Shield",
+    "editable": true
+  },
+  {
+    "id": 1608,
+    "name": "Gustavs Shield",
+    "type": 8,
+    "category": "Shield",
+    "editable": true
+  },
+  {
+    "id": 1609,
+    "name": "Adamantine Shield",
+    "type": 8,
+    "category": "Shield",
+    "editable": true
+  },
+  {
+    "id": 1610,
+    "name": "Tower Shield",
+    "type": 8,
+    "category": "Shield",
+    "editable": true
+  },
+  {
+    "id": 1611,
+    "name": "Spiked Shield",
+    "type": 8,
+    "category": "Shield",
+    "editable": true
+  },
+  {
+    "id": 1612,
+    "name": "Elemental Shield",
+    "type": 8,
+    "category": "Shield",
+    "editable": true
+  },
+  {
+    "id": 1613,
+    "name": "Elusive Shield",
+    "type": 8,
+    "category": "Shield",
+    "editable": true
+  },
+  {
+    "id": 1614,
+    "name": "Plate Shield",
+    "type": 8,
+    "category": "Shield",
+    "editable": true
+  },
+  {
+    "id": 1615,
+    "name": "Kite Shield",
+    "type": 8,
+    "category": "Shield",
+    "editable": true
+  },
+  {
+    "id": 1616,
+    "name": "Sturdy Shield",
+    "type": 8,
+    "category": "Shield",
+    "editable": true
+  },
+  {
+    "id": 1617,
+    "name": "Round Shield",
+    "type": 8,
+    "category": "Shield",
+    "editable": true
+  },
+  {
+    "id": 1618,
+    "name": "Buckler",
+    "type": 8,
+    "category": "Shield",
+    "editable": true
+  },
+  {
+    "id": 1701,
+    "name": "Crystal Helm",
+    "type": 9,
+    "category": "Head",
+    "editable": true
+  },
+  {
+    "id": 1702,
+    "name": "Hypnos Crown",
+    "type": 9,
+    "category": "Head",
+    "editable": true
+  },
+  {
+    "id": 1703,
+    "name": "Adamantine Hat",
+    "type": 9,
+    "category": "Head",
+    "editable": true
+  },
+  {
+    "id": 1704,
+    "name": "Dragons Helm",
+    "type": 9,
+    "category": "Head",
+    "editable": true
+  },
+  {
+    "id": 1705,
+    "name": "Monster Trainers Hat",
+    "type": 9,
+    "category": "Head",
+    "editable": true
+  },
+  {
+    "id": 1706,
+    "name": "Teachers Hat",
+    "type": 9,
+    "category": "Head",
+    "editable": true
+  },
+  {
+    "id": 1707,
+    "name": "Adventurers Hat",
+    "type": 9,
+    "category": "Head",
+    "editable": true
+  },
+  {
+    "id": 1708,
+    "name": "Platinum Helm",
+    "type": 9,
+    "category": "Head",
+    "editable": true
+  },
+  {
+    "id": 1709,
+    "name": "Historian's Hat",
+    "type": 9,
+    "category": "Head",
+    "editable": true
+  },
+  {
+    "id": 1710,
+    "name": "Oasis Hat",
+    "type": 9,
+    "category": "Head",
+    "editable": true
+  },
+  {
+    "id": 1711,
+    "name": "Revellos Helm",
+    "type": 9,
+    "category": "Head",
+    "editable": true
+  },
+  {
+    "id": 1712,
+    "name": "Imperial Helm",
+    "type": 9,
+    "category": "Head",
+    "editable": true
+  },
+  {
+    "id": 1713,
+    "name": "Silent Bandana",
+    "type": 9,
+    "category": "Head",
+    "editable": true
+  },
+  {
+    "id": 1714,
+    "name": "Fur Cap",
+    "type": 9,
+    "category": "Head",
+    "editable": true
+  },
+  {
+    "id": 1715,
+    "name": "Enchanted Circlet",
+    "type": 9,
+    "category": "Head",
+    "editable": true
+  },
+  {
+    "id": 1716,
+    "name": "Elemental Hat",
+    "type": 9,
+    "category": "Head",
+    "editable": true
+  },
+  {
+    "id": 1717,
+    "name": "Veterans Helm",
+    "type": 9,
+    "category": "Head",
+    "editable": true
+  },
+  {
+    "id": 1718,
+    "name": "Gareths Helm",
+    "type": 9,
+    "category": "Head",
+    "editable": true
+  },
+  {
+    "id": 1719,
+    "name": "Grand Helm",
+    "type": 9,
+    "category": "Head",
+    "editable": true
+  },
+  {
+    "id": 1720,
+    "name": "Horned Helm",
+    "type": 9,
+    "category": "Head",
+    "editable": true
+  },
+  {
+    "id": 1721,
+    "name": "Starlight Hat",
+    "type": 9,
+    "category": "Head",
+    "editable": true
+  },
+  {
+    "id": 1722,
+    "name": "Hasty Helm",
+    "type": 9,
+    "category": "Head",
+    "editable": true
+  },
+  {
+    "id": 1723,
+    "name": "Falcon Hat",
+    "type": 9,
+    "category": "Head",
+    "editable": true
+  },
+  {
+    "id": 1724,
+    "name": "Bishops Hat",
+    "type": 9,
+    "category": "Head",
+    "editable": true
+  },
+  {
+    "id": 1725,
+    "name": "Golden Hairpiece",
+    "type": 9,
+    "category": "Head",
+    "editable": true
+  },
+  {
+    "id": 1726,
+    "name": "Silver Helm",
+    "type": 9,
+    "category": "Head",
+    "editable": true
+  },
+  {
+    "id": 1727,
+    "name": "Snowy Hood",
+    "type": 9,
+    "category": "Head",
+    "editable": true
+  },
+  {
+    "id": 1728,
+    "name": "Saintly Tiara",
+    "type": 9,
+    "category": "Head",
+    "editable": true
+  },
+  {
+    "id": 1729,
+    "name": "Chakra Band",
+    "type": 9,
+    "category": "Head",
+    "editable": true
+  },
+  {
+    "id": 1730,
+    "name": "Sturdy Helm",
+    "type": 9,
+    "category": "Head",
+    "editable": true
+  },
+  {
+    "id": 1731,
+    "name": "Flying Helm",
+    "type": 9,
+    "category": "Head",
+    "editable": true
+  },
+  {
+    "id": 1732,
+    "name": "Black Cap",
+    "type": 9,
+    "category": "Head",
+    "editable": true
+  },
+  {
+    "id": 1733,
+    "name": "Headgear",
+    "type": 9,
+    "category": "Head",
+    "editable": true
+  },
+  {
+    "id": 1734,
+    "name": "Circlet",
+    "type": 9,
+    "category": "Head",
+    "editable": true
+  },
+  {
+    "id": 1735,
+    "name": "Iron Helm",
+    "type": 9,
+    "category": "Head",
+    "editable": true
+  },
+  {
+    "id": 1736,
+    "name": "Silver Hairpiece",
+    "type": 9,
+    "category": "Head",
+    "editable": true
+  },
+  {
+    "id": 1737,
+    "name": "Bronze Helm",
+    "type": 9,
+    "category": "Head",
+    "editable": true
+  },
+  {
+    "id": 1738,
+    "name": "Feathered Hat",
+    "type": 9,
+    "category": "Head",
+    "editable": true
+  },
+  {
+    "id": 1739,
+    "name": "Pointed Hat",
+    "type": 9,
+    "category": "Head",
+    "editable": true
+  },
+  {
+    "id": 1740,
+    "name": "Leather Helm",
+    "type": 9,
+    "category": "Head",
+    "editable": true
+  },
+  {
+    "id": 1741,
+    "name": "Leather Hat",
+    "type": 9,
+    "category": "Head",
+    "editable": true
+  },
+  {
+    "id": 1742,
+    "name": "Ordinary Hat",
+    "type": 9,
+    "category": "Head",
+    "editable": true
+  },
+  {
+    "id": 1801,
+    "name": "Crystal Armor",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1802,
+    "name": "Crystal Vest",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1803,
+    "name": "Robe of the Flame",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1804,
+    "name": "Dragonscale Armor",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1805,
+    "name": "Dragons Vest",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1806,
+    "name": "Ethereal Dancer Garb",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1807,
+    "name": "Sorcerers Robe",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1808,
+    "name": "Confessional Armor",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1809,
+    "name": "High Houses Armor",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1810,
+    "name": "Princesss Coat",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1811,
+    "name": "Ardante Attire",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1812,
+    "name": "Robe of the Dragon Princess",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1813,
+    "name": "Platinum Armor",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1814,
+    "name": "Vendetta Coat",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1815,
+    "name": "Imperial Armor",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1816,
+    "name": "Platinum Vest",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1817,
+    "name": "Imperial Vest",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1818,
+    "name": "Elemental Heavy Armor",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1819,
+    "name": "Silent Cape",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1820,
+    "name": "Primeval Robe",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1821,
+    "name": "Rainbow Robe",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1822,
+    "name": "Elemental Light Armor",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1823,
+    "name": "Fur Coat",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1824,
+    "name": "Exotic Garb",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1825,
+    "name": "Grand Armor",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1826,
+    "name": "Obsidian Garb",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1827,
+    "name": "Grand Vest",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1828,
+    "name": "Falcon Garb",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1829,
+    "name": "Elemental Robe",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1830,
+    "name": "Spiked Armor",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1831,
+    "name": "Silver Armor",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1832,
+    "name": "Spiked Vest",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1833,
+    "name": "Silver Vest",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1834,
+    "name": "Charm Robe",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1835,
+    "name": "Snowy Cape",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1836,
+    "name": "Iron Armor",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1837,
+    "name": "Sturdy Armor",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1838,
+    "name": "Iron Vest",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1839,
+    "name": "Peacebringers Garb",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1840,
+    "name": "Sturdy Vest",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1841,
+    "name": "Fur Robe",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1842,
+    "name": "Black Attire",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1843,
+    "name": "Wind Attire",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1844,
+    "name": "Traditional Dancer Garb",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1845,
+    "name": "Bronze Armor",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1846,
+    "name": "Bronze Vest",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1847,
+    "name": "Linen Robe",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1848,
+    "name": "Leather Armor",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1849,
+    "name": "Leather Vest",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1850,
+    "name": "Robe",
+    "type": 10,
+    "category": "Body",
+    "editable": true
+  },
+  {
+    "id": 1901,
+    "name": "Spurning Ribbon",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1903,
+    "name": "Alluring Ribbon",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1904,
+    "name": "Captains Badge",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1905,
+    "name": "Badge of Friendship",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1906,
+    "name": "Dragons Scarf",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1907,
+    "name": "Beastly Scarf",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1908,
+    "name": "Royal Crest",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1909,
+    "name": "Gravekeepers Mark",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1910,
+    "name": "Physical Belt",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1911,
+    "name": "Mental Belt",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1912,
+    "name": "Blessed Blazon",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1913,
+    "name": "Blazon of Protection",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1914,
+    "name": "Mighty Belt",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1915,
+    "name": "Elemental Augmentor",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1916,
+    "name": "Guardian Amulet",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1917,
+    "name": "Elemental Ward",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1918,
+    "name": "Empowering Necklace",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1919,
+    "name": "Stimulating Necklace",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1920,
+    "name": "Protective Necklace",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1921,
+    "name": "Unerring Necklace",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1922,
+    "name": "Enlightening Necklace",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1923,
+    "name": "Sprightly Necklace",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1924,
+    "name": "Critical Necklace",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1925,
+    "name": "Empowering Bracelet",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1926,
+    "name": "Stimulating Bracelet",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1927,
+    "name": "Protective Bracelet",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1928,
+    "name": "Unerring Bracelet",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1929,
+    "name": "Enlightening Bracelet",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1930,
+    "name": "Sprightly Bracelet",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1931,
+    "name": "Critical Bracelet",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1932,
+    "name": "Empowering Ring",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1933,
+    "name": "Stimulating Ring",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1934,
+    "name": "Protective Ring",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1935,
+    "name": "Unerring Ring",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1936,
+    "name": "Enlightening Ring",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1937,
+    "name": "Sprightly Ring",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1938,
+    "name": "Critical Ring",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1939,
+    "name": "Empowering Earring",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1940,
+    "name": "Stimulating Earring",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1941,
+    "name": "Protective Earring",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1942,
+    "name": "Unerring Earring",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1943,
+    "name": "Enlightening Earring",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1944,
+    "name": "Sprightly Earring",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1945,
+    "name": "Critical Earring",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1946,
+    "name": "Weavers Charm",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1947,
+    "name": "Gentlemans Charm",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1948,
+    "name": "Gourmets Charm",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1949,
+    "name": "Inferno Amulet",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1950,
+    "name": "Blizzard Amulet",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1951,
+    "name": "Tempest Amulet",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1952,
+    "name": "Thunderstorm Amulet",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1953,
+    "name": "Void Amulet",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1954,
+    "name": "Gleaming Amulet",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1955,
+    "name": "Fire Amulet",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1956,
+    "name": "Ice Amulet",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1957,
+    "name": "Wind Amulet",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1958,
+    "name": "Lightning Amulet",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1959,
+    "name": "Dark Amulet",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1960,
+    "name": "Light Amulet",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1961,
+    "name": "Antidote Stone",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1962,
+    "name": "Wakeful Stone",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1963,
+    "name": "Articulate Stone",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1964,
+    "name": "Bright Stone",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1965,
+    "name": "Calming Stone",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1966,
+    "name": "Clarity Stone",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1967,
+    "name": "Conscious Stone",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 1968,
+    "name": "Vivifying Stone",
+    "type": 11,
+    "category": "Accessory",
+    "editable": true
+  },
+  {
+    "id": 2500,
+    "name": "Soothing Seed",
+    "type": 12,
+    "category": "Material",
+    "editable": true
+  },
+  {
+    "id": 2501,
+    "name": "Soothing Dust",
+    "type": 12,
+    "category": "Material",
+    "editable": true
+  },
+  {
+    "id": 2502,
+    "name": "Purifying Seed",
+    "type": 12,
+    "category": "Material",
+    "editable": true
+  },
+  {
+    "id": 2503,
+    "name": "Purifying Dust",
+    "type": 12,
+    "category": "Material",
+    "editable": true
+  },
+  {
+    "id": 2504,
+    "name": "Injurious Seed",
+    "type": 12,
+    "category": "Material",
+    "editable": true
+  },
+  {
+    "id": 2505,
+    "name": "Injurious Dust",
+    "type": 12,
+    "category": "Material",
+    "editable": true
+  },
+  {
+    "id": 2506,
+    "name": "Ruinous Seed",
+    "type": 12,
+    "category": "Material",
+    "editable": true
+  },
+  {
+    "id": 2507,
+    "name": "Ruinous Dust",
+    "type": 12,
+    "category": "Material",
+    "editable": true
+  },
+  {
+    "id": 2516,
+    "name": "Noxroot",
+    "type": 12,
+    "category": "Material",
+    "editable": true
+  },
+  {
+    "id": 2517,
+    "name": "Sleepweed",
+    "type": 12,
+    "category": "Material",
+    "editable": true
+  },
+  {
+    "id": 2518,
+    "name": "Addlewort",
+    "type": 12,
+    "category": "Material",
+    "editable": true
+  },
+  {
+    "id": 2519,
+    "name": "Essence of Grape",
+    "type": 12,
+    "category": "Material",
+    "editable": true
+  },
+  {
+    "id": 2520,
+    "name": "Essence of Plum",
+    "type": 12,
+    "category": "Material",
+    "editable": true
+  },
+  {
+    "id": 2521,
+    "name": "Essence of Pomegranate",
+    "type": 12,
+    "category": "Material",
+    "editable": true
+  },
+  {
+    "id": 2522,
+    "name": "Olive Bloom",
+    "type": 12,
+    "category": "Material",
+    "editable": true
+  },
+  {
+    "id": 2523,
+    "name": "Curious Bloom",
+    "type": 12,
+    "category": "Material",
+    "editable": true
+  },
+  {
+    "id": 302,
+    "name": "Translated Tome",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 303,
+    "name": "Original Tome",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 304,
+    "name": "Letter from Master",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 305,
+    "name": "Herb of grace",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 307,
+    "name": "Blue swordfish",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 308,
+    "name": "Bottle of Wine",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 309,
+    "name": "Sleepweed 2",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 310,
+    "name": "Anonymous Diary",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 311,
+    "name": "Nondescript Stone(311=312)",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 312,
+    "name": "Skystone(311=312)",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 313,
+    "name": "Edbarts Shield",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 314,
+    "name": "Ancient Map",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 316,
+    "name": "Letter from Baltazar",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 315,
+    "name": "Eldrite",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 317,
+    "name": "Aelfrics Lanthorn",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 318,
+    "name": "Letter of Introduction",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 320,
+    "name": "Oasis Water",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 321,
+    "name": "Wyvern Scale",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 322,
+    "name": "Crystal Ore",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 323,
+    "name": "Crystal Key",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 326,
+    "name": "Attendants Mask(325=326=327)",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 325,
+    "name": "Aristrocrats Mask(325=326=327)",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 327,
+    "name": "Black Market Inventory(325=326=327)",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 329,
+    "name": "Brigands Garb",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 328,
+    "name": "Brigand Leaders Garb",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 332,
+    "name": "Alfyns Satchel",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 334,
+    "name": "Zephs Satchel",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 337,
+    "name": "House Azelhart Dagger",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 338,
+    "name": "Yusufas Handkerchief",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 339,
+    "name": "Left hand Mans Map",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 392,
+    "name": "River Blossom",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 340,
+    "name": "Dungeon Key",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 344,
+    "name": "Ambrosial Milk",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 345,
+    "name": "Emperor Crab",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 346,
+    "name": "Roc Egg",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 348,
+    "name": "Final Masterpiece",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 349,
+    "name": "Cow Droppings",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 350,
+    "name": "Lories Diary",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 351,
+    "name": "Diva Dress",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 352,
+    "name": "Saucy Prawns",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 354,
+    "name": "Rebels Axe",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 355,
+    "name": "Revolutionary Sword",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 356,
+    "name": "Spear of Justice",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 357,
+    "name": "Giant Tusk",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 358,
+    "name": "Satisfactory Coal",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 359,
+    "name": "Adequate Flax",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 360,
+    "name": "Portable Pot",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 361,
+    "name": "Codger-friendly Bow",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 363,
+    "name": "Leviathan Egg",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 365,
+    "name": "Beetroot",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 369,
+    "name": "Orewell Whetstone",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 370,
+    "name": "Gendys Footcloth",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 375,
+    "name": "Byrons Ring",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 379,
+    "name": "Sword of Sokrath",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 380,
+    "name": "Tales from a Faraway Land",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 381,
+    "name": "House Landar Records",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 384,
+    "name": "Memorial Sword",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 385,
+    "name": "Tools of Learning",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 386,
+    "name": "Adventurers Attire",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 387,
+    "name": "Timeworn Tapestry",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 388,
+    "name": "Tightly Sealed Envelope",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 389,
+    "name": "Snakesbane",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 390,
+    "name": "Letter from Zeph",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 391,
+    "name": "Letter from Mercedes",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 394,
+    "name": "Memorial Necklace",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 395,
+    "name": "Jotunn Horn",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 396,
+    "name": "Giant Egg",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 397,
+    "name": "Mercenary Crest",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 398,
+    "name": "Hugos Journal",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 399,
+    "name": "Mind me always",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 400,
+    "name": "Astonishing Object",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 401,
+    "name": "Incredible Item",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 402,
+    "name": "Marvelous Memento",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 403,
+    "name": "Quatrait Bloom",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 404,
+    "name": "Dragon Egg",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 406,
+    "name": "Letter from Noa",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 407,
+    "name": "Lapis Lazuli",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 405,
+    "name": "Direwolf Fang",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 408,
+    "name": "High Hornburgian Dictionary",
+    "type": 13,
+    "category": "Valuable",
+    "editable": false
+  },
+  {
+    "id": 658,
+    "name": "A Safe Route",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 586,
+    "name": "A Use for Textiles",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 886,
+    "name": "Alphass Poem",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 506,
+    "name": "An Eyewitness Account",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 868,
+    "name": "Archibolds Weak Points",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 878,
+    "name": "Byron Family Lineage",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 758,
+    "name": "Chieftains Schedule",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 752,
+    "name": "City of Gold",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 677,
+    "name": "Dominics Remorse",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 676,
+    "name": "Dominics Seclusion",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 695,
+    "name": "Dominics Troubles",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 634,
+    "name": "Donovans Condition",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 844,
+    "name": "Dragon of the Clifflands",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 525,
+    "name": "Dragon of the Frostlands",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 671,
+    "name": "Dragon of the highlands",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 799,
+    "name": "Early Ice Thawing",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 761,
+    "name": "Elixir Recipe",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 865,
+    "name": "Estadass Condition",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 864,
+    "name": "Father and Fighter",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 884,
+    "name": "Forbidden Gold",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 885,
+    "name": "From the Far Reaches of Hell",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 624,
+    "name": "Gossip of Glowworm Moss",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 718,
+    "name": "Gravekeepers Information",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 869,
+    "name": "Gustavs Weak Points",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 808,
+    "name": "History of the Cliftlands",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 524,
+    "name": "History of the Frostlands",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 879,
+    "name": "History of the Woodlands",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 852,
+    "name": "How to Train a Tiger",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 867,
+    "name": "Joshuas Weak Points",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 655,
+    "name": "Laras New Life",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 563,
+    "name": "Librarians Testimony",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 860,
+    "name": "Martas Gang",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 773,
+    "name": "Meryls Past",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 866,
+    "name": "Mont DOrs Condition",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 760,
+    "name": "Ninas Secret",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 843,
+    "name": "Ogens Mutterings",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 781,
+    "name": "Old Woman to the Northwest",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 776,
+    "name": "Old Woman to the Southeast",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 809,
+    "name": "Project Plans",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 518,
+    "name": "Rumors of Knight Ardante",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 565,
+    "name": "Russells Situation",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 853,
+    "name": "Tale of the Beast Tamers",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 675,
+    "name": "The Books Whereabouts",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 696,
+    "name": "The Fall of House Landar",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 681,
+    "name": "The Fortress of Everhold",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 743,
+    "name": "The Giant Serpents",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 564,
+    "name": "The Guard's Situation",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 573,
+    "name": "The Headmasters Situation",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 570,
+    "name": "The Jellypeno",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 882,
+    "name": "The Murals Meaning",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 825,
+    "name": "The Sewers",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 569,
+    "name": "The Song of Sokrath",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 780,
+    "name": "Tidings of Elderly Friends",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 883,
+    "name": "Trial of the Twelve",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 0,
+    "name": "Vanessa's Destination (Unknown ID)",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 603,
+    "name": "Where the Direwolf Prowls",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 549,
+    "name": "Where the Giant Boar Roams",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 507,
+    "name": "Where the Ice Giant Sleeps",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 823,
+    "name": "Where the Incidents Happened",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 826,
+    "name": "Why She Doesnt Visit Geoffrey",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  },
+  {
+    "id": 824,
+    "name": "Witness Testimony",
+    "type": 14,
+    "category": "Knowledge",
+    "editable": false
+  }
+]
