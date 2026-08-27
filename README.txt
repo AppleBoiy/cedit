@@ -30,10 +30,25 @@ package needed - PySide6 bundles its own Qt build, unlike Tkinter which
 depends on whatever Tcl/Tk your Python happens to be linked against.
 
 
+GRAPH VIEW
+----------
+View > Graph View... (or the toolbar button) opens a node-graph explorer
+of the currently loaded save alongside the regular tree: click a green
+box to expand/collapse its children, double-click a blue leaf to edit it
+(same read-only/special-value rules as the tree), search to expand and
+jump straight to a match anywhere in the file, scroll to zoom, drag to
+pan. It only ever builds the parts of the graph you've actually expanded
+(a save can have thousands of nodes - laying all of them out as one big
+graph at once wouldn't be readable or fast), so it's an explorer, not a
+full-file map. It doesn't auto-sync with edits made elsewhere while open;
+click Refresh (or reopen it) to catch up.
+
+
 FOLDER LAYOUT
 -------------
-    cedit.py    - the generic editor: menus, tree view, quick-edit panel,
-                  raw JSON preview, file I/O. Has no per-game logic at all.
+    cedit.py    - the generic editor: menus, tree view, graph view,
+                  quick-edit panel, raw JSON preview, file I/O. Has no
+                  per-game logic at all.
     games/      - one module per game, each exporting a `PROFILE` object
                   (see lib/base.py's GameProfile for the contract).
     lib/        - lib/base.py (the shared plugin contract + utilities) plus
