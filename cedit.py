@@ -55,7 +55,7 @@ from PySide6.QtWidgets import (
     QPlainTextEdit, QSplitter, QFileDialog, QMessageBox, QInputDialog,
     QGroupBox, QAbstractItemView, QMenu,
     QTableWidget, QTableWidgetItem, QDialog, QCheckBox,
-    QListWidget, QListWidgetItem,
+    QListWidget, QListWidgetItem, QGridLayout, QSizePolicy,
 )
 
 from games import list_games, get_game
@@ -604,9 +604,19 @@ class SaveEditorWindow(QMainWindow):
         row.addWidget(self.path_label)
         return bar
 
+    # Fields per row before wrapping to the next line. A plain QHBoxLayout
+    # packing every field into one row squeezes everyone's labels/fields
+    # once a profile defines more than a handful of quick_fields (Dave the
+    # Diver's 8 vs. Duckov's 3-ish) - wrapping keeps each field's label
+    # fully readable and its Apply button a consistent size regardless of
+    # how many fields a given game profile declares.
+    _QUICK_EDIT_COLUMNS = 4
+
     def _build_quick_edit(self):
         group = QGroupBox("Quick Edit")
-        self.quick_layout = QHBoxLayout(group)
+        self.quick_layout = QGridLayout(group)
+        self.quick_layout.setHorizontalSpacing(12)
+        self.quick_layout.setVerticalSpacing(6)
         return group
 
     def _rebuild_quick_edit_widgets(self):
@@ -618,23 +628,36 @@ class SaveEditorWindow(QMainWindow):
         self.quick_rows.clear()
 
         if not self.profile.quick_fields:
-            self.quick_layout.addWidget(QLabel("(no quick-edit fields defined for this game)"))
-            self.quick_layout.addStretch(1)
+            self.quick_layout.addWidget(
+                QLabel("(no quick-edit fields defined for this game)"), 0, 0
+            )
             return
 
-        for name in self.profile.quick_fields:
-            self.quick_layout.addWidget(QLabel(f"{name}:"))
+        cols = self._QUICK_EDIT_COLUMNS
+        for i, name in enumerate(self.profile.quick_fields):
+            row, group_col = divmod(i, cols)
+            base_col = group_col * 3
+
+            label = QLabel(f"{name}:")
+            label.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+            self.quick_layout.addWidget(label, row, base_col)
+
             edit = QLineEdit()
             edit.setMinimumWidth(70)
             edit.setMaximumWidth(140)
             edit.setEnabled(False)
-            self.quick_layout.addWidget(edit)
+            self.quick_layout.addWidget(edit, row, base_col + 1)
+
             btn = QPushButton("Apply")
             btn.setEnabled(False)
             btn.clicked.connect(lambda checked=False, n=name: self.apply_quick_field(n))
-            self.quick_layout.addWidget(btn)
+            self.quick_layout.addWidget(btn, row, base_col + 2)
+
             self.quick_rows[name] = (edit, btn)
-        self.quick_layout.addStretch(1)
+
+        # A trailing stretch column so a partially-filled last row doesn't
+        # spread its fields out to fill the window's full width.
+        self.quick_layout.setColumnStretch(cols * 3, 1)
 
     def refresh_quick_edit(self):
         for name, path in self.profile.quick_fields.items():
