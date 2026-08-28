@@ -232,6 +232,45 @@ class TestInventoryHooks(unittest.TestCase):
         self.assertEqual(len(targets), len(mhw._CONTAINER_LABELS))  # only slot 0 populated here
 
 
+class TestItemCatalog(unittest.TestCase):
+    """games/mhw.py's item name catalog (data/mhw/item_names.json) - see
+    data/mhw/README.md for how it was extracted."""
+
+    def test_catalog_loaded_from_real_game_data(self):
+        # A regression floor, not an exact count - data/mhw/item_names.json
+        # is a real extracted file, not a fixture; this just confirms it's
+        # actually there and non-trivial, not that its size is frozen.
+        self.assertGreater(len(mhw._ITEM_NAMES), 1000)
+
+    def test_item_name_known_and_unknown_ids(self):
+        self.assertEqual(mhw.item_name(1), "Potion")
+        self.assertIsNone(mhw.item_name(0))
+        self.assertIsNone(mhw.item_name(99999999))
+
+    def test_item_name_accepts_str_or_int(self):
+        self.assertEqual(mhw.item_name("1"), mhw.item_name(1))
+
+    def test_item_catalog_rows_sorted_by_name(self):
+        rows = mhw.item_catalog(None)
+        names = [name for name, _id in rows]
+        self.assertEqual(names, sorted(names, key=str.lower))
+        self.assertIn(("Potion", "1"), rows)
+
+    def test_describe_entry_names_item_pouch_slots(self):
+        # An item_pouch/storage slot dict ({"id", "amount"}) gets a name...
+        hint = mhw._describe_entry({"id": 1, "amount": 5}, "id", 1)
+        self.assertEqual(hint, "Potion")
+
+    def test_describe_entry_ignores_equipment_ids(self):
+        # ...but an equipment entry's "id" is a different (unmapped) id
+        # space - no "amount" key present, so it must not be looked up here.
+        equipment_entry = {"sort_index": 0, "category": 1, "type": 0, "id": 1, "level": 0}
+        self.assertIsNone(mhw._describe_entry(equipment_entry, "id", 1))
+
+    def test_describe_entry_ignores_other_keys(self):
+        self.assertIsNone(mhw._describe_entry({"id": 1, "amount": 5}, "amount", 5))
+
+
 class TestProfileWiring(unittest.TestCase):
     def test_profile_basics(self):
         self.assertEqual(mhw.PROFILE.key, "mhw")
@@ -240,10 +279,27 @@ class TestProfileWiring(unittest.TestCase):
         self.assertIsNotNone(mhw.PROFILE.spawn_item)
         self.assertIsNotNone(mhw.PROFILE.inventory_state)
         self.assertIsNotNone(mhw.PROFILE.remove_inventory_item)
+        self.assertIsNotNone(mhw.PROFILE.describe_entry)
+        self.assertIsNotNone(mhw.PROFILE.item_catalog)
+        self.assertIsNotNone(mhw.PROFILE.custom_launcher)
 
     def test_registered_in_games_registry(self):
         from games import get_game
         self.assertIs(get_game("mhw"), mhw.PROFILE)
+
+    def test_custom_launcher_defers_pyside6_import(self):
+        """games/mhw.py itself must stay importable with no PySide6 (see
+        games/dredge.py's identical convention) - only games/mhw_window.py
+        (imported lazily inside launch()) may depend on it."""
+        import ast
+        import inspect
+        source = inspect.getsource(mhw)
+        tree = ast.parse(source)
+        for node in ast.walk(tree):
+            if isinstance(node, (ast.Import, ast.ImportFrom)):
+                module = getattr(node, "module", None) or ""
+                names = [a.name for a in node.names]
+                self.assertNotIn("PySide6", [module] + names)
 
 
 if __name__ == "__main__":

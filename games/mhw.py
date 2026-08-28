@@ -29,10 +29,51 @@ understand yet (equipment sub-fields like decorations/augments, guild
 cards, quest completion, room decor, investigations, ...) round-trips
 untouched because its bytes were never touched at all.
 """
+import json
 import struct
+from pathlib import Path
 
 from lib.base import GameProfile
 from lib.mhw_crypto import SLOT_REGIONS, decrypt_save, encrypt_save
+
+# data/mhw/item_names.json: itemID -> display name, covering items, ammo,
+# materials, and decorations (they all share one ID space in MHW's own
+# itemData.itm table - equipment/weapon/armor ids are a separate namespace
+# this catalog doesn't cover). Extracted straight from the game's own
+# shipped itemData.itm + item_eng.gmd files (bundled inside the
+# MHWISaveEditor-master repo the user pointed cedit at) - see
+# data/mhw/README.md for exactly how, and data/mhw/extract_item_names.py
+# for the extraction script itself. Loaded once at import time; missing/
+# corrupt just means no names show, not a crash - same convention as
+# games/duckov.py's own catalog.
+_ITEM_NAMES_PATH = Path(__file__).resolve().parent.parent / "data" / "mhw" / "item_names.json"
+try:
+    _ITEM_NAMES = json.loads(_ITEM_NAMES_PATH.read_text(encoding="utf-8"))
+except (FileNotFoundError, json.JSONDecodeError):
+    _ITEM_NAMES = {}
+
+
+def item_name(item_id):
+    """itemID (int or str) -> looked-up display name, or None if this
+    catalog doesn't cover it (id 0 = empty slot, or an id outside the
+    2774-entry table this was extracted from)."""
+    return _ITEM_NAMES.get(str(item_id))
+
+
+def _describe_entry(container, key, value):
+    # Only item_pouch/storage slot dicts ({"id", "amount"}) - equipment
+    # entries also have an "id" field but it's a weapon/armor id from a
+    # completely different table this catalog doesn't cover.
+    if key == "id" and isinstance(value, int) and isinstance(container, dict) and "amount" in container:
+        return item_name(value)
+    return None
+
+
+def item_catalog(data):
+    """Every catalog entry, as [(name, id_str), ...] sorted by name - feeds
+    the Inventory Editor window's "Browse Catalog..." picker, and the
+    dedicated MHW editor window's own item pickers."""
+    return sorted(((name, item_id) for item_id, name in _ITEM_NAMES.items()), key=lambda row: row[0].lower())
 
 # ------------------------------------------------------- per-slot layout
 #
@@ -297,6 +338,15 @@ def remove_inventory_item(data, target_key, instance_id):
     return f"Cleared slot {instance_id} of {target_key}."
 
 
+def launch(parent):
+    # Lazy import, same reasoning as games/dredge.py's own launch(): keep
+    # this module (and therefore `import games`, the CLI, and every test
+    # that just wants loads/dumps/the inventory hooks) usable with zero
+    # PySide6 installed. Only opening the dedicated window itself needs it.
+    from games.mhw_window import launch as _launch
+    _launch(parent)
+
+
 PROFILE = GameProfile(
     key="mhw",
     display_name="Monster Hunter World: Iceborne",
@@ -312,17 +362,23 @@ PROFILE = GameProfile(
     loads=loads,
     dumps=dumps,
     binary=True,
+    custom_launcher=launch,
     notes=(
-        "Load the SAVEDATA1000 file directly (usually under "
-        "Steam/userdata/<id>/582010/remote/). Every hunter slot (up to 3) "
-        "loads together; only edit/save the ones you actually use - all "
-        "three get re-encrypted together either way. Equipment entries "
-        "only expose id/level/points/decos/pendant for now; decoration "
-        "slots, augments, and custom upgrades round-trip untouched but "
-        "aren't editable here yet."
+        "Opens a dedicated MHW editor window (per-hunter tabs, item pouch/"
+        "storage/equipment tables, name-based item picker) instead of the "
+        "generic tree editor - load the SAVEDATA1000 file directly from "
+        "there (usually under Steam/userdata/<id>/582010/remote/). Every "
+        "hunter slot (up to 3) loads together; only edit/save the ones you "
+        "actually use - all three get re-encrypted together either way. "
+        "Equipment entries only expose id/level/points/decos/pendant for "
+        "now (no name lookup - that's a separate id space this profile "
+        "doesn't have a catalog for yet); decoration slots, augments, and "
+        "custom upgrades round-trip untouched but aren't editable here yet."
     ),
 )
 PROFILE.spawn_item_targets = spawn_item_targets
 PROFILE.spawn_item = spawn_item
 PROFILE.inventory_state = inventory_state
 PROFILE.remove_inventory_item = remove_inventory_item
+PROFILE.describe_entry = _describe_entry
+PROFILE.item_catalog = item_catalog

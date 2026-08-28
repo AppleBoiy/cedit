@@ -19,7 +19,9 @@ Currently supported:
   - DREDGE                   (games/dredge.py + lib/dredge_client.py)
   - Dave the Diver           (games/dave.py + data/dave/)
   - BlazBlue Entropy Effect  (games/bbee.py + lib/bbee_lib.py)
-  - Monster Hunter World: Iceborne (games/mhw.py + lib/mhw_crypto.py)
+  - Monster Hunter World: Iceborne (games/mhw.py + games/mhw_window.py +
+      lib/mhw_crypto.py + data/mhw/ - dedicated editor window like DREDGE's,
+      with a real 2774-item name catalog for the item pouch/storage)
 
 VERSION at the repo root is the single source of truth for cedit's own
 version - shown in the GUI's status bar footer and `cedit.py --version`,
