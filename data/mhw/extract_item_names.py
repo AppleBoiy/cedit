@@ -25,15 +25,26 @@ assert ITM_ENTRY_SIZE == 32, ITM_ENTRY_SIZE
 
 
 def parse_itm(path):
+    """-> [(id, category), ...] - category is itm_entry's own "type" field
+    (types/file/itm.h's itemCategory enum: Item=0, Material=1, Account=2,
+    Ammo=3, Decoration=4, Furniture=5), used to sort each item into the
+    right container (item_pouch:items vs :ammo, storage:materials, etc -
+    see games/mhw.py's _CONTAINER_CATEGORY)."""
     raw = path.read_bytes()
     magic1, magic2, entry_count = struct.unpack_from("<IHI", raw, 0)
     off = struct.calcsize("<IHI")
-    ids = []
+    entries = []
     for i in range(entry_count):
         entry = struct.unpack_from(ITM_ENTRY_FMT, raw, off)
-        ids.append(entry[0])
+        entries.append((entry[0], entry[2]))  # (id, type/category)
         off += ITM_ENTRY_SIZE
-    return ids
+    return entries
+
+
+# ItemDB::ReadCustomFlags's own two category overrides (see this repo's
+# ItemDB.h comment: "Mega Dash Juice is a material, but needs to be an
+# item. Exhaust Coating is a material, but needs to be an ammo.").
+_CATEGORY_OVERRIDES = {19: 0, 179: 3}  # id -> category (Item, Ammo)
 
 
 STYL_RE = re.compile(r"<STYL.*?>(.*?)</STYL>", re.DOTALL)
@@ -70,12 +81,13 @@ _ADJUST = {2270: 819, 819: 2270, 956: 957, 957: 956}
 
 
 def main():
-    ids = parse_itm(ITM_PATH)
+    entries = parse_itm(ITM_PATH)
     strings = parse_gmd_strings(GMD_PATH)
-    print(f"itm entries: {len(ids)}, gmd strings: {len(strings)}")
+    print(f"itm entries: {len(entries)}, gmd strings: {len(strings)}")
 
     names = {}
-    for item_id in ids:
+    categories = {}
+    for item_id, category in entries:
         if item_id <= 0:
             continue
         lookup_id = _ADJUST.get(item_id, item_id)
@@ -86,15 +98,21 @@ def main():
         if not name:
             continue
         names[str(item_id)] = name
+        categories[str(item_id)] = _CATEGORY_OVERRIDES.get(item_id, category)
 
-    out_path = Path(__file__).resolve().parent / "item_names.json"
-    out_path.write_text(
+    out_dir = Path(__file__).resolve().parent
+    (out_dir / "item_names.json").write_text(
         json.dumps(dict(sorted(names.items(), key=lambda kv: int(kv[0]))), indent=2, ensure_ascii=False),
         encoding="utf-8",
     )
-    print(f"Wrote {len(names)} names -> {out_path}")
+    (out_dir / "item_categories.json").write_text(
+        json.dumps(dict(sorted(categories.items(), key=lambda kv: int(kv[0]))), indent=2, ensure_ascii=False),
+        encoding="utf-8",
+    )
+    print(f"Wrote {len(names)} names -> {out_dir / 'item_names.json'}")
+    print(f"Wrote {len(categories)} categories -> {out_dir / 'item_categories.json'}")
     for sample_id in ("219", "252", "19", "179", "2270", "819"):
-        print(sample_id, names.get(sample_id))
+        print(sample_id, names.get(sample_id), categories.get(sample_id))
 
 
 if __name__ == "__main__":

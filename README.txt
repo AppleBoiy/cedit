@@ -20,9 +20,11 @@ Currently supported:
   - Dave the Diver           (games/dave.py + data/dave/)
   - BlazBlue Entropy Effect  (games/bbee.py + lib/bbee_lib.py)
   - Monster Hunter World: Iceborne (games/mhw.py + games/mhw_window.py +
-      lib/mhw_crypto.py + data/mhw/ - dedicated editor window like DREDGE's,
-      with real name catalogs for item pouch/storage (2774 items) and
-      equipment (11421 armor/charms/weapons/kinsects))
+      lib/mhw_crypto.py + data/mhw/ - dedicated editor window like DREDGE's;
+      item pouch/storage is a searchable, item-centric grid (every item
+      that belongs in a container, real name, quantity editable in place -
+      2774 items catalogued) and equipment resolves to real names too
+      (11421 armor/charms/weapons/kinsects))
 
 VERSION at the repo root is the single source of truth for cedit's own
 version - shown in the GUI's status bar footer and `cedit.py --version`,

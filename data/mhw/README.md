@@ -15,18 +15,30 @@ game's own shipped data files, which happen to be checked into
 struct layout were themselves reverse-engineered from - see that module's
 own docstring).
 
-## Items (`item_names.json`)
+## Items (`item_names.json` + `item_categories.json`)
 
 2774 entries: consumables, materials, ammo, decorations - **not**
-weapons/armor, which use the separate id space below.
+weapons/armor, which use the separate id space below. Two parallel files,
+both keyed by the same bare item id:
+
+- `item_names.json` - id -> display name.
+- `item_categories.json` - id -> `itemCategory` (`types/file/itm.h`:
+  `Item=0, Material=1, Account=2, Ammo=3, Decoration=4, Furniture=5`) -
+  each item's own `itm_entry.type` field. This is what
+  `games/mhw.py`'s `items_for_container()` uses to sort the full catalog
+  into the right container for the editor window's item grid (a Material
+  Box only ever shows materials, etc - see `types/inventory_areas.h`'s own
+  `inventory_areas[]` table, which maps every container to exactly one
+  category the same way). Categories `Account` and `Furniture` don't
+  correspond to any item_pouch/storage container and are never matched.
 
 ### How it was built
 
 1. `itemData.itm` (`res/chunk/common/item/itemData.itm` in
    MHWISaveEditor-master) is a flat array of item records, one per id -
    parsed per that project's own `itm.bt` 010 Editor binary template
-   (header + fixed 32-byte entries; only each entry's own `id` field is
-   actually needed here).
+   (header + fixed 32-byte entries; each entry's own `id` and `type`
+   fields are both used here).
 2. `item_eng.gmd` (`res/chunk/common/text/steam/item_eng.gmd`) is the
    English localized text file for items - parsed per that project's own
    `gmd.bt` template (header, a hash-keyed lookup table that's skipped
@@ -38,10 +50,17 @@ weapons/armor, which use the separate id space below.
    exactly how the file is laid out. Two id pairs get swapped before
    lookup (`ItemDB::AdjustItemID`) because the game's own data has their
    names backwards: Smoke Jewel (819) <-> Survival Jewel (2270), and Igni
-   Sign (956) <-> Hunter Runestone (957).
+   Sign (956) <-> Hunter Runestone (957) - the same swap is applied to
+   `item_categories.json` too, for consistency.
 4. Each resulting name has any `<STYL ...>...</STYL>` markup (the game's
    own rich-text color/style tags) stripped down to its inner text, and is
    written out as `{id: name}`.
+5. `ItemDB::ReadCustomFlags` overrides two items' categories in-place
+   before anything else reads them: Mega Dash Juice (id 19) is stored as a
+   Material but is actually an Item, and Exhaust Coating (id 179) is
+   stored as a Material but is actually Ammo (that comment is verbatim
+   from `ItemDB.h`) - `item_categories.json` applies the same two
+   overrides.
 
 See `extract_item_names.py` in this folder for the actual script (reads
 straight from a local `MHWISaveEditor-master` checkout's `res/chunk/`

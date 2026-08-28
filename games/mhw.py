@@ -52,12 +52,64 @@ try:
 except (FileNotFoundError, json.JSONDecodeError):
     _ITEM_NAMES = {}
 
+# data/mhw/item_categories.json: itemID -> itemCategory (types/file/itm.h:
+# Item=0, Material=1, Account=2, Ammo=3, Decoration=4, Furniture=5) - each
+# item's own itm_entry.type field, extracted alongside item_names.json (see
+# extract_item_names.py). Used to sort the full item catalog into the
+# right container (a real item pouch/storage slot only ever holds items of
+# one specific category - see _CONTAINER_CATEGORY below), the same way
+# MHWISaveEditor's own inventory_areas.h does it. Categories 2 (Account)
+# and 5 (Furniture) don't correspond to any item_pouch/storage container
+# at all and are never matched by items_for_container().
+_ITEM_CATEGORIES_PATH = Path(__file__).resolve().parent.parent / "data" / "mhw" / "item_categories.json"
+try:
+    _ITEM_CATEGORIES = json.loads(_ITEM_CATEGORIES_PATH.read_text(encoding="utf-8"))
+except (FileNotFoundError, json.JSONDecodeError):
+    _ITEM_CATEGORIES = {}
+
+CATEGORY_ITEM = 0
+CATEGORY_MATERIAL = 1
+CATEGORY_AMMO = 3
+CATEGORY_DECORATION = 4
+
+# container key (matches _CONTAINER_LABELS below) -> itemCategory - the
+# exact mapping MHWISaveEditor's own inventory_areas.h uses.
+_CONTAINER_CATEGORY = {
+    "item_pouch:items": CATEGORY_ITEM,
+    "item_pouch:ammo": CATEGORY_AMMO,
+    "storage:items": CATEGORY_ITEM,
+    "storage:ammo": CATEGORY_AMMO,
+    "storage:materials": CATEGORY_MATERIAL,
+    "storage:decorations": CATEGORY_DECORATION,
+}
+
 
 def item_name(item_id):
     """itemID (int or str) -> looked-up display name, or None if this
     catalog doesn't cover it (id 0 = empty slot, or an id outside the
     2774-entry table this was extracted from)."""
     return _ITEM_NAMES.get(str(item_id))
+
+
+def items_for_container(container_key):
+    """Every catalog item that actually belongs in this container (by real
+    itemCategory - a Material Box only ever holds materials, etc), as
+    [(name, id_str), ...] sorted by name. Backs the dedicated MHW editor
+    window's per-container item grid - unlike item_catalog() (used by
+    cedit's generic Inventory Editor picker, which doesn't know or care
+    about MHW's container/category split), this is what lets that grid
+    show "every possible item you could put here" instead of every item
+    in the whole game."""
+    category = _CONTAINER_CATEGORY.get(container_key)
+    if category is None:
+        return []
+    return sorted(
+        (
+            (name, item_id) for item_id, name in _ITEM_NAMES.items()
+            if _ITEM_CATEGORIES.get(item_id) == category
+        ),
+        key=lambda row: row[0].lower(),
+    )
 
 
 def _describe_entry(container, key, value):
@@ -398,6 +450,56 @@ def remove_inventory_item(data, target_key, instance_id):
         raise ValueError("That slot is already empty.")
     slots[instance_id] = {"id": 0, "amount": 0}
     return f"Cleared slot {instance_id} of {target_key}."
+
+
+# ------------------------------------------------------ item-centric edits
+#
+# The hooks above (spawn_item/remove_inventory_item/inventory_state) are
+# slot-centric - built for cedit's generic Inventory Editor window, which
+# has no idea what a "Material Box" is and just wants "an empty slot" or
+# "the item at position N". The dedicated MHW editor window's own item
+# grid (one row per possible item in a container, each with a quantity
+# field - see games/mhw_window.py) is naturally item-centric instead: "how
+# much of THIS item is in THIS container", find-or-create a slot as
+# needed. get_item_quantity/set_item_quantity below are that, layered on
+# top of the exact same underlying slot list _resolve_container returns -
+# no new storage model, just a different way to address it.
+
+def get_item_quantity(data, target_key, item_id):
+    """Current amount of `item_id` in this container, or 0 if it's not
+    present at all (not an error - most catalog items aren't)."""
+    slots = _resolve_container(data, target_key)
+    for entry in slots:
+        if entry["id"] == item_id:
+            return entry["amount"]
+    return 0
+
+
+def set_item_quantity(data, target_key, item_id, quantity):
+    """Set `item_id`'s amount in this container to exactly `quantity`,
+    finding its existing slot if it has one or the first empty slot if it
+    doesn't (quantity <= 0 clears/no-ops instead of ever creating a
+    0-amount slot). Raises ValueError if `item_id` needs a new slot and
+    the container is completely full."""
+    if not isinstance(item_id, int) or isinstance(item_id, bool) or item_id <= 0:
+        raise ValueError("Item type id must be a positive whole number.")
+    if not isinstance(quantity, int) or isinstance(quantity, bool):
+        raise ValueError("Quantity must be a whole number.")
+    slots = _resolve_container(data, target_key)
+
+    existing = next((i for i, e in enumerate(slots) if e["id"] == item_id), None)
+    if quantity <= 0:
+        if existing is not None:
+            slots[existing] = {"id": 0, "amount": 0}
+        return
+
+    if existing is not None:
+        slots[existing]["amount"] = quantity
+        return
+    free = next((i for i, e in enumerate(slots) if e["id"] == 0), None)
+    if free is None:
+        raise ValueError("This container is completely full - no empty slots left.")
+    slots[free] = {"id": item_id, "amount": quantity}
 
 
 def launch(parent):

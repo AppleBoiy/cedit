@@ -22,7 +22,7 @@ from PySide6.QtWidgets import (
     QDialog, QWidget, QVBoxLayout, QHBoxLayout, QFormLayout, QLabel,
     QLineEdit, QPushButton, QComboBox, QTableWidget, QTableWidgetItem,
     QFileDialog, QMessageBox, QTabWidget, QAbstractItemView, QGroupBox,
-    QListWidget, QListWidgetItem, QInputDialog, QCheckBox,
+    QListWidget, QListWidgetItem, QCheckBox,
 )
 
 from lib.base import GAME_WINDOW_SIZE, GAME_WINDOW_MIN, backup_file
@@ -113,6 +113,16 @@ class _SlotTab(QWidget):
         layout.addWidget(inner_tabs, stretch=1)
 
     def _build_inventory_tab(self):
+        # An item-centric grid - one row per possible item for whichever
+        # container is selected (games/mhw.py's items_for_container(), by
+        # real itemCategory: a Material Box only ever shows materials,
+        # etc), each with its current quantity directly editable in place.
+        # No modal picker needed for the common case any more - type to
+        # filter, double-click a quantity cell, done. Setting a quantity to
+        # 0 clears/no-ops instead of needing a separate Clear action (see
+        # games/mhw.py's set_item_quantity - it find-or-creates the
+        # underlying slot the real fixed-size array still needs, but that
+        # bookkeeping never surfaces here).
         page = QWidget()
         layout = QVBoxLayout(page)
 
@@ -127,39 +137,36 @@ class _SlotTab(QWidget):
         container_row.addWidget(self.capacity_label)
         layout.addLayout(container_row)
 
-        filter_row = QHBoxLayout()
-        self.show_all_inventory = QCheckBox("Show all slots (default: occupied only)")
-        self.show_all_inventory.stateChanged.connect(lambda _s: self._populate_table())
-        filter_row.addWidget(self.show_all_inventory, stretch=1)
-        spawn_btn = QPushButton("Spawn Item (browse names)...")
-        spawn_btn.setToolTip("Finds an empty slot automatically - no need to select a row.")
-        spawn_btn.clicked.connect(self._spawn_item)
-        filter_row.addWidget(spawn_btn)
-        set_btn = QPushButton("Set Selected Slot (browse names)...")
-        set_btn.setToolTip("Replaces whatever is in the selected row, empty or not.")
-        set_btn.clicked.connect(self._set_selected)
-        filter_row.addWidget(set_btn)
-        clear_btn = QPushButton("Clear Selected Slot")
-        clear_btn.clicked.connect(self._clear_selected)
-        filter_row.addWidget(clear_btn)
-        layout.addLayout(filter_row)
+        search_row = QHBoxLayout()
+        search_row.addWidget(QLabel("Search:"))
+        self.inventory_search = QLineEdit()
+        self.inventory_search.setPlaceholderText("Filter by item name...")
+        self.inventory_search.textChanged.connect(lambda _t: self._populate_table())
+        search_row.addWidget(self.inventory_search, stretch=1)
+        self.show_owned_only = QCheckBox("Owned only")
+        self.show_owned_only.stateChanged.connect(lambda _s: self._populate_table())
+        search_row.addWidget(self.show_owned_only)
+        layout.addLayout(search_row)
 
         self.table = QTableWidget()
-        self.table.setColumnCount(3)
-        self.table.setHorizontalHeaderLabels(["Slot #", "Item", "Amount"])
+        self.table.setColumnCount(2)
+        self.table.setHorizontalHeaderLabels(["Item", "Quantity"])
         self.table.setEditTriggers(QAbstractItemView.DoubleClicked | QAbstractItemView.EditKeyPressed)
         self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.table.setSelectionMode(QAbstractItemView.SingleSelection)
-        self.table.setColumnWidth(0, 60)
-        self.table.setColumnWidth(1, 260)
+        self.table.setColumnWidth(0, 340)
         self.table.itemChanged.connect(self._on_inventory_cell_changed)
         layout.addWidget(self.table, stretch=1)
 
-        note = QLabel("Amount is editable directly in the table (double-click a cell) for slots that already hold an item.")
+        note = QLabel(
+            "Quantity is editable directly in the table (double-click a cell) - set it to 0 "
+            "to remove an item. Every item that can go in this container is listed, whether "
+            "you have any or not; check \"Owned only\" to hide the ones you don't."
+        )
         note.setWordWrap(True)
         layout.addWidget(note)
 
-        self._inventory_rows = []  # table row -> real index into the container's slot list
+        self._inventory_rows = []  # table row -> item id shown on that row
         self._populate_table()
         return page
 
@@ -248,99 +255,61 @@ class _SlotTab(QWidget):
         target_key = f"{self.slot_idx}:{self._container_key}"
         return mhw._resolve_container(self.window.data, target_key)
 
+    def _target_key(self):
+        return f"{self.slot_idx}:{self._container_key}"
+
     def _populate_table(self):
-        slots = self._slots()
-        show_all = self.show_all_inventory.isChecked()
-        rows = [(i, e) for i, e in enumerate(slots) if show_all or e["id"] != 0]
-        self._inventory_rows = [i for i, _e in rows]
-        occupied_count = sum(1 for e in slots if e["id"] != 0)
-        self.capacity_label.setText(f"{occupied_count} / {len(slots)} occupied")
+        target_key = self._target_key()
+        catalog = mhw.items_for_container(self._container_key)  # [(name, id_str), ...]
+        needle = self.inventory_search.text().strip().lower()
+        owned_only = self.show_owned_only.isChecked()
+
+        rows = []  # (item_id, name, quantity)
+        owned_count = 0
+        for name, id_str in catalog:
+            item_id = int(id_str)
+            quantity = mhw.get_item_quantity(self.window.data, target_key, item_id)
+            if quantity > 0:
+                owned_count += 1
+            if needle and needle not in name.lower():
+                continue
+            if owned_only and quantity <= 0:
+                continue
+            rows.append((item_id, name, quantity))
+        self._inventory_rows = [item_id for item_id, _name, _qty in rows]
+
+        capacity = len(self._slots())
+        self.capacity_label.setText(f"{owned_count} distinct items owned - {capacity} slots available in this container")
 
         self.table.blockSignals(True)
         self.table.setRowCount(len(rows))
-        for row, (real_idx, entry) in enumerate(rows):
-            item_id = entry["id"]
-            name = mhw.item_name(item_id) if item_id else None
-            label = f"{name} (id {item_id})" if name else (f"id {item_id}" if item_id else "(empty)")
-
-            slot_item = QTableWidgetItem(str(real_idx))
-            slot_item.setFlags(slot_item.flags() & ~Qt.ItemIsEditable)
-            self.table.setItem(row, 0, slot_item)
-
-            name_item = QTableWidgetItem(label)
+        for row, (item_id, name, quantity) in enumerate(rows):
+            name_item = QTableWidgetItem(f"{name} (id {item_id})")
             name_item.setFlags(name_item.flags() & ~Qt.ItemIsEditable)
-            self.table.setItem(row, 1, name_item)
-
-            self.table.setItem(row, 2, QTableWidgetItem(str(entry["amount"]) if item_id else ""))
+            self.table.setItem(row, 0, name_item)
+            self.table.setItem(row, 1, QTableWidgetItem(str(quantity) if quantity else "0"))
         self.table.blockSignals(False)
 
     def _on_inventory_cell_changed(self, item):
-        if item.column() != 2:
+        if item.column() != 1:
             return
         row = item.row()
         if row >= len(self._inventory_rows):
             return
-        real_idx = self._inventory_rows[row]
-        slots = self._slots()
-        entry = slots[real_idx]
+        item_id = self._inventory_rows[row]
         text = item.text().strip()
-        if entry["id"] == 0:
-            self.window.set_status("That slot is empty - use Spawn Item or Set Selected Slot to put something there first.")
-            self._populate_table()
-            return
         try:
-            amount = int(text)
+            quantity = int(text)
         except ValueError:
-            self.window.set_status(f"'{text}' isn't a whole number - amount left unchanged.")
+            self.window.set_status(f"'{text}' isn't a whole number - quantity left unchanged.")
             self._populate_table()
             return
-        entry["amount"] = amount
-        self.window.mark_dirty()
-
-    def _spawn_item(self):
-        catalog = mhw.item_catalog(self.window.data)
-        picker = _CatalogPickerDialog(self.window, catalog, "Choose an item to spawn")
-        if picker.exec() != QDialog.Accepted or picker.chosen_id is None:
-            return
-        quantity, ok = _ask_quantity(self.window)
-        if not ok:
-            return
-        target_key = f"{self.slot_idx}:{self._container_key}"
         try:
-            message = mhw.spawn_item(self.window.data, target_key, int(picker.chosen_id), quantity)
+            mhw.set_item_quantity(self.window.data, self._target_key(), item_id, quantity)
         except ValueError as e:
-            QMessageBox.critical(self.window, "MHW Editor", f"Couldn't spawn item:\n{e}")
+            self.window.set_status(f"Couldn't set quantity: {e}")
+            self._populate_table()
             return
-        self.window.mark_dirty()
-        self._populate_table()
-        self.window.set_status(message)
-
-    def _set_selected(self):
-        row = self.table.currentRow()
-        if row < 0:
-            QMessageBox.information(self.window, "MHW Editor", "Select a slot first.")
-            return
-        catalog = mhw.item_catalog(self.window.data)
-        picker = _CatalogPickerDialog(self.window, catalog, "Choose an item")
-        if picker.exec() != QDialog.Accepted or picker.chosen_id is None:
-            return
-        quantity, ok = _ask_quantity(self.window)
-        if not ok:
-            return
-        real_idx = self._inventory_rows[row]
-        slots = self._slots()
-        slots[real_idx] = {"id": int(picker.chosen_id), "amount": quantity}
-        self.window.mark_dirty()
-        self._populate_table()
-
-    def _clear_selected(self):
-        row = self.table.currentRow()
-        if row < 0:
-            QMessageBox.information(self.window, "MHW Editor", "Select a slot first.")
-            return
-        real_idx = self._inventory_rows[row]
-        slots = self._slots()
-        slots[real_idx] = {"id": 0, "amount": 0}
         self.window.mark_dirty()
         self._populate_table()
 
@@ -445,11 +414,6 @@ class _SlotTab(QWidget):
         self._refresh_hunter_form()
         self._populate_table()
         self._populate_equipment_table()
-
-
-def _ask_quantity(parent):
-    value, ok = QInputDialog.getInt(parent, "Quantity", "How many?", 1, 1, 999999)
-    return value, ok
 
 
 class MHWEditorWindow(QDialog):

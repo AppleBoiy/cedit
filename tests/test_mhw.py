@@ -275,6 +275,80 @@ class TestInventoryHooks(unittest.TestCase):
         self.assertIn("0:item_pouch:items", keys)
         self.assertEqual(len(targets), len(mhw._CONTAINER_LABELS))  # only slot 0 populated here
 
+    def test_get_item_quantity_zero_when_absent(self):
+        self.assertEqual(mhw.get_item_quantity(self.data, "0:item_pouch:items", 999), 0)
+
+    def test_get_item_quantity_matches_existing_slot(self):
+        self.data["slots"][0]["item_pouch"]["items"][3] = {"id": 42, "amount": 7}
+        self.assertEqual(mhw.get_item_quantity(self.data, "0:item_pouch:items", 42), 7)
+
+    def test_set_item_quantity_creates_new_slot(self):
+        mhw.set_item_quantity(self.data, "0:item_pouch:items", 252, 3)
+        self.assertEqual(self.data["slots"][0]["item_pouch"]["items"][0], {"id": 252, "amount": 3})
+
+    def test_set_item_quantity_updates_existing_slot_in_place(self):
+        self.data["slots"][0]["item_pouch"]["items"][5] = {"id": 42, "amount": 1}
+        mhw.set_item_quantity(self.data, "0:item_pouch:items", 42, 99)
+        self.assertEqual(self.data["slots"][0]["item_pouch"]["items"][5], {"id": 42, "amount": 99})
+        # and it must not have also created a second slot for the same item
+        self.assertEqual(mhw.get_item_quantity(self.data, "0:item_pouch:items", 42), 99)
+
+    def test_set_item_quantity_zero_clears_existing_slot(self):
+        self.data["slots"][0]["item_pouch"]["items"][5] = {"id": 42, "amount": 1}
+        mhw.set_item_quantity(self.data, "0:item_pouch:items", 42, 0)
+        self.assertEqual(self.data["slots"][0]["item_pouch"]["items"][5], {"id": 0, "amount": 0})
+
+    def test_set_item_quantity_zero_on_absent_item_is_a_noop(self):
+        mhw.set_item_quantity(self.data, "0:item_pouch:items", 999, 0)  # must not raise
+        self.assertEqual(mhw.get_item_quantity(self.data, "0:item_pouch:items", 999), 0)
+
+    def test_set_item_quantity_raises_when_full(self):
+        pouch = self.data["slots"][0]["item_pouch"]["items"]
+        for i in range(len(pouch)):
+            pouch[i] = {"id": 1000 + i, "amount": 1}
+        with self.assertRaises(ValueError):
+            mhw.set_item_quantity(self.data, "0:item_pouch:items", 5, 1)
+
+    def test_set_item_quantity_rejects_bad_item_id(self):
+        with self.assertRaises(ValueError):
+            mhw.set_item_quantity(self.data, "0:item_pouch:items", -1, 1)
+
+
+class TestItemsForContainer(unittest.TestCase):
+    """games/mhw.py's items_for_container() - the per-container catalog
+    filter (by real itemCategory) backing the editor window's item grid."""
+
+    def test_covers_all_six_containers(self):
+        for _label, key in mhw._CONTAINER_LABELS:
+            rows = mhw.items_for_container(key)
+            self.assertGreater(len(rows), 0, key)
+
+    def test_unknown_container_returns_empty(self):
+        self.assertEqual(mhw.items_for_container("not:a:container"), [])
+
+    def test_rows_sorted_by_name(self):
+        rows = mhw.items_for_container("storage:materials")
+        names = [name for name, _id in rows]
+        self.assertEqual(names, sorted(names, key=str.lower))
+
+    def test_containers_dont_overlap_categories(self):
+        # A Material Box item must never also show up in the Ammo Pouch,
+        # etc - each real category belongs to exactly one container shape.
+        items_ids = {i for _n, i in mhw.items_for_container("storage:items")}
+        ammo_ids = {i for _n, i in mhw.items_for_container("storage:ammo")}
+        material_ids = {i for _n, i in mhw.items_for_container("storage:materials")}
+        decoration_ids = {i for _n, i in mhw.items_for_container("storage:decorations")}
+        self.assertEqual(items_ids & ammo_ids, set())
+        self.assertEqual(items_ids & material_ids, set())
+        self.assertEqual(material_ids & decoration_ids, set())
+
+    def test_known_item_in_the_right_container(self):
+        # "Potion" (id 1) is itemCategory::Item - belongs in item pouch/box,
+        # never in the ammo/material/decoration containers.
+        self.assertIn(("Potion", "1"), mhw.items_for_container("item_pouch:items"))
+        self.assertNotIn(("Potion", "1"), mhw.items_for_container("item_pouch:ammo"))
+        self.assertNotIn(("Potion", "1"), mhw.items_for_container("storage:materials"))
+
 
 class TestItemCatalog(unittest.TestCase):
     """games/mhw.py's item name catalog (data/mhw/item_names.json) - see
