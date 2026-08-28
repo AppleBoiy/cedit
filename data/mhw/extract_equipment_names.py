@@ -29,6 +29,7 @@ import re
 import struct
 from pathlib import Path
 
+# pyrefly: ignore [missing-import]
 from Crypto.Cipher import Blowfish
 
 KEY_ROD_INSE = b"SFghFQVFJycHnypExurPwut98ZZq1cwvm7lpDpASeP4biRhstQgULzlb"

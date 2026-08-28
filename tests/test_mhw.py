@@ -120,6 +120,48 @@ class TestEquipmentRoundTrip(unittest.TestCase):
         result = mhw._unpack_equipment(raw, slot_off)
         self.assertEqual(result, equipment)
 
+    def test_entries_dont_overlap_with_distinct_values(self):
+        # Same shape as TestItemSlotsRoundTrip's own "don't overlap" test -
+        # distinct, non-sentinel values in several consecutive entries so a
+        # struct-size/offset bug can't hide behind identical all-sentinel
+        # neighbors. NOTE: because _pack_equipment/_unpack_equipment always
+        # agree with each other on _EQUIPMENT_SIZE, a self-consistent round
+        # trip like this can't by itself catch an *absolute* stride error
+        # (both sides would drift together) - see
+        # test_stride_matches_real_struct_size below for that.
+        raw = _blank_buffer()
+        slot_off, _ = SLOT_REGIONS[0]
+        equipment = [
+            {"sort_index": -1, "category": -1, "type": -1, "id": 0, "level": 0,
+             "points": 0, "decos": [-1, -1, -1], "pendant": -1}
+            for _ in range(mhw._EQUIPMENT_COUNT)
+        ]
+        for i in range(5):
+            equipment[i] = {
+                "sort_index": 100 + i, "category": 0, "type": i, "id": 2 + i,
+                "level": 0, "points": 0, "decos": [-1, -1, -1], "pendant": -1,
+            }
+        mhw._pack_equipment(raw, slot_off, equipment)
+        result = mhw._unpack_equipment(raw, slot_off)
+        for i in range(5):
+            self.assertEqual(result[i], equipment[i], f"entry {i} corrupted - stride/offset drift")
+
+    def test_stride_matches_real_struct_size(self):
+        # Regression test for a real bug: _EQUIPMENT_SIZE was 125 for a
+        # while (one byte short of the true 126-byte struct) - it passed
+        # every test above (self-consistent round trips can't catch an
+        # absolute offset error) but corrupted every equipment entry past
+        # the first when read against an actual save: each entry read a
+        # cumulative N bytes into its neighbor, producing type/id/deco
+        # values that were exact 256^N multiples of entry 0's. Confirmed
+        # against a real save file - brute-force scoring candidate strides
+        # by how many consecutive entries decoded to plausible values
+        # (category in -1..4, small type/id/level) picked out 126 as the
+        # clear winner (46/50 sane vs. 125's single-digit scores), and 126
+        # then produced perfectly sane, catalog-matching gear for every
+        # occupied slot. See games/mhw.py's own comment on _EQUIPMENT_SIZE.
+        self.assertEqual(mhw._EQUIPMENT_SIZE, 126)
+
 
 class TestLoadsAndDumps(unittest.TestCase):
     """loads()/dumps() with the real crypto mocked to identity - see this

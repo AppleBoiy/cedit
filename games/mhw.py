@@ -160,8 +160,15 @@ _EQUIPMENT_COUNT = 2500
 # gameplay-relevant scalar fields; bowgun_mods/augments/custom_upgrades/
 # awakens aren't exposed yet (still preserved byte-for-byte on save).
 _EQUIPMENT_FMT = "<3i3I3ii"
-_EQUIPMENT_SIZE = 125  # real struct size (see games/mhw.py's own notes below);
-                        # _EQUIPMENT_FMT only covers this struct's first 40 bytes
+_EQUIPMENT_SIZE = 126  # real struct size, empirically confirmed against a real
+                        # save (armor slots 0-4 all sane, weapon ids matching
+                        # the equipment_names.json catalog) - the .bt template
+                        # this profile's other offsets come from doesn't give
+                        # a usable stride here, and 125 (one byte short) reads
+                        # every entry past the first at a cumulative 1-byte
+                        # offset into its neighbor, corrupting type/id/decos
+                        # more with each index. _EQUIPMENT_FMT only covers
+                        # this struct's first 40 of 126 bytes.
 
 
 # --------------------------------------------------------------- loads/dumps
