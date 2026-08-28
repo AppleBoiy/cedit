@@ -49,8 +49,14 @@ def collect_dredge_bridge_sources():
     return pairs
 
 
+with open(os.path.join(REPO_ROOT, "VERSION"), encoding="utf-8") as _f:
+    APP_VERSION = _f.read().strip()
+
 datas = [
     (os.path.join(REPO_ROOT, "packaging", "icon.png"), "packaging"),
+    # At the bundle root (not a subfolder) so _resource_path("VERSION")
+    # in cedit.py (which joins straight onto sys._MEIPASS) finds it.
+    (os.path.join(REPO_ROOT, "VERSION"), "."),
 ]
 datas += collect_dir("data")
 datas += collect_dredge_bridge_sources()
@@ -112,7 +118,7 @@ app = BUNDLE(
     info_plist={
         "CFBundleName": "cedit",
         "CFBundleDisplayName": "cedit",
-        "CFBundleShortVersionString": "1.0.0",
+        "CFBundleShortVersionString": APP_VERSION,
         "NSHighResolutionCapable": True,
     },
 )

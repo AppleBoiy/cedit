@@ -50,6 +50,10 @@ def collect_dir(rel_path):
 
 
 datas = collect_dir("data")
+# At the bundle root (not a subfolder) so cli.py's _read_version() (which
+# joins straight onto sys._MEIPASS) finds it - same convention as
+# cedit.spec's own VERSION entry.
+datas.append((os.path.join(REPO_ROOT, "VERSION"), "."))
 
 a = Analysis(
     [os.path.join(REPO_ROOT, "cli.py")],

@@ -27,6 +27,7 @@ Examples:
 """
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -40,6 +41,22 @@ from lib.base import (
     coerce_value,
     smart_parse,
 )
+
+
+def _read_version():
+    """VERSION at the repo root, or bundled alongside cedit-cli via
+    packaging/cedit_cli.spec's datas - see cedit.py's identical helper
+    (not shared/imported: this file deliberately has zero dependency on
+    cedit.py, which would drag in PySide6-adjacent module-level code)."""
+    base = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
+    try:
+        with open(os.path.join(base, "VERSION"), encoding="utf-8") as f:
+            return f.read().strip()
+    except OSError:
+        return "dev"
+
+
+__version__ = _read_version()
 
 
 class CliError(Exception):
@@ -239,6 +256,7 @@ def build_parser():
         prog="cedit-cli",
         description="Scriptable, headless access to cedit's game profiles - see this file's module docstring for examples.",
     )
+    parser.add_argument("--version", action="version", version=f"cedit-cli {__version__}")
     sub = parser.add_subparsers(dest="command", required=True)
 
     sub.add_parser("list-games", help="List every registered game profile").set_defaults(func=cmd_list_games)

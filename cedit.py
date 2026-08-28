@@ -72,7 +72,31 @@ from lib.base import (
     MAIN_WINDOW_MIN,
 )
 
+def _resource_path(*parts):
+    """Resolve a path that works both running from source and from a
+    PyInstaller-built app bundle (which unpacks bundled data under
+    sys._MEIPASS instead of next to this script)."""
+    base = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base, *parts)
+
+
+def _read_version():
+    """The VERSION file at the repo root (or bundled alongside the frozen
+    app via packaging/cedit.spec's datas) - the single source of truth
+    also used for packaging/cedit.spec and packaging/cedit_cli.spec's own
+    CFBundleShortVersionString/--version output, so there's one place to
+    bump per release rather than several that can drift out of sync.
+    "dev" if it's missing entirely (e.g. a stripped-down checkout) rather
+    than crashing the whole app over a cosmetic detail."""
+    try:
+        with open(_resource_path("VERSION"), encoding="utf-8") as f:
+            return f.read().strip()
+    except OSError:
+        return "dev"
+
+
 APP_TITLE = "cedit"
+APP_VERSION = _read_version()
 
 # QSettings organization/app name pair - identifies where recent-files
 # (and any future preferences) get stored via Qt's native per-OS
@@ -1016,6 +1040,12 @@ class SaveEditorWindow(QMainWindow):
         layout.addLayout(self._build_raw_buttons())
 
         self.statusBar().showMessage("Ready.")
+        # A permanent widget (not showMessage()) so the version stays
+        # visible in the footer's right corner no matter what status text
+        # _set_status() puts in the main (left) part of the bar.
+        version_label = QLabel(f"{APP_TITLE} v{APP_VERSION}")
+        version_label.setStyleSheet("color: palette(mid);")
+        self.statusBar().addPermanentWidget(version_label)
 
     def _build_toolbar(self):
         bar = QWidget()
@@ -2041,16 +2071,9 @@ class SaveEditorWindow(QMainWindow):
         event.accept()
 
 
-def _resource_path(*parts):
-    """Resolve a path that works both running from source and from a
-    PyInstaller-built app bundle (which unpacks bundled data under
-    sys._MEIPASS instead of next to this script)."""
-    base = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
-    return os.path.join(base, *parts)
-
-
 def main():
     parser = argparse.ArgumentParser(description=APP_TITLE)
+    parser.add_argument("--version", action="version", version=f"{APP_TITLE} {APP_VERSION}")
     parser.add_argument("save_file", nargs="?", help="Save file to open immediately")
     parser.add_argument(
         "--game", choices=[p.key for p in list_games()], default=list_games()[0].key,

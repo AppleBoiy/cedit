@@ -31,11 +31,14 @@ clean: ## Remove build artifacts (build/, dist/, .venv-build/, __pycache__/) - n
 	rm -rf build dist .venv-build
 	find . -name '__pycache__' -not -path './.venv/*' -exec rm -rf {} +
 
-release: ## Tag and explain how to push a release - usage: make release VERSION=1.5.0
+release: ## Bump VERSION, commit, and tag - usage: make release VERSION=1.5.0
 	@if [ -z "$(VERSION)" ]; then \
 		echo "Usage: make release VERSION=1.5.0" >&2; exit 1; \
 	fi
+	echo "$(VERSION)" > VERSION
+	git add VERSION
+	git commit -m "Bump version to $(VERSION)"
 	git tag -a "v$(VERSION)" -m "v$(VERSION)"
 	@echo
-	@echo "Tagged v$(VERSION) locally. Push it to trigger the release build:"
-	@echo "    git push origin v$(VERSION)"
+	@echo "Bumped VERSION, committed, and tagged v$(VERSION) locally. Push both to trigger the release build:"
+	@echo "    git push origin $$(git rev-parse --abbrev-ref HEAD) v$(VERSION)"

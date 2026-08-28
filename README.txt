@@ -20,6 +20,12 @@ Currently supported:
   - Dave the Diver           (games/dave.py + data/dave/)
   - BlazBlue Entropy Effect  (games/bbee.py + lib/bbee_lib.py)
 
+VERSION at the repo root is the single source of truth for cedit's own
+version - shown in the GUI's status bar footer and `cedit.py --version`,
+`cedit-cli --version`, and both PyInstaller specs' bundled version. Bump
+that one file (`make release VERSION=x.y.z` does this, plus tagging) and
+everything else follows from it.
+
 
 RUNNING IT
 ----------
