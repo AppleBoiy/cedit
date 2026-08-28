@@ -22,7 +22,7 @@ build: build-app build-cli ## Build both dist/cedit.app and dist/cedit-cli
 install-app: ## Build (if needed) and install cedit.app into /Applications (macOS only)
 	./packaging/install_app.sh
 
-install-cli: ## Install cedit-cli onto PATH (prebuilt binary if present, else cli.py's source)
+install-cli: ## Build (if needed) and install cedit-cli onto PATH
 	./packaging/install_cli.sh
 
 install: install-app install-cli ## Install both the app and the CLI
