@@ -58,46 +58,57 @@ folder).
 
 ## Equipment (`equipment_names.json`)
 
-11316 entries covering armor, charms, and all 13 weapon trees (Great Sword
-through Light Bowgun) - **not** kinsects (see Coverage below). Keyed by
-`"category:type:id"` (`mhw_equip_category`, `mhw_equip_type`, and the
-item's own id - the same three fields `games/mhw.py`'s equipment struct
-already exposes), since a bare id isn't unique across categories/types the
-way an item pouch id is.
+11421 entries covering armor, charms, all 13 weapon trees (Great Sword
+through Light Bowgun), and kinsects. Keyed by `"category:type:id"`
+(`mhw_equip_category`, `mhw_equip_type`, and the item's own id - the same
+three fields `games/mhw.py`'s equipment struct already exposes), since a
+bare id isn't unique across categories/types the way an item pouch id is.
 
 ### How it was built
 
-1. `armor.am_dat` (armor + charms), and one `<weapon>.wp_dat` or
-   `<weapon>.wp_dat_g` per weapon type (`res/chunk/common/equip/`) are each
-   a flat array of equipment records - parsed per MHWISaveEditor-master's
-   own `am_dat.bt`/`wp_dat.bt`/`wp_dat_g.bt` 010 Editor templates.
+1. `armor.am_dat` (armor + charms), one `<weapon>.wp_dat` or
+   `<weapon>.wp_dat_g` per weapon type, and `rod_insect.rod_inse`
+   (kinsects) - all under `res/chunk/common/equip/` - are each a flat
+   array of equipment records, parsed per MHWISaveEditor-master's own
+   `am_dat.bt`/`wp_dat.bt`/`wp_dat_g.bt`/`rod_inse.bt` 010 Editor
+   templates.
 2. Unlike items, every armor/weapon entry carries its own explicit
    `gmd_name_index` field (no `id * 2` positional guessing needed) -
    `data/EquipmentDB.cpp`'s `GetNameArmor`/`GetNameWeaponMelee`/
    `GetNameWeaponRanged` just read that field straight out of the matching
-   `armor_eng.gmd` / `<weapon>_eng.gmd` text file.
+   `armor_eng.gmd` / `<weapon>_eng.gmd` text file. `rod_inse_entry` has no
+   such field - `GetNameKinsect` instead reuses each entry's own `index`
+   field directly as the string position in `rod_insect_eng.gmd`
+   (confirmed by `string_count == entry_count == 105` in that file).
 3. Armor entries are looked up by `(equip_slot, set_group)`, which becomes
    this catalog's `(type, id)` - `EquipmentDB::GetEntryArmor`. Weapon
    entries are looked up by `id` alone within their own weapon-type file -
-   `GetEntryWeaponMelee`/`GetEntryWeaponRanged`. Charms reuse the exact same
-   armor table/lookup as armor (that's the real game's own behavior, not a
+   `GetEntryWeaponMelee`/`GetEntryWeaponRanged`. Kinsects are looked up by
+   `equip_id` alone (`GetEntryKinsect` ignores its own `type` parameter
+   entirely), stored here under a placeholder `type` of `0` since it's
+   never actually consulted. Charms reuse the exact same armor table/
+   lookup as armor (that's the real game's own behavior, not a
    simplification here - see `EquipmentDB::GetEquipment`'s combined
    `Armor`/`Charm` case), so this catalog's armor entries serve double duty
    for both categories.
 4. Armor names also get `<ICON ALPHA/BETA/GAMMA>` markup replaced with
    actual α/β/γ characters (`EquipmentDB::GetNameArmor`'s own
    replacements), on top of the same `<STYL>` stripping items get.
+5. **`rod_insect.rod_inse` is additionally Blowfish-encrypted** - the only
+   one of these equipment files that is (`utility/read_bin_file.h`'s
+   `ReadMetaFile(rod_inse_meta*, ...)` calls `blowfish_decrypt` on it
+   before parsing, unlike every sibling overload). Same byteswap +
+   Blowfish-ECB + byteswap transform `lib/mhw_crypto.py`'s
+   `_blowfish_decrypt` already implements for the save file itself, just
+   with its own key (`types/constants.h`'s `KEY_ROD_INSE`) and no outer
+   SHA1/inner-region layer on top - decrypting it turns those
+   previously-inscrutable bytes straight into the same plain
+   `01 10 09 18`-magic packed struct every other equipment file here is.
 
 See `extract_equipment_names.py` in this folder for the actual script.
 
 ### Coverage and quirks
 
-- **Kinsects are not covered.** `rod_insect.rod_inse` doesn't start with
-  the `01 10 09 18` raw-struct magic every other equipment file here has -
-  it looks compressed/encrypted in some format this project's `.bt`
-  templates don't document, and the extraction script deliberately doesn't
-  guess at it. Kinsect equipment entries (category `Kinsect`) still only
-  show a raw id.
 - Category `Tool` isn't looked up by the real game's own `EquipmentDB`
   either (`GetEquipment`'s switch has no case for it) - not something this
   extraction skipped, that's upstream behavior.

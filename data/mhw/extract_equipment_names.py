@@ -14,11 +14,39 @@ item_names.json), armor/weapon entries carry their own explicit
 gmd_name_index field - no id*2 positional-index guessing needed; kinsects
 have no such field and reuse their own `index` field directly instead
 (this is not a bug - EquipmentDB::GetNameKinsect does exactly this).
+
+rod_insect.rod_inse (kinsect data) is additionally Blowfish-encrypted
+(utility/read_bin_file.h's ReadMetaFile(rod_inse_meta*, ...) - the only
+one of these equipment files that is) - same byteswap+Blowfish-ECB+
+byteswap transform lib/mhw_crypto.py's _blowfish_decrypt already
+implements for the save file itself, just with its own key
+(types/constants.h's KEY_ROD_INSE). Reimplemented standalone below rather
+than importing lib.mhw_crypto, so this stays a self-contained script like
+extract_item_names.py.
 """
 import json
 import re
 import struct
 from pathlib import Path
+
+from Crypto.Cipher import Blowfish
+
+KEY_ROD_INSE = b"SFghFQVFJycHnypExurPwut98ZZq1cwvm7lpDpASeP4biRhstQgULzlb"
+
+
+def _byteswap(data):
+    for i in range(0, len(data), 4):
+        data[i], data[i + 3] = data[i + 3], data[i]
+        data[i + 1], data[i + 2] = data[i + 2], data[i + 1]
+
+
+def decrypt_rod_inse(raw):
+    data = bytearray(raw)
+    _byteswap(data)
+    cipher = Blowfish.new(KEY_ROD_INSE, Blowfish.MODE_ECB)
+    data[:] = cipher.decrypt(bytes(data))
+    _byteswap(data)
+    return bytes(data)
 
 # Point this at a local MHWISaveEditor-master checkout's res/chunk/common
 # folder (https://github.com/EnderHDMC/MHWISaveEditor) to regenerate.
@@ -80,9 +108,8 @@ def _struct_from_fields(fields):
     return struct.Struct(fmt), names
 
 
-def _read_entries(path, fields):
+def _read_entries_from_bytes(raw, fields):
     struct_obj, names = _struct_from_fields(fields)
-    raw = path.read_bytes()
     magic, version, entry_count = struct.unpack_from("<IHI", raw, 0)
     off = struct.calcsize("<IHI")
     out = []
@@ -91,6 +118,10 @@ def _read_entries(path, fields):
         out.append(dict(zip(names, values)))
         off += struct_obj.size
     return out
+
+
+def _read_entries(path, fields):
+    return _read_entries_from_bytes(path.read_bytes(), fields)
 
 
 AM_DAT_FIELDS = [
@@ -201,12 +232,23 @@ def main():
             key = f"{CATEGORY_WEAPON}:{type_id}:{e['id']}"
             catalog.setdefault(key, name)
 
-    # --- Kinsects: rod_insect.rod_inse does NOT start with the usual
-    # "01 10 09 18" raw-struct magic every other *_dat file here has - it's
-    # some other (likely compressed) container this script doesn't know
-    # how to open, unlike the .bt template assumes. Left uncovered for now
-    # (kinsect equipment entries just show a raw id, same as before) rather
-    # than guess at an undocumented format.
+    # --- Kinsects: rod_insect.rod_inse is Blowfish-encrypted (see this
+    # module's own docstring) - decrypt first, then it's the same plain
+    # packed struct every other equipment file here is. Looked up by
+    # equip_id alone (EquipmentDB::GetEntryKinsect ignores its own `type`
+    # parameter), and named via each entry's own `index` field directly
+    # into rod_insect_eng.gmd - not a gmd_name_index field (rod_inse_entry
+    # doesn't have one) and not id*2 either; this is GetNameKinsect's own
+    # behavior, confirmed by string_count == entry_count (105 == 105).
+    kinsect_raw = decrypt_rod_inse((EQUIP / "rod_insect.rod_inse").read_bytes())
+    kinsect_entries = _read_entries_from_bytes(kinsect_raw, ROD_INSE_FIELDS)
+    kinsect_gmd = parse_gmd_strings(VFONT_TEXT / "rod_insect_eng.gmd")
+    for e in kinsect_entries:
+        name = gmd_value(kinsect_gmd, e["index"])
+        if not name:
+            continue
+        key = f"{CATEGORY_KINSECT}:0:{e['equip_id']}"
+        catalog.setdefault(key, name)
 
     out_path = Path(__file__).resolve().parent / "equipment_names.json"
     out_path.write_text(

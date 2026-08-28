@@ -178,8 +178,7 @@ class _SlotTab(QWidget):
 
         note = QLabel(
             "Level/Points/Decos/Pendant are editable directly in the table (double-click a "
-            "cell). Decos are 3 comma-separated deco ids (-1 = empty). Kinsects don't have "
-            "name lookup yet - see data/mhw/README.md."
+            "cell). Decos are 3 comma-separated deco ids (-1 = empty)."
         )
         note.setWordWrap(True)
         layout.addWidget(note)

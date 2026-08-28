@@ -44,6 +44,12 @@ from pathlib import Path
 from Crypto.Cipher import AES, Blowfish
 
 KEY_SAVEDATA1000 = b"xieZjoe#P2134-3zmaghgpqoe0z8$3azeq"
+# rod_insect.rod_inse (kinsect equipment data) - a completely separate
+# game data file from the save itself, encrypted the exact same way
+# (byteswap + Blowfish-ECB + byteswap - see _blowfish_decrypt) but with
+# its own key (types/constants.h's KEY_ROD_INSE), no outer SHA1 hash, and
+# no inner per-region layer - see decrypt_rod_inse() below.
+KEY_ROD_INSE = b"SFghFQVFJycHnypExurPwut98ZZq1cwvm7lpDpASeP4biRhstQgULzlb"
 
 # (offset, length, save_slot_id) for the four inner-encrypted regions -
 # hardcoded straight from EncryptSave/DecryptSave in iceborne_crypt.h,
@@ -82,18 +88,30 @@ def _byteswap(data):
         data[i + 1], data[i + 2] = data[i + 2], data[i + 1]
 
 
-def _blowfish_decrypt(data):
+def _blowfish_decrypt(data, key=KEY_SAVEDATA1000):
     _byteswap(data)
-    cipher = Blowfish.new(KEY_SAVEDATA1000, Blowfish.MODE_ECB)
+    cipher = Blowfish.new(key, Blowfish.MODE_ECB)
     data[:] = cipher.decrypt(bytes(data))
     _byteswap(data)
 
 
-def _blowfish_encrypt(data):
+def _blowfish_encrypt(data, key=KEY_SAVEDATA1000):
     _byteswap(data)
-    cipher = Blowfish.new(KEY_SAVEDATA1000, Blowfish.MODE_ECB)
+    cipher = Blowfish.new(key, Blowfish.MODE_ECB)
     data[:] = cipher.encrypt(bytes(data))
     _byteswap(data)
+
+
+def decrypt_rod_inse(raw):
+    """rod_insect.rod_inse's raw bytes -> decrypted bytearray (the plain
+    "01 10 09 18"-magic packed struct rod_inse.bt documents - see
+    data/mhw/README.md's Kinsect section). Just Blowfish - no SHA1 header
+    check and no inner per-region layer like the save file has, so there's
+    nothing to validate here beyond "the magic looks right", left to the
+    caller."""
+    data = bytearray(raw)
+    _blowfish_decrypt(data, key=KEY_ROD_INSE)
+    return data
 
 
 def _generate_hash(save, offset):

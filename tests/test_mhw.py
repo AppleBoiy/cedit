@@ -15,8 +15,10 @@ import struct
 import unittest
 from unittest import mock
 
+from Crypto.Cipher import Blowfish
+
 from games import mhw
-from lib.mhw_crypto import SLOT_REGIONS
+from lib.mhw_crypto import KEY_ROD_INSE, SLOT_REGIONS, decrypt_rod_inse
 
 
 def _blank_buffer():
@@ -276,6 +278,42 @@ class TestItemCatalog(unittest.TestCase):
         self.assertIsNone(mhw._describe_entry({"id": 1, "amount": 5}, "amount", 5))
 
 
+class TestDecryptRodInse(unittest.TestCase):
+    """lib.mhw_crypto.decrypt_rod_inse - rod_insect.rod_inse (kinsect data)
+    is Blowfish-encrypted with its own key, same byteswap+ECB+byteswap
+    transform as the save file itself (see that function's own docstring
+    and data/mhw/README.md's Equipment section for how this was found).
+    Independently re-implements the same encryption here (not by calling
+    lib.mhw_crypto's own encrypt helper) so this is a real round-trip
+    check, not a tautology - this is the same construction
+    extract_equipment_names.py used to pull real kinsect names out of a
+    local MHWISaveEditor-master checkout."""
+
+    @staticmethod
+    def _byteswap(data):
+        for i in range(0, len(data), 4):
+            data[i], data[i + 3] = data[i + 3], data[i]
+            data[i + 1], data[i + 2] = data[i + 2], data[i + 1]
+
+    def _encrypt(self, plaintext):
+        data = bytearray(plaintext)
+        self._byteswap(data)
+        cipher = Blowfish.new(KEY_ROD_INSE, Blowfish.MODE_ECB)
+        data[:] = cipher.encrypt(bytes(data))
+        self._byteswap(data)
+        return bytes(data)
+
+    def test_round_trips_arbitrary_bytes(self):
+        plaintext = bytes(range(64)) * 3  # 192 bytes, a Blowfish block multiple
+        self.assertEqual(decrypt_rod_inse(self._encrypt(plaintext)), plaintext)
+
+    def test_decrypts_to_the_expected_header_magic(self):
+        # Real rod_inse files start "01 10 09 18" (same magic every other
+        # *_dat file in this project uses) once decrypted.
+        header = bytes([0x01, 0x10, 0x09, 0x18]) + b"\x00" * 60
+        self.assertTrue(decrypt_rod_inse(self._encrypt(header)).startswith(bytes([0x01, 0x10, 0x09, 0x18])))
+
+
 class TestEquipmentCatalog(unittest.TestCase):
     """games/mhw.py's equipment name catalog (data/mhw/equipment_names.json)
     - a separate (category, type, id) id space from _ITEM_NAMES, see
@@ -289,11 +327,14 @@ class TestEquipmentCatalog(unittest.TestCase):
         self.assertEqual(mhw.equipment_name(1, 0, 10), "Buster Sword I")
         # Helmet (category=Armor, type=0) id 1 - "Hunter's Headgear".
         self.assertEqual(mhw.equipment_name(0, 0, 1), "Hunter's Headgear")
+        # Kinsect (category=Kinsect, type is unused/placeholder 0) equip_id
+        # 0 - "Culldrone I" (rod_insect.rod_inse is Blowfish-encrypted; see
+        # data/mhw/README.md's Equipment section for how this is decrypted).
+        self.assertEqual(mhw.equipment_name(4, 0, 0), "Culldrone I")
 
     def test_equipment_name_unknown_returns_none(self):
         self.assertIsNone(mhw.equipment_name(1, 0, 99999999))
-        # Category 4 (Kinsect) isn't covered by this catalog at all yet.
-        self.assertIsNone(mhw.equipment_name(4, 0, 1))
+        self.assertIsNone(mhw.equipment_name(4, 0, 99999999))
 
     def test_equipment_catalog_rows_sorted_by_name(self):
         rows = mhw.equipment_catalog()

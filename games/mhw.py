@@ -81,15 +81,12 @@ def item_catalog(data):
 
 
 # data/mhw/equipment_names.json: "category:type:id" -> display name (armor,
-# charms, and the 13 weapon trees - see data/mhw/README.md's "Equipment"
-# section for how, and extract_equipment_names.py for the script). This is
-# a SEPARATE id space from _ITEM_NAMES above: an equipment entry's own
-# "id" field only means something alongside its "category"/"type" fields,
-# unlike item pouch/storage slots where a bare id is already unambiguous.
-# Kinsects aren't covered - rod_insect.rod_inse isn't the plain packed
-# struct every other equipment file here is (looks compressed/encrypted;
-# left unparsed rather than guessed at), so kinsect equipment entries still
-# only show a raw id.
+# charms, all 13 weapon trees, and kinsects - see data/mhw/README.md's
+# "Equipment" section for how, and extract_equipment_names.py for the
+# script). This is a SEPARATE id space from _ITEM_NAMES above: an
+# equipment entry's own "id" field only means something alongside its
+# "category"/"type" fields, unlike item pouch/storage slots where a bare
+# id is already unambiguous.
 _EQUIPMENT_NAMES_PATH = Path(__file__).resolve().parent.parent / "data" / "mhw" / "equipment_names.json"
 try:
     _EQUIPMENT_NAMES = json.loads(_EQUIPMENT_NAMES_PATH.read_text(encoding="utf-8"))
@@ -119,8 +116,8 @@ WEAPON_TYPE_NAMES = {
 
 def equipment_name(category, equip_type, item_id):
     """(category, type, id) -> looked-up display name, or None if this
-    catalog doesn't cover it (kinsects, category "Tool", or an id this
-    extraction didn't find - see this module's own catalog docstring)."""
+    catalog doesn't cover it (category "Tool", or an id this extraction
+    didn't find - see this module's own catalog docstring)."""
     return _EQUIPMENT_NAMES.get(f"{category}:{equip_type}:{item_id}")
 
 
@@ -429,11 +426,9 @@ PROFILE = GameProfile(
         "Every hunter slot (up to 3) loads together; only edit/save the "
         "ones you actually use - all three get re-encrypted together "
         "either way. Equipment entries only expose id/level/points/decos/"
-        "pendant for now; armor, charms, and all 13 weapon trees resolve "
-        "to real names, but kinsects don't yet (rod_insect.rod_inse is in "
-        "a format this profile can't parse - see data/mhw/README.md). "
-        "Decoration slots, augments, and custom upgrades round-trip "
-        "untouched but aren't editable here yet."
+        "pendant for now (armor, charms, all 13 weapon trees, and kinsects "
+        "all resolve to real names). Decoration slots, augments, and "
+        "custom upgrades round-trip untouched but aren't editable here yet."
     ),
 )
 PROFILE.spawn_item_targets = spawn_item_targets
