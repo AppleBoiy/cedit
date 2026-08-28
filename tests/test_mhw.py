@@ -261,14 +261,58 @@ class TestItemCatalog(unittest.TestCase):
         hint = mhw._describe_entry({"id": 1, "amount": 5}, "id", 1)
         self.assertEqual(hint, "Potion")
 
-    def test_describe_entry_ignores_equipment_ids(self):
-        # ...but an equipment entry's "id" is a different (unmapped) id
-        # space - no "amount" key present, so it must not be looked up here.
+    def test_describe_entry_routes_equipment_ids_to_equipment_catalog_not_items(self):
+        # ...an equipment entry's "id" is a DIFFERENT id space from an item
+        # pouch slot's - _describe_entry must route it through
+        # equipment_name (see TestEquipmentCatalog), never item_name, even
+        # though both dicts have an "id" key. id 1 as an ITEM is "Potion";
+        # id 1 as this Great Sword (category=1, type=0) is not.
         equipment_entry = {"sort_index": 0, "category": 1, "type": 0, "id": 1, "level": 0}
-        self.assertIsNone(mhw._describe_entry(equipment_entry, "id", 1))
+        hint = mhw._describe_entry(equipment_entry, "id", 1)
+        self.assertNotEqual(hint, "Potion")
+        self.assertEqual(hint, mhw.equipment_name(1, 0, 1))
 
     def test_describe_entry_ignores_other_keys(self):
         self.assertIsNone(mhw._describe_entry({"id": 1, "amount": 5}, "amount", 5))
+
+
+class TestEquipmentCatalog(unittest.TestCase):
+    """games/mhw.py's equipment name catalog (data/mhw/equipment_names.json)
+    - a separate (category, type, id) id space from _ITEM_NAMES, see
+    data/mhw/README.md's "Equipment" section."""
+
+    def test_catalog_loaded_from_real_game_data(self):
+        self.assertGreater(len(mhw._EQUIPMENT_NAMES), 1000)
+
+    def test_equipment_name_known_weapon_and_armor(self):
+        # Great Sword (category=Weapon, type=0) id 10 - "Buster Sword I".
+        self.assertEqual(mhw.equipment_name(1, 0, 10), "Buster Sword I")
+        # Helmet (category=Armor, type=0) id 1 - "Hunter's Headgear".
+        self.assertEqual(mhw.equipment_name(0, 0, 1), "Hunter's Headgear")
+
+    def test_equipment_name_unknown_returns_none(self):
+        self.assertIsNone(mhw.equipment_name(1, 0, 99999999))
+        # Category 4 (Kinsect) isn't covered by this catalog at all yet.
+        self.assertIsNone(mhw.equipment_name(4, 0, 1))
+
+    def test_equipment_catalog_rows_sorted_by_name(self):
+        rows = mhw.equipment_catalog()
+        names = [name for name, _key in rows]
+        self.assertEqual(names, sorted(names, key=str.lower))
+        self.assertIn(("Buster Sword I", "1:0:10"), rows)
+
+    def test_describe_entry_names_equipment_ids(self):
+        equipment_entry = {
+            "sort_index": 0, "category": 1, "type": 0, "id": 10,
+            "level": 0, "points": 0, "decos": [-1, -1, -1], "pendant": -1,
+        }
+        self.assertEqual(mhw._describe_entry(equipment_entry, "id", 10), "Buster Sword I")
+
+    def test_describe_entry_ignores_item_pouch_slots_for_equipment_lookup(self):
+        # An item_pouch slot dict ({"id", "amount"}) must go through
+        # item_name, never equipment_name, even though both have an "id" key.
+        hint = mhw._describe_entry({"id": 10, "amount": 1}, "id", 10)
+        self.assertNotEqual(hint, "Buster Sword I")
 
 
 class TestProfileWiring(unittest.TestCase):

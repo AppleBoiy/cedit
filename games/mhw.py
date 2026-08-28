@@ -61,11 +61,15 @@ def item_name(item_id):
 
 
 def _describe_entry(container, key, value):
-    # Only item_pouch/storage slot dicts ({"id", "amount"}) - equipment
-    # entries also have an "id" field but it's a weapon/armor id from a
-    # completely different table this catalog doesn't cover.
-    if key == "id" and isinstance(value, int) and isinstance(container, dict) and "amount" in container:
-        return item_name(value)
+    if key == "id" and isinstance(value, int) and isinstance(container, dict):
+        if "amount" in container:
+            # An item_pouch/storage slot dict ({"id", "amount"}).
+            return item_name(value)
+        if "category" in container and "type" in container:
+            # An equipment entry ({"category", "type", "id", ...}) - a
+            # completely different id space from item_name's, keyed on
+            # (category, type, id) together, not id alone.
+            return equipment_name(container["category"], container["type"], value)
     return None
 
 
@@ -74,6 +78,60 @@ def item_catalog(data):
     the Inventory Editor window's "Browse Catalog..." picker, and the
     dedicated MHW editor window's own item pickers."""
     return sorted(((name, item_id) for item_id, name in _ITEM_NAMES.items()), key=lambda row: row[0].lower())
+
+
+# data/mhw/equipment_names.json: "category:type:id" -> display name (armor,
+# charms, and the 13 weapon trees - see data/mhw/README.md's "Equipment"
+# section for how, and extract_equipment_names.py for the script). This is
+# a SEPARATE id space from _ITEM_NAMES above: an equipment entry's own
+# "id" field only means something alongside its "category"/"type" fields,
+# unlike item pouch/storage slots where a bare id is already unambiguous.
+# Kinsects aren't covered - rod_insect.rod_inse isn't the plain packed
+# struct every other equipment file here is (looks compressed/encrypted;
+# left unparsed rather than guessed at), so kinsect equipment entries still
+# only show a raw id.
+_EQUIPMENT_NAMES_PATH = Path(__file__).resolve().parent.parent / "data" / "mhw" / "equipment_names.json"
+try:
+    _EQUIPMENT_NAMES = json.loads(_EQUIPMENT_NAMES_PATH.read_text(encoding="utf-8"))
+except (FileNotFoundError, json.JSONDecodeError):
+    _EQUIPMENT_NAMES = {}
+
+# mhw_equip_category (types/mhw_enums.h) - only the categories this
+# catalog actually covers.
+EQUIP_CATEGORY_ARMOR = 0
+EQUIP_CATEGORY_WEAPON = 1
+EQUIP_CATEGORY_CHARM = 2
+EQUIP_CATEGORY_KINSECT = 4
+EQUIP_CATEGORY_NAMES = {
+    -1: "(empty)", 0: "Armor", 1: "Weapon", 2: "Charm", 3: "Tool", 4: "Kinsect",
+}
+# Weapon "type" values (mhw_equip_type, weapon half) - EquipmentDB's own
+# BindMapping order. Armor's "type" values (Helmet=0..Feet=4) reuse the
+# same enum at different numbers and don't need a separate label table -
+# the equipment tab just shows the raw slot number for those.
+WEAPON_TYPE_NAMES = {
+    0: "Great Sword", 1: "Sword And Shield", 2: "Dual Blades", 3: "Longsword",
+    4: "Hammer", 5: "Hunting Horn", 6: "Lance", 7: "Gunlance", 8: "Switch Axe",
+    9: "Charge Blade", 10: "Insect Glaive", 11: "Bow", 12: "Heavy Bowgun",
+    13: "Light Bowgun",
+}
+
+
+def equipment_name(category, equip_type, item_id):
+    """(category, type, id) -> looked-up display name, or None if this
+    catalog doesn't cover it (kinsects, category "Tool", or an id this
+    extraction didn't find - see this module's own catalog docstring)."""
+    return _EQUIPMENT_NAMES.get(f"{category}:{equip_type}:{item_id}")
+
+
+def equipment_catalog():
+    """Every known (category, type, id) triple as
+    [(display_name, "category:type:id"), ...] sorted by name - feeds the
+    dedicated MHW editor window's equipment picker."""
+    return sorted(
+        ((name, key) for key, name in _EQUIPMENT_NAMES.items()),
+        key=lambda row: row[0].lower(),
+    )
 
 # ------------------------------------------------------- per-slot layout
 #
@@ -365,15 +423,17 @@ PROFILE = GameProfile(
     custom_launcher=launch,
     notes=(
         "Opens a dedicated MHW editor window (per-hunter tabs, item pouch/"
-        "storage/equipment tables, name-based item picker) instead of the "
-        "generic tree editor - load the SAVEDATA1000 file directly from "
-        "there (usually under Steam/userdata/<id>/582010/remote/). Every "
-        "hunter slot (up to 3) loads together; only edit/save the ones you "
-        "actually use - all three get re-encrypted together either way. "
-        "Equipment entries only expose id/level/points/decos/pendant for "
-        "now (no name lookup - that's a separate id space this profile "
-        "doesn't have a catalog for yet); decoration slots, augments, and "
-        "custom upgrades round-trip untouched but aren't editable here yet."
+        "storage/equipment tables, name-based pickers for both) instead of "
+        "the generic tree editor - load the SAVEDATA1000 file directly "
+        "from there (usually under Steam/userdata/<id>/582010/remote/). "
+        "Every hunter slot (up to 3) loads together; only edit/save the "
+        "ones you actually use - all three get re-encrypted together "
+        "either way. Equipment entries only expose id/level/points/decos/"
+        "pendant for now; armor, charms, and all 13 weapon trees resolve "
+        "to real names, but kinsects don't yet (rod_insect.rod_inse is in "
+        "a format this profile can't parse - see data/mhw/README.md). "
+        "Decoration slots, augments, and custom upgrades round-trip "
+        "untouched but aren't editable here yet."
     ),
 )
 PROFILE.spawn_item_targets = spawn_item_targets

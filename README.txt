@@ -21,7 +21,8 @@ Currently supported:
   - BlazBlue Entropy Effect  (games/bbee.py + lib/bbee_lib.py)
   - Monster Hunter World: Iceborne (games/mhw.py + games/mhw_window.py +
       lib/mhw_crypto.py + data/mhw/ - dedicated editor window like DREDGE's,
-      with a real 2774-item name catalog for the item pouch/storage)
+      with real name catalogs for item pouch/storage (2774 items) and
+      equipment (11316 armor/charms/weapons; kinsects still id-only))
 
 VERSION at the repo root is the single source of truth for cedit's own
 version - shown in the GUI's status bar footer and `cedit.py --version`,

@@ -22,7 +22,7 @@ from PySide6.QtWidgets import (
     QDialog, QWidget, QVBoxLayout, QHBoxLayout, QFormLayout, QLabel,
     QLineEdit, QPushButton, QComboBox, QTableWidget, QTableWidgetItem,
     QFileDialog, QMessageBox, QTabWidget, QAbstractItemView, QGroupBox,
-    QListWidget, QListWidgetItem, QInputDialog,
+    QListWidget, QListWidgetItem, QInputDialog, QCheckBox,
 )
 
 from lib.base import GAME_WINDOW_SIZE, GAME_WINDOW_MIN, backup_file
@@ -107,6 +107,15 @@ class _SlotTab(QWidget):
         layout = QVBoxLayout(self)
         layout.addWidget(self._build_hunter_form())
 
+        inner_tabs = QTabWidget()
+        inner_tabs.addTab(self._build_inventory_tab(), "Item Pouch / Storage")
+        inner_tabs.addTab(self._build_equipment_tab(), "Equipment")
+        layout.addWidget(inner_tabs, stretch=1)
+
+    def _build_inventory_tab(self):
+        page = QWidget()
+        layout = QVBoxLayout(page)
+
         container_row = QHBoxLayout()
         container_row.addWidget(QLabel("Container:"))
         self.container_combo = QComboBox()
@@ -133,6 +142,51 @@ class _SlotTab(QWidget):
         layout.addWidget(self.table, stretch=1)
 
         self._populate_table()
+        return page
+
+    def _build_equipment_tab(self):
+        page = QWidget()
+        layout = QVBoxLayout(page)
+
+        top_row = QHBoxLayout()
+        self.show_all_equipment = QCheckBox("Show all 2500 slots (default: owned/equipped only)")
+        self.show_all_equipment.stateChanged.connect(lambda _s: self._populate_equipment_table())
+        top_row.addWidget(self.show_all_equipment, stretch=1)
+        set_btn = QPushButton("Set Equipment (browse names)...")
+        set_btn.clicked.connect(self._set_equipment_selected)
+        top_row.addWidget(set_btn)
+        clear_btn = QPushButton("Clear Selected")
+        clear_btn.clicked.connect(self._clear_equipment_selected)
+        top_row.addWidget(clear_btn)
+        layout.addLayout(top_row)
+
+        self.equipment_table = QTableWidget()
+        self.equipment_table.setColumnCount(7)
+        self.equipment_table.setHorizontalHeaderLabels(
+            ["Slot #", "Category", "Item", "Level", "Points", "Decos", "Pendant"]
+        )
+        self.equipment_table.setEditTriggers(
+            QAbstractItemView.DoubleClicked | QAbstractItemView.EditKeyPressed
+        )
+        self.equipment_table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.equipment_table.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.equipment_table.setColumnWidth(0, 55)
+        self.equipment_table.setColumnWidth(1, 70)
+        self.equipment_table.setColumnWidth(2, 260)
+        self.equipment_table.itemChanged.connect(self._on_equipment_cell_changed)
+        layout.addWidget(self.equipment_table, stretch=1)
+
+        note = QLabel(
+            "Level/Points/Decos/Pendant are editable directly in the table (double-click a "
+            "cell). Decos are 3 comma-separated deco ids (-1 = empty). Kinsects don't have "
+            "name lookup yet - see data/mhw/README.md."
+        )
+        note.setWordWrap(True)
+        layout.addWidget(note)
+
+        self._equipment_rows = []  # table row -> real index into the 2500-entry array
+        self._populate_equipment_table()
+        return page
 
     def _build_hunter_form(self):
         box = QGroupBox("Hunter Info")
@@ -216,9 +270,107 @@ class _SlotTab(QWidget):
         self._populate_table()
         self.table.selectRow(row)
 
+    def _equipment(self):
+        return self.window.data["slots"][self.slot_idx]["equipment"]
+
+    def _populate_equipment_table(self):
+        equipment = self._equipment()
+        show_all = self.show_all_equipment.isChecked()
+        rows = [
+            (i, e) for i, e in enumerate(equipment)
+            if show_all or e["category"] != -1
+        ]
+        self._equipment_rows = [i for i, _e in rows]
+
+        self.equipment_table.blockSignals(True)
+        self.equipment_table.setRowCount(len(rows))
+        for row, (real_idx, e) in enumerate(rows):
+            name = mhw.equipment_name(e["category"], e["type"], e["id"]) if e["category"] != -1 else None
+            item_label = f"{name} (id {e['id']})" if name else (f"id {e['id']}" if e["category"] != -1 else "(empty)")
+            category_label = mhw.EQUIP_CATEGORY_NAMES.get(e["category"], str(e["category"]))
+
+            slot_item = QTableWidgetItem(str(real_idx))
+            slot_item.setFlags(slot_item.flags() & ~Qt.ItemIsEditable)
+            self.equipment_table.setItem(row, 0, slot_item)
+
+            cat_item = QTableWidgetItem(category_label)
+            cat_item.setFlags(cat_item.flags() & ~Qt.ItemIsEditable)
+            self.equipment_table.setItem(row, 1, cat_item)
+
+            item_item = QTableWidgetItem(item_label)
+            item_item.setFlags(item_item.flags() & ~Qt.ItemIsEditable)
+            self.equipment_table.setItem(row, 2, item_item)
+
+            self.equipment_table.setItem(row, 3, QTableWidgetItem(str(e["level"])))
+            self.equipment_table.setItem(row, 4, QTableWidgetItem(str(e["points"])))
+            self.equipment_table.setItem(row, 5, QTableWidgetItem(",".join(str(d) for d in e["decos"])))
+            self.equipment_table.setItem(row, 6, QTableWidgetItem(str(e["pendant"])))
+        self.equipment_table.blockSignals(False)
+
+    def _on_equipment_cell_changed(self, item):
+        row = item.row()
+        col = item.column()
+        if row >= len(self._equipment_rows) or col not in (3, 4, 5, 6):
+            return
+        real_idx = self._equipment_rows[row]
+        entry = self._equipment()[real_idx]
+        text = item.text().strip()
+        try:
+            if col == 3:
+                entry["level"] = int(text)
+            elif col == 4:
+                entry["points"] = int(text)
+            elif col == 6:
+                entry["pendant"] = int(text)
+            elif col == 5:
+                parts = [p.strip() for p in text.split(",")]
+                if len(parts) != 3:
+                    raise ValueError("need exactly 3 comma-separated deco ids")
+                entry["decos"] = [int(p) for p in parts]
+        except ValueError as e:
+            self.window.set_status(f"'{text}' isn't valid here ({e}) - reverted.")
+            self._populate_equipment_table()
+            return
+        self.window.mark_dirty()
+
+    def _set_equipment_selected(self):
+        row = self.equipment_table.currentRow()
+        if row < 0:
+            QMessageBox.information(self.window, "MHW Editor", "Select an equipment slot first.")
+            return
+        catalog = mhw.equipment_catalog()
+        picker = _CatalogPickerDialog(self.window, catalog, "Choose equipment")
+        if picker.exec() != QDialog.Accepted or picker.chosen_id is None:
+            return
+        try:
+            category_str, type_str, id_str = picker.chosen_id.split(":")
+        except ValueError:
+            return
+        real_idx = self._equipment_rows[row]
+        entry = self._equipment()[real_idx]
+        entry["category"] = int(category_str)
+        entry["type"] = int(type_str)
+        entry["id"] = int(id_str)
+        self.window.mark_dirty()
+        self._populate_equipment_table()
+
+    def _clear_equipment_selected(self):
+        row = self.equipment_table.currentRow()
+        if row < 0:
+            QMessageBox.information(self.window, "MHW Editor", "Select an equipment slot first.")
+            return
+        real_idx = self._equipment_rows[row]
+        self._equipment()[real_idx] = {
+            "sort_index": -1, "category": -1, "type": -1, "id": 0,
+            "level": 0, "points": 0, "decos": [-1, -1, -1], "pendant": -1,
+        }
+        self.window.mark_dirty()
+        self._populate_equipment_table()
+
     def refresh(self):
         self._refresh_hunter_form()
         self._populate_table()
+        self._populate_equipment_table()
 
 
 def _ask_quantity(parent):

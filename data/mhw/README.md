@@ -1,15 +1,26 @@
-# Monster Hunter World: Iceborne item name catalog
+# Monster Hunter World: Iceborne name catalogs
 
-`item_names.json`: numeric item id -> a display name, for every item MHW's
-own shipped item table knows about (2774 entries: consumables, materials,
-ammo, decorations - **not** weapons/armor, which use a separate id space
-this catalog doesn't cover). **Not from a wiki or datamine** - parsed
-straight from the game's own `itemData.itm` + `item_eng.gmd` files, which
-happen to be checked into `EnderHDMC/MHWISaveEditor`'s repo (the project
-`games/mhw.py`'s crypto and struct layout were themselves reverse-engineered
-from - see that module's own docstring).
+Two separate catalogs, because MHW itself uses two separate id spaces for
+"what's in this slot":
 
-## How it was built
+- `item_names.json` - item pouch/storage slots (consumables, materials,
+  ammo, decorations). Keyed by a bare item id.
+- `equipment_names.json` - equipment slots (armor, charms, weapons). Keyed
+  by `"category:type:id"` together - a bare id alone is ambiguous here
+  (e.g. weapon id 10 means something different per weapon type).
+
+Neither is from a wiki or datamine - both are parsed straight from the
+game's own shipped data files, which happen to be checked into
+`EnderHDMC/MHWISaveEditor`'s repo (the project `games/mhw.py`'s crypto and
+struct layout were themselves reverse-engineered from - see that module's
+own docstring).
+
+## Items (`item_names.json`)
+
+2774 entries: consumables, materials, ammo, decorations - **not**
+weapons/armor, which use the separate id space below.
+
+### How it was built
 
 1. `itemData.itm` (`res/chunk/common/item/itemData.itm` in
    MHWISaveEditor-master) is a flat array of item records, one per id -
@@ -36,22 +47,64 @@ See `extract_item_names.py` in this folder for the actual script (reads
 straight from a local `MHWISaveEditor-master` checkout's `res/chunk/`
 folder).
 
-## Coverage and quirks
+### Coverage and quirks
 
 - 2774 unique positive item ids (id 0 is the game's own "empty slot"
   marker and is dropped, matching `spawn_item`'s own `id <= 0` rejection).
-- These are consumables/materials/ammo/decorations only. Equipment
-  (weapons/armor) ids in `games/mhw.py`'s equipment array are a *different*
-  id space, resolved through separate `wp_dat`/`am_dat`/`eq_crt`/`eq_cus`
-  files this catalog doesn't parse - equipment still only shows/accepts raw
-  numeric ids for now.
 - English names only (`item_eng.gmd`) - MHWISaveEditor-master ships the same
   file for every other supported language too (`item_jpn.gmd`,
   `item_ger.gmd`, ...), so a translated catalog is a straightforward rerun
   away if it's ever wanted.
 
-## Regenerating it
+## Equipment (`equipment_names.json`)
 
-Point `BASE` in `extract_item_names.py` at a local `MHWISaveEditor-master`
-checkout's `res/chunk/common` folder and rerun it; it writes a fresh
-`item_names.json` next to itself.
+11316 entries covering armor, charms, and all 13 weapon trees (Great Sword
+through Light Bowgun) - **not** kinsects (see Coverage below). Keyed by
+`"category:type:id"` (`mhw_equip_category`, `mhw_equip_type`, and the
+item's own id - the same three fields `games/mhw.py`'s equipment struct
+already exposes), since a bare id isn't unique across categories/types the
+way an item pouch id is.
+
+### How it was built
+
+1. `armor.am_dat` (armor + charms), and one `<weapon>.wp_dat` or
+   `<weapon>.wp_dat_g` per weapon type (`res/chunk/common/equip/`) are each
+   a flat array of equipment records - parsed per MHWISaveEditor-master's
+   own `am_dat.bt`/`wp_dat.bt`/`wp_dat_g.bt` 010 Editor templates.
+2. Unlike items, every armor/weapon entry carries its own explicit
+   `gmd_name_index` field (no `id * 2` positional guessing needed) -
+   `data/EquipmentDB.cpp`'s `GetNameArmor`/`GetNameWeaponMelee`/
+   `GetNameWeaponRanged` just read that field straight out of the matching
+   `armor_eng.gmd` / `<weapon>_eng.gmd` text file.
+3. Armor entries are looked up by `(equip_slot, set_group)`, which becomes
+   this catalog's `(type, id)` - `EquipmentDB::GetEntryArmor`. Weapon
+   entries are looked up by `id` alone within their own weapon-type file -
+   `GetEntryWeaponMelee`/`GetEntryWeaponRanged`. Charms reuse the exact same
+   armor table/lookup as armor (that's the real game's own behavior, not a
+   simplification here - see `EquipmentDB::GetEquipment`'s combined
+   `Armor`/`Charm` case), so this catalog's armor entries serve double duty
+   for both categories.
+4. Armor names also get `<ICON ALPHA/BETA/GAMMA>` markup replaced with
+   actual α/β/γ characters (`EquipmentDB::GetNameArmor`'s own
+   replacements), on top of the same `<STYL>` stripping items get.
+
+See `extract_equipment_names.py` in this folder for the actual script.
+
+### Coverage and quirks
+
+- **Kinsects are not covered.** `rod_insect.rod_inse` doesn't start with
+  the `01 10 09 18` raw-struct magic every other equipment file here has -
+  it looks compressed/encrypted in some format this project's `.bt`
+  templates don't document, and the extraction script deliberately doesn't
+  guess at it. Kinsect equipment entries (category `Kinsect`) still only
+  show a raw id.
+- Category `Tool` isn't looked up by the real game's own `EquipmentDB`
+  either (`GetEquipment`'s switch has no case for it) - not something this
+  extraction skipped, that's upstream behavior.
+- English names only, same caveat as the item catalog above.
+
+## Regenerating either catalog
+
+Point `BASE` in `extract_item_names.py` / `extract_equipment_names.py` at
+a local `MHWISaveEditor-master` checkout's `res/chunk/common` folder and
+rerun; each writes a fresh JSON file next to itself.
