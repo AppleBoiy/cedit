@@ -48,9 +48,12 @@ jobs:
           ditto -c -k --sequesterRsrc --keepParent cedit.app cedit-macos.zip
 
       - name: Zip cedit-cli
+        # dist/cedit-cli is a folder (onedir build, not onefile - see
+        # packaging/cedit_cli.spec's comment for why), so this needs -r to
+        # recurse into it, not -j (which is for flattening single files).
         run: |
           cd dist
-          zip -j cedit-cli-macos.zip cedit-cli
+          zip -r cedit-cli-macos.zip cedit-cli
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2

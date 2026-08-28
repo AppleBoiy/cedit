@@ -7,10 +7,16 @@
 #     ./packaging/install_cli.sh --source        # skip building - symlink cli.py's source instead
 #     ./packaging/install_cli.sh --source /usr/local/bin  # flags and a directory can combine
 #
-# Mirrors install_app.sh: builds dist/cedit-cli automatically (via
-# ./packaging/build_cli.sh) if it doesn't exist yet, then installs a real
-# copy - a binary can't "pick up" later source changes the way a symlink
-# would anyway, so rerun this script after any future build_cli.sh.
+# Mirrors install_app.sh: builds dist/cedit-cli/ automatically (via
+# ./packaging/build_cli.sh) if it doesn't exist yet. dist/cedit-cli/ is a
+# folder (onedir build - see cedit_cli.spec's own comment for why: a
+# onefile build re-unpacks its whole runtime on every launch, adding a
+# very noticeable ~2s to something as trivial as `cedit-cli list-games`).
+# This copies that whole folder into DATA_DIR below (a real copy, not a
+# symlink - a binary can't "pick up" later source changes anyway, so
+# rerun this script after any future build_cli.sh), then symlinks just
+# the inner executable onto PATH, so `cedit-cli` still works as a normal
+# single command regardless of the folder underneath it.
 #
 # --source skips all of that and symlinks cli.py's own source instead:
 # no venv, no build step, works with just Python 3's standard library
@@ -21,6 +27,7 @@
 set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 LINK_NAME="cedit-cli"
+DATA_DIR="$HOME/.local/share/cedit-cli"
 
 SOURCE_MODE=0
 INSTALL_DIR="$HOME/.local/bin"
@@ -39,13 +46,15 @@ if [ "$SOURCE_MODE" = "1" ]; then
     ln -sf "$REPO_ROOT/cli.py" "$INSTALL_DIR/$LINK_NAME"
     echo "Linked $INSTALL_DIR/$LINK_NAME -> $REPO_ROOT/cli.py (needs python3 on PATH)."
 else
-    if [ ! -x "$REPO_ROOT/dist/cedit-cli" ]; then
-        echo "No dist/cedit-cli binary found - building it first ..."
+    if [ ! -d "$REPO_ROOT/dist/cedit-cli" ]; then
+        echo "No dist/cedit-cli build found - building it first ..."
         "$REPO_ROOT/packaging/build_cli.sh"
     fi
-    cp "$REPO_ROOT/dist/cedit-cli" "$INSTALL_DIR/$LINK_NAME"
-    chmod +x "$INSTALL_DIR/$LINK_NAME"
-    echo "Copied dist/cedit-cli -> $INSTALL_DIR/$LINK_NAME"
+    rm -rf "$DATA_DIR"
+    mkdir -p "$(dirname "$DATA_DIR")"
+    cp -R "$REPO_ROOT/dist/cedit-cli" "$DATA_DIR"
+    ln -sf "$DATA_DIR/cedit-cli" "$INSTALL_DIR/$LINK_NAME"
+    echo "Installed to $DATA_DIR, linked from $INSTALL_DIR/$LINK_NAME"
 fi
 
 case ":$PATH:" in

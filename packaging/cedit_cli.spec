@@ -4,9 +4,17 @@
 # into your venv):
 #     pyinstaller packaging/cedit_cli.spec --noconfirm
 #
-# Output lands in dist/cedit-cli - a single self-contained executable, no
-# Python install needed to run it. See packaging/build_cli.sh for a
-# one-line wrapper, and packaging/install_cli.sh to put it on PATH.
+# Output lands in dist/cedit-cli/ - a folder (onedir, not onefile) whose
+# dist/cedit-cli/cedit-cli is the actual executable. Deliberately onedir,
+# matching how cedit.spec builds cedit.app: a onefile build re-extracts
+# its entire bundled runtime into a temp dir on every single launch and
+# deletes it on exit, which is where a "trivial" `cedit-cli list-games`
+# picks up a very noticeable ~2s of pure unpack/cleanup overhead on top
+# of actually running. Onedir already has its files sitting on disk, so
+# each launch skips all of that - see packaging/install_cli.sh for how
+# this folder gets installed (it symlinks the inner executable onto
+# PATH, not the folder itself). See packaging/build_cli.sh for a
+# one-line wrapper.
 #
 # Unlike cedit.spec, this one needs no PySide6 at all: cli.py's own
 # _require_scriptable() guard means it never actually calls
@@ -66,21 +74,28 @@ pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 exe = EXE(
     pyz,
     a.scripts,
-    a.binaries,
-    a.zipfiles,
-    a.datas,
     [],
+    exclude_binaries=True,
     name="cedit-cli",
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
-    upx_exclude=[],
-    runtime_tmpdir=None,
     console=True,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+)
+
+coll = COLLECT(
+    exe,
+    a.binaries,
+    a.zipfiles,
+    a.datas,
+    strip=False,
+    upx=True,
+    upx_exclude=[],
+    name="cedit-cli",
 )

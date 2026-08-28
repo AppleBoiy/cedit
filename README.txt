@@ -53,8 +53,15 @@ Or install it once as a `cedit-cli` command on your PATH:
 different directory as an argument, e.g. `./packaging/install_cli.sh
 /usr/local/bin`). Builds dist/cedit-cli automatically if it doesn't
 already exist (same as install_app.sh does for cedit.app), then installs
-that standalone binary - no Python install needed at all to run it.
-Pass --source to skip building entirely and symlink cli.py's own source
+that standalone build - no Python install needed at all to run it. It's
+a onedir build, not onefile (deliberately - see packaging/cedit_cli.spec's
+comment: onefile re-unpacks its whole bundled runtime on every launch,
+which turns something as trivial as `cedit-cli list-games` into a very
+noticeable ~2 second wait; onedir's files just sit on disk, so each
+launch is near-instant instead), so this copies the whole build to
+~/.local/share/cedit-cli and symlinks just its executable onto PATH -
+`cedit-cli` still works as a normal single command either way. Pass
+--source to skip building entirely and symlink cli.py's own source
 instead (needs python3 on PATH, but nothing to reinstall after a
 `git pull`, since cli.py has no PySide6 dependency at all - see FOLDER
 LAYOUT below).
@@ -155,8 +162,11 @@ macos-latest runner, zips each, and publishes them as release assets
 (cedit-macos.zip, cedit-cli-macos.zip) with auto-generated release notes.
 Bump the tag (v1.0.1, v1.1.0, ...) for each new release. Someone who only
 grabs cedit-cli-macos.zip from a Release (never clones the repo at all)
-still gets a fully working cedit-cli - see packaging/cedit_cli.spec's own
-comment for how it stays free of cedit.app's PySide6/Qt weight.
+still gets a fully working cedit-cli - unzip it, then either run
+cedit-cli/cedit-cli directly or point install_cli.sh-style PATH setup at
+it (it's a folder, same onedir shape as install_cli.sh installs locally -
+see that section above). See packaging/cedit_cli.spec's own comment for
+how it stays free of cedit.app's PySide6/Qt weight.
 
 The built app is unsigned and not notarized (that needs a paid Apple
 Developer account), so macOS Gatekeeper will warn on first launch -
