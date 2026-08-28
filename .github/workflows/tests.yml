@@ -27,11 +27,14 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y lz4
 
       # Only lib/base.py, lib/dredge_client.py, lib/octopath_lib.py,
-      # lib/bbee_lib.py, and games/octopath.py, games/dave.py, games/bbee.py
-      # are covered here - they're pure Python with no PySide6/display
-      # dependency. cedit.py and games/dredge.py (the PySide6 UI) have no
-      # automated coverage: a GUI test would need a real (or virtual)
-      # display, which is a bigger lift than this workflow's scope - see
-      # README.txt's TESTS section.
+      # lib/bbee_lib.py, games/octopath.py, games/dave.py, games/bbee.py,
+      # games/duckov.py, and cli.py are covered here - they're pure Python
+      # with no PySide6/display dependency (this runner has no PySide6
+      # installed at all, and tests.test_cli's own
+      # test_games_package_does_not_require_pyside6 actively asserts that
+      # `import games` stays that way). cedit.py and games/dredge_window.py
+      # (the PySide6 UI) have no automated coverage: a GUI test would need
+      # a real (or virtual) display, which is a bigger lift than this
+      # workflow's scope - see README.txt's TESTS section.
       - name: Run unit tests
         run: python3 -m unittest discover -s tests -v

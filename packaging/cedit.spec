@@ -60,7 +60,10 @@ a = Analysis(
     pathex=[REPO_ROOT],
     binaries=[],
     datas=datas,
-    hiddenimports=[],
+    # games/dredge.py imports games.dredge_window lazily (inside a function,
+    # not at module level - see its own docstring for why), so PyInstaller's
+    # static import scan can miss it; spell it out explicitly here.
+    hiddenimports=["games.dredge_window"],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

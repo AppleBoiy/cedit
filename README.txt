@@ -32,6 +32,30 @@ package needed - PySide6 bundles its own Qt build, unlike Tkinter which
 depends on whatever Tcl/Tk your Python happens to be linked against.
 
 
+CLI (scripting without the GUI)
+--------------------------------
+cli.py gives scriptable, headless access to the same GameProfile logic
+the GUI uses - reading/editing arbitrary fields, spawning/removing items,
+browsing an inventory or item catalog - without opening any window.
+Doesn't need PySide6 installed at all (see FOLDER LAYOUT below for why):
+
+    python3 cli.py list-games
+    python3 cli.py get --game duckov --save Save_1.sav --path EconomyData.value.money
+    python3 cli.py set --game duckov --save Save_1.sav --path EconomyData.value.money --value 999999
+    python3 cli.py targets --game duckov --save Save_1.sav
+    python3 cli.py inventory --game duckov --save Save_1.sav --target backpack
+    python3 cli.py spawn --game duckov --save Save_1.sav --target backpack --item 594 --quantity 3
+    python3 cli.py remove --game duckov --save Save_1.sav --target backpack --instance -116
+    python3 cli.py catalog --game duckov --search rifle
+
+Every write goes through the same backup-then-atomic-replace path as the
+GUI (pass --no-backup to skip the .bak). DREDGE can't be used this way -
+it has no loads/dumps at all (see games/dredge.py) - every command tells
+you so cleanly rather than pretending to support it. Run `python3 cli.py
+<command> --help` for each command's full option list, or see cli.py's
+own module docstring.
+
+
 SEARCH
 ------
 Type a query into the toolbar's Find box and press Enter (or click
@@ -123,8 +147,16 @@ FOLDER LAYOUT
 -------------
     cedit.py    - the generic editor: menus, tree view, quick-edit panel,
                   raw JSON preview, file I/O. Has no per-game logic at all.
+    cli.py      - scriptable, headless equivalent of the GUI's editing
+                  actions (get/set/spawn/remove/inventory/catalog) - see
+                  the CLI section above.
     games/      - one module per game, each exporting a `PROFILE` object
-                  (see lib/base.py's GameProfile for the contract).
+                  (see lib/base.py's GameProfile for the contract). Every
+                  games/*.py is plain Python with no PySide6 dependency
+                  except games/dredge_window.py (DREDGE's actual window -
+                  games/dredge.py itself only imports that module lazily,
+                  inside custom_launcher, so `import games` never requires
+                  PySide6 - that's what lets cli.py work without it too).
     lib/        - lib/base.py (the shared plugin contract + utilities) plus
                   any game's own parsing code too unusual to be pure config
                   (lib/octopath_lib.py, lib/dredge_client.py).
