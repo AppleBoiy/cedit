@@ -24,7 +24,11 @@ pip install --upgrade pip
 pip install -r requirements.txt
 pip install -r packaging/requirements.txt
 
-rm -rf build dist
+# Only this build's own outputs - not the whole build/ and dist/ trees,
+# since build_cli.sh's dist/cedit-cli (a separate PyInstaller output that
+# happens to share these same top-level folders) would otherwise get
+# wiped out by running this script afterwards.
+rm -rf build/cedit dist/cedit.app
 
 pyinstaller packaging/cedit.spec --noconfirm
 

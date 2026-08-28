@@ -51,9 +51,13 @@ Doesn't need PySide6 installed at all (see FOLDER LAYOUT below for why):
 Or install it once as a `cedit-cli` command on your PATH:
 `./packaging/install_cli.sh` (installs to ~/.local/bin by default; pass a
 different directory as an argument, e.g. `./packaging/install_cli.sh
-/usr/local/bin`). This just symlinks cli.py itself - no venv, no build
-step, nothing to reinstall after a `git pull` - since cli.py has no
-PySide6 dependency at all (see FOLDER LAYOUT below).
+/usr/local/bin`). If dist/cedit-cli already exists (built via
+./packaging/build_cli.sh, or downloaded from a GitHub Release - see
+RELEASING below) it copies that standalone binary in - no Python install
+needed at all to run it. Otherwise it falls back to symlinking cli.py's
+own source instead (needs python3 on PATH, but nothing to reinstall
+after a `git pull`, since cli.py has no PySide6 dependency at all - see
+FOLDER LAYOUT below).
 
 Every write goes through the same backup-then-atomic-replace path as the
 GUI (pass --no-backup to skip the .bak). DREDGE can't be used this way -
@@ -136,19 +140,23 @@ Not handled by packaging: DREDGE saves still need a local DREDGE install
 bundle - those aren't things a Python bundle can carry for you.
 
 
-RELEASING (automated cedit.app builds)
-----------------------------------------
-Push a version tag and GitHub Actions builds cedit.app on macOS and
-attaches it to a new GitHub Release automatically - no local build needed
-to hand someone a copy:
+RELEASING (automated cedit.app + cedit-cli builds)
+----------------------------------------------------
+Push a version tag and GitHub Actions builds both cedit.app and the
+standalone cedit-cli binary on macOS and attaches them to a new GitHub
+Release automatically - no local build needed to hand someone a copy:
 
     git tag v1.0.0
     git push origin v1.0.0
 
 That triggers .github/workflows/release.yml, which runs the test suite,
-builds packaging/cedit.spec on a macos-latest runner, zips dist/cedit.app,
-and publishes it as a release asset (cedit-macos.zip) with auto-generated
-release notes. Bump the tag (v1.0.1, v1.1.0, ...) for each new release.
+builds packaging/cedit.spec and packaging/cedit_cli.spec on a
+macos-latest runner, zips each, and publishes them as release assets
+(cedit-macos.zip, cedit-cli-macos.zip) with auto-generated release notes.
+Bump the tag (v1.0.1, v1.1.0, ...) for each new release. Someone who only
+grabs cedit-cli-macos.zip from a Release (never clones the repo at all)
+still gets a fully working cedit-cli - see packaging/cedit_cli.spec's own
+comment for how it stays free of cedit.app's PySide6/Qt weight.
 
 The built app is unsigned and not notarized (that needs a paid Apple
 Developer account), so macOS Gatekeeper will warn on first launch -
@@ -176,10 +184,12 @@ FOLDER LAYOUT
     data/       - per-game config/data files a games/<name>.py loads at
                   import time (data/duckov.json, data/octopath/*.json,
                   data/dredge/*.json).
-    packaging/  - PyInstaller spec, build/install scripts, and app icon
-                  for building and installing a real cedit.app (see
-                  PACKAGING above) and cli.py (install_cli.sh - see the
-                  CLI section above).
+    packaging/  - PyInstaller specs, build/install scripts, and app icon
+                  for both cedit.app (cedit.spec, build_app.sh,
+                  install_app.sh - see PACKAGING above) and the
+                  standalone cedit-cli binary (cedit_cli.spec,
+                  build_cli.sh, install_cli.sh - see the CLI section
+                  above).
 
 
 PER-GAME NOTES

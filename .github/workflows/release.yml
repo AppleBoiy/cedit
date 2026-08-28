@@ -39,13 +39,23 @@ jobs:
       - name: Build cedit.app
         run: pyinstaller packaging/cedit.spec --noconfirm
 
+      - name: Build cedit-cli
+        run: pyinstaller packaging/cedit_cli.spec --noconfirm
+
       - name: Zip cedit.app
         run: |
           cd dist
           ditto -c -k --sequesterRsrc --keepParent cedit.app cedit-macos.zip
 
+      - name: Zip cedit-cli
+        run: |
+          cd dist
+          zip -j cedit-cli-macos.zip cedit-cli
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/cedit-macos.zip
+          files: |
+            dist/cedit-macos.zip
+            dist/cedit-cli-macos.zip
           generate_release_notes: true
