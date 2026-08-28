@@ -19,7 +19,7 @@ import os
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
-    QDialog, QWidget, QVBoxLayout, QHBoxLayout, QFormLayout, QLabel,
+    QDialog, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QLabel,
     QLineEdit, QPushButton, QComboBox, QTableWidget, QTableWidgetItem,
     QFileDialog, QMessageBox, QTabWidget, QAbstractItemView, QGroupBox,
     QListWidget, QListWidgetItem, QCheckBox,
@@ -214,13 +214,27 @@ class _SlotTab(QWidget):
         return page
 
     def _build_hunter_form(self):
+        # A compact grid (3 fields per row) rather than one field per row -
+        # 9 stacked rows in a single column pushed the actually-interesting
+        # item/equipment tables far enough down the window that only 2-3
+        # rows of those were ever visible without scrolling.
         box = QGroupBox("Hunter Info")
-        form = QFormLayout(box)
-        for key, label, _kind in _HUNTER_FIELDS:
+        grid = QGridLayout(box)
+        grid.setHorizontalSpacing(8)
+        grid.setVerticalSpacing(4)
+        columns = 3
+        for i, (key, label, _kind) in enumerate(_HUNTER_FIELDS):
+            row, col = divmod(i, columns)
             edit = QLineEdit()
+            edit.setMaximumWidth(140)
             edit.editingFinished.connect(lambda k=key: self._commit_hunter_field(k))
-            form.addRow(label, edit)
+            label_widget = QLabel(label + ":")
+            label_widget.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+            grid.addWidget(label_widget, row, col * 2)
+            grid.addWidget(edit, row, col * 2 + 1)
             self._field_edits[key] = edit
+        for col in range(columns):
+            grid.setColumnStretch(col * 2 + 1, 1)
         self._refresh_hunter_form()
         return box
 
