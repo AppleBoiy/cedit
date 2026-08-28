@@ -48,6 +48,13 @@ Doesn't need PySide6 installed at all (see FOLDER LAYOUT below for why):
     python3 cli.py remove --game duckov --save Save_1.sav --target backpack --instance -116
     python3 cli.py catalog --game duckov --search rifle
 
+Or install it once as a `cedit-cli` command on your PATH:
+`./packaging/install_cli.sh` (installs to ~/.local/bin by default; pass a
+different directory as an argument, e.g. `./packaging/install_cli.sh
+/usr/local/bin`). This just symlinks cli.py itself - no venv, no build
+step, nothing to reinstall after a `git pull` - since cli.py has no
+PySide6 dependency at all (see FOLDER LAYOUT below).
+
 Every write goes through the same backup-then-atomic-replace path as the
 GUI (pass --no-backup to skip the .bak). DREDGE can't be used this way -
 it has no loads/dumps at all (see games/dredge.py) - every command tells
@@ -106,6 +113,12 @@ PyInstaller into it, and produces dist/cedit.app. Drag that into
 /Applications and launch it like any other Mac app - no terminal, no
 Python environment to get right, ever again.
 
+Or skip the manual drag: `./packaging/install_app.sh` builds (if
+dist/cedit.app doesn't exist yet - pass --rebuild to force a fresh build)
+and copies it straight into /Applications/cedit.app, clearing the
+quarantine flag itself (safe to do automatically here, since it's your
+own local build, not a download).
+
 Must be run on macOS (PyInstaller bundles are platform-specific, and this
 one was only ever built/tested there - it can't be built or verified from
 a Linux CI runner). Rebuild it any time you pull new changes.
@@ -163,8 +176,10 @@ FOLDER LAYOUT
     data/       - per-game config/data files a games/<name>.py loads at
                   import time (data/duckov.json, data/octopath/*.json,
                   data/dredge/*.json).
-    packaging/  - PyInstaller spec, build script, and app icon for
-                  building a real cedit.app - see PACKAGING above.
+    packaging/  - PyInstaller spec, build/install scripts, and app icon
+                  for building and installing a real cedit.app (see
+                  PACKAGING above) and cli.py (install_cli.sh - see the
+                  CLI section above).
 
 
 PER-GAME NOTES
