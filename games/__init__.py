@@ -15,6 +15,7 @@ from .octopath import PROFILE as OCTOPATH_PROFILE
 from .dredge import PROFILE as DREDGE_PROFILE
 from .dave import PROFILE as DAVE_PROFILE
 from .bbee import PROFILE as BBEE_PROFILE
+from .mhw import PROFILE as MHW_PROFILE
 
 _REGISTRY = {
     DUCKOV_PROFILE.key: DUCKOV_PROFILE,
@@ -22,6 +23,7 @@ _REGISTRY = {
     DREDGE_PROFILE.key: DREDGE_PROFILE,
     DAVE_PROFILE.key: DAVE_PROFILE,
     BBEE_PROFILE.key: BBEE_PROFILE,
+    MHW_PROFILE.key: MHW_PROFILE,
 }
 
 

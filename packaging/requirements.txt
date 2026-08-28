@@ -1,2 +1,8 @@
-# Extra requirements for building cedit.app - not needed to just run cedit.
+# Extra requirements for building cedit.app AND cedit-cli - not needed to
+# just run cedit.py from source (see ../requirements.txt for that).
+#
+# pycryptodome is listed explicitly here (not "-r ../requirements.txt")
+# rather than pulling in PySide6 too - build_cli.sh's whole point is a
+# CLI build with no Qt dependency at all (see its own comment).
 pyinstaller
+pycryptodome

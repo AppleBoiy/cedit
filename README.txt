@@ -19,6 +19,7 @@ Currently supported:
   - DREDGE                   (games/dredge.py + lib/dredge_client.py)
   - Dave the Diver           (games/dave.py + data/dave/)
   - BlazBlue Entropy Effect  (games/bbee.py + lib/bbee_lib.py)
+  - Monster Hunter World: Iceborne (games/mhw.py + lib/mhw_crypto.py)
 
 VERSION at the repo root is the single source of truth for cedit's own
 version - shown in the GUI's status bar footer and `cedit.py --version`,
@@ -29,13 +30,15 @@ everything else follows from it.
 
 RUNNING IT
 ----------
-    pip install -r requirements.txt   # installs PySide6
+    pip install -r requirements.txt   # installs PySide6 + pycryptodome
     python3 cedit.py
     python3 cedit.py --game duckov /path/to/Save_1.sav
 
-Requires Python 3 and PySide6 (`pip install PySide6`). No separate system
-package needed - PySide6 bundles its own Qt build, unlike Tkinter which
-depends on whatever Tcl/Tk your Python happens to be linked against.
+Requires Python 3, PySide6 (`pip install PySide6`), and pycryptodome
+(only actually used by games/mhw.py's AES/Blowfish - see lib/mhw_crypto.py).
+No separate system package needed for PySide6 - it bundles its own Qt
+build, unlike Tkinter which depends on whatever Tcl/Tk your Python
+happens to be linked against.
 
 
 CLI (scripting without the GUI)

@@ -1,0 +1,328 @@
+"""
+cedit game profile: Monster Hunter World: Iceborne (PC, SAVEDATA1000)
+
+The crypto (two encryption layers - see lib/mhw_crypto.py's own docstring)
+was ported straight from EnderHDMC/MHWISaveEditor's real C++ source and
+verified byte-for-byte round-trip against a real save file (re-encrypting
+an unedited decrypt reproduces the original file exactly).
+
+The struct LAYOUT below (byte offsets for the hunter/item-pouch/storage/
+equipment fields this profile edits) comes from that same project's own
+SAVEDATA1000.bt (a 010 Editor binary template, hand-maintained by the
+project's authors) - except the three save-slot regions' absolute file
+offsets/lengths, which come from iceborne_crypt.h's own DecryptSave/
+EncryptSave calls instead (lib.mhw_crypto.SLOT_REGIONS): the .bt's
+computed section layout is off by ~1KB from where the actual encrypted
+regions start (probably template drift against a slightly newer patch),
+so it's only trustworthy for offsets *relative to* a slot's own start,
+never for locating that start within the file.
+
+Rather than parse the entire multi-megabyte, mostly-still-unmapped
+per-slot struct into a Python object and re-serialize the whole thing
+back (most of it is undocumented and would be too easy to corrupt),
+loads() keeps the full decrypted buffer around (MHWSaveData.raw) and
+only decodes the specific fields this profile knows about into a normal
+nested dict/list Python structure for cedit's tree editor. dumps() then
+writes just those same fields back into their exact original byte
+offsets in that buffer and re-encrypts - anything this profile doesn't
+understand yet (equipment sub-fields like decorations/augments, guild
+cards, quest completion, room decor, investigations, ...) round-trips
+untouched because its bytes were never touched at all.
+"""
+import struct
+
+from lib.base import GameProfile
+from lib.mhw_crypto import SLOT_REGIONS, decrypt_save, encrypt_save
+
+# ------------------------------------------------------- per-slot layout
+#
+# Byte offsets are relative to a save slot's own start (SLOT_REGIONS[n][0]
+# in the fully-decrypted buffer) - see this module's docstring for why
+# that start itself has to come from lib.mhw_crypto, not the .bt.
+
+_HUNTER_OFF = 4          # u32 unknown0, then mhw_hunter
+_HUNTER_FMT = "<64s8I"   # name, hunter_rank, master_rank, zeni, research_points,
+                         # hunter_rank_xp, master_rank_xp, playtime, room_preference
+_HUNTER_SIZE = struct.calcsize(_HUNTER_FMT)  # 96
+
+_ITEM_POUCH_OFF = 1_138_840
+_ITEM_POUCH_ITEMS = 24
+_ITEM_POUCH_AMMO = 16
+
+_STORAGE_OFF = 1_139_456
+_STORAGE_ITEMS = 200
+_STORAGE_AMMO = 200
+_STORAGE_MATERIALS = 1250
+_STORAGE_DECORATIONS = 500
+
+_ITEM_SLOT_FMT = "<2I"   # id, amount
+_ITEM_SLOT_SIZE = struct.calcsize(_ITEM_SLOT_FMT)  # 8
+
+_EQUIPMENT_OFF = 1_156_656
+_EQUIPMENT_COUNT = 2500
+# sort_index, category, type, id, level, points, deco0-2, pendant - the
+# gameplay-relevant scalar fields; bowgun_mods/augments/custom_upgrades/
+# awakens aren't exposed yet (still preserved byte-for-byte on save).
+_EQUIPMENT_FMT = "<3i3I3ii"
+_EQUIPMENT_SIZE = 125  # real struct size (see games/mhw.py's own notes below);
+                        # _EQUIPMENT_FMT only covers this struct's first 40 bytes
+
+
+# --------------------------------------------------------------- loads/dumps
+
+class MHWSaveData(dict):
+    """A plain dict (so cedit.py's generic get_by_path/set_by_path tree
+    editing works on it unmodified) that also carries the full decrypted
+    save buffer around as a hidden, non-key attribute - dumps() patches
+    edited fields back into this buffer rather than trying to serialize
+    the whole (mostly still unmapped) save structure from scratch."""
+
+
+def _unpack_hunter(raw, slot_off):
+    name, hr, mr, zeni, rp, hrxp, mrxp, playtime, room = struct.unpack_from(
+        _HUNTER_FMT, raw, slot_off + _HUNTER_OFF
+    )
+    return {
+        "name": name.split(b"\x00", 1)[0].decode("utf-8", errors="replace"),
+        "hunter_rank": hr,
+        "master_rank": mr,
+        "zeni": zeni,
+        "research_points": rp,
+        "hunter_rank_xp": hrxp,
+        "master_rank_xp": mrxp,
+        "playtime_seconds": playtime,
+        "room_preference": room,
+    }
+
+
+def _pack_hunter(raw, slot_off, hunter):
+    name_bytes = hunter["name"].encode("utf-8", errors="replace")[:63]
+    name_bytes = name_bytes + b"\x00" * (64 - len(name_bytes))
+    struct.pack_into(
+        _HUNTER_FMT, raw, slot_off + _HUNTER_OFF,
+        name_bytes,
+        int(hunter["hunter_rank"]), int(hunter["master_rank"]), int(hunter["zeni"]),
+        int(hunter["research_points"]), int(hunter["hunter_rank_xp"]),
+        int(hunter["master_rank_xp"]), int(hunter["playtime_seconds"]),
+        int(hunter["room_preference"]),
+    )
+
+
+def _unpack_slots(raw, off, count):
+    return [
+        {"id": v[0], "amount": v[1]}
+        for v in struct.iter_unpack(_ITEM_SLOT_FMT, bytes(raw[off:off + count * _ITEM_SLOT_SIZE]))
+    ]
+
+
+def _pack_slots(raw, off, slots):
+    for i, entry in enumerate(slots):
+        struct.pack_into(_ITEM_SLOT_FMT, raw, off + i * _ITEM_SLOT_SIZE,
+                          int(entry["id"]), int(entry["amount"]))
+
+
+def _unpack_item_pouch(raw, slot_off):
+    base = slot_off + _ITEM_POUCH_OFF
+    return {
+        "items": _unpack_slots(raw, base, _ITEM_POUCH_ITEMS),
+        "ammo": _unpack_slots(raw, base + _ITEM_POUCH_ITEMS * _ITEM_SLOT_SIZE, _ITEM_POUCH_AMMO),
+    }
+
+
+def _pack_item_pouch(raw, slot_off, pouch):
+    base = slot_off + _ITEM_POUCH_OFF
+    _pack_slots(raw, base, pouch["items"])
+    _pack_slots(raw, base + _ITEM_POUCH_ITEMS * _ITEM_SLOT_SIZE, pouch["ammo"])
+
+
+def _unpack_storage(raw, slot_off):
+    base = slot_off + _STORAGE_OFF
+    off = base
+    out = {}
+    for name, count in (("items", _STORAGE_ITEMS), ("ammo", _STORAGE_AMMO),
+                         ("materials", _STORAGE_MATERIALS), ("decorations", _STORAGE_DECORATIONS)):
+        out[name] = _unpack_slots(raw, off, count)
+        off += count * _ITEM_SLOT_SIZE
+    return out
+
+
+def _pack_storage(raw, slot_off, storage):
+    base = slot_off + _STORAGE_OFF
+    off = base
+    for name, count in (("items", _STORAGE_ITEMS), ("ammo", _STORAGE_AMMO),
+                         ("materials", _STORAGE_MATERIALS), ("decorations", _STORAGE_DECORATIONS)):
+        _pack_slots(raw, off, storage[name])
+        off += count * _ITEM_SLOT_SIZE
+
+
+def _unpack_equipment(raw, slot_off):
+    base = slot_off + _EQUIPMENT_OFF
+    out = []
+    for i in range(_EQUIPMENT_COUNT):
+        entry_off = base + i * _EQUIPMENT_SIZE
+        sort_index, category, etype, item_id, level, points, d0, d1, d2, pendant = \
+            struct.unpack_from(_EQUIPMENT_FMT, raw, entry_off)
+        out.append({
+            "sort_index": sort_index, "category": category, "type": etype,
+            "id": item_id, "level": level, "points": points,
+            "decos": [d0, d1, d2], "pendant": pendant,
+        })
+    return out
+
+
+def _pack_equipment(raw, slot_off, equipment):
+    base = slot_off + _EQUIPMENT_OFF
+    for i, e in enumerate(equipment):
+        entry_off = base + i * _EQUIPMENT_SIZE
+        decos = e["decos"]
+        struct.pack_into(
+            _EQUIPMENT_FMT, raw, entry_off,
+            int(e["sort_index"]), int(e["category"]), int(e["type"]),
+            int(e["id"]), int(e["level"]), int(e["points"]),
+            int(decos[0]), int(decos[1]), int(decos[2]), int(e["pendant"]),
+        )
+
+
+def loads(raw_bytes):
+    raw, region_ok = decrypt_save(raw_bytes)
+    bad = [slot for slot, ok in region_ok.items() if not ok]
+    if bad:
+        raise ValueError(
+            f"Save decrypted, but the checksum for slot(s) {bad} didn't match - "
+            f"that slot's data may be corrupt. Loading anyway so the other "
+            f"slot(s) are still usable; be cautious editing/saving the flagged one."
+        )
+
+    data = MHWSaveData()
+    data.raw = raw
+    data["slots"] = []
+    for slot in (0, 1, 2):
+        slot_off, _length = SLOT_REGIONS[slot]
+        data["slots"].append({
+            "hunter": _unpack_hunter(raw, slot_off),
+            "item_pouch": _unpack_item_pouch(raw, slot_off),
+            "storage": _unpack_storage(raw, slot_off),
+            "equipment": _unpack_equipment(raw, slot_off),
+        })
+    return data
+
+
+def dumps(data):
+    if not isinstance(data, MHWSaveData) or not hasattr(data, "raw"):
+        raise TypeError("This isn't a save loaded by games/mhw.py's own loads().")
+    raw = bytearray(data.raw)
+    for slot in (0, 1, 2):
+        slot_off, _length = SLOT_REGIONS[slot]
+        entry = data["slots"][slot]
+        _pack_hunter(raw, slot_off, entry["hunter"])
+        _pack_item_pouch(raw, slot_off, entry["item_pouch"])
+        _pack_storage(raw, slot_off, entry["storage"])
+        _pack_equipment(raw, slot_off, entry["equipment"])
+    return encrypt_save(raw)
+
+
+# ------------------------------------------------------- inventory editor
+#
+# Target keys are "<slot>:<container>", e.g. "0:item_pouch:items" - the
+# Inventory Editor window treats each as an independent fixed-size grid
+# (unlike Duckov, MHW's pouch/storage arrays have a fixed slot count with
+# no separate capacity concept - every array index always "exists", just
+# possibly holding id=0/amount=0 for "empty").
+
+_CONTAINER_LABELS = [
+    ("Item Pouch - Items", "item_pouch:items"),
+    ("Item Pouch - Ammo", "item_pouch:ammo"),
+    ("Storage - Items", "storage:items"),
+    ("Storage - Ammo", "storage:ammo"),
+    ("Storage - Materials", "storage:materials"),
+    ("Storage - Decorations", "storage:decorations"),
+]
+
+
+def spawn_item_targets(data):
+    targets = []
+    for slot_idx, slot in enumerate(data["slots"]):
+        name = slot["hunter"]["name"] or f"Slot {slot_idx + 1}"
+        for label, key in _CONTAINER_LABELS:
+            targets.append((f"{name} - {label}", f"{slot_idx}:{key}"))
+    return targets
+
+
+def _resolve_container(data, target_key):
+    try:
+        slot_str, section, container = target_key.split(":")
+        slot_idx = int(slot_str)
+    except ValueError:
+        raise ValueError(f"Unknown inventory target {target_key!r}.")
+    try:
+        slot = data["slots"][slot_idx]
+    except (IndexError, TypeError):
+        raise ValueError(f"No such save slot {slot_str!r}.")
+    section_data = slot.get(section)
+    if not isinstance(section_data, dict) or container not in section_data:
+        raise ValueError(f"Unknown inventory target {target_key!r}.")
+    return section_data[container]
+
+
+def inventory_state(data, target_key):
+    slots = _resolve_container(data, target_key)
+    occupied = [
+        {"position": i, "instance_id": i, "type_id": entry["id"]}
+        for i, entry in enumerate(slots) if entry["id"] != 0
+    ]
+    return {"capacity": len(slots), "capacity_note": None, "slots": occupied}
+
+
+def spawn_item(data, target_key, item_id, quantity):
+    if not isinstance(item_id, int) or isinstance(item_id, bool) or item_id <= 0:
+        raise ValueError("Item type id must be a positive whole number.")
+    if not isinstance(quantity, int) or isinstance(quantity, bool) or quantity <= 0:
+        raise ValueError("Quantity must be a positive whole number.")
+    slots = _resolve_container(data, target_key)
+    free = [i for i, entry in enumerate(slots) if entry["id"] == 0]
+    if not free:
+        raise ValueError("This container is completely full - no empty slots left.")
+    idx = free[0]
+    slots[idx] = {"id": item_id, "amount": quantity}
+    return f"Placed {quantity}x item type {item_id} into slot {idx} of {target_key}."
+
+
+def remove_inventory_item(data, target_key, instance_id):
+    slots = _resolve_container(data, target_key)
+    if not isinstance(instance_id, int) or not (0 <= instance_id < len(slots)):
+        raise ValueError("That slot doesn't exist in this container.")
+    if slots[instance_id]["id"] == 0:
+        raise ValueError("That slot is already empty.")
+    slots[instance_id] = {"id": 0, "amount": 0}
+    return f"Cleared slot {instance_id} of {target_key}."
+
+
+PROFILE = GameProfile(
+    key="mhw",
+    display_name="Monster Hunter World: Iceborne",
+    default_save_dirs=[],
+    file_patterns=[("MHW save files", "SAVEDATA1000"), ("All files", "*.*")],
+    quick_fields={
+        "Hunter 1 - Name": ["slots", 0, "hunter", "name"],
+        "Hunter 1 - Zenny": ["slots", 0, "hunter", "zeni"],
+        "Hunter 1 - HR": ["slots", 0, "hunter", "hunter_rank"],
+        "Hunter 1 - MR": ["slots", 0, "hunter", "master_rank"],
+        "Hunter 1 - Research Points": ["slots", 0, "hunter", "research_points"],
+    },
+    loads=loads,
+    dumps=dumps,
+    binary=True,
+    notes=(
+        "Load the SAVEDATA1000 file directly (usually under "
+        "Steam/userdata/<id>/582010/remote/). Every hunter slot (up to 3) "
+        "loads together; only edit/save the ones you actually use - all "
+        "three get re-encrypted together either way. Equipment entries "
+        "only expose id/level/points/decos/pendant for now; decoration "
+        "slots, augments, and custom upgrades round-trip untouched but "
+        "aren't editable here yet."
+    ),
+)
+PROFILE.spawn_item_targets = spawn_item_targets
+PROFILE.spawn_item = spawn_item
+PROFILE.inventory_state = inventory_state
+PROFILE.remove_inventory_item = remove_inventory_item
