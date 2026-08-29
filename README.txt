@@ -26,9 +26,12 @@ Currently supported:
       2774 items catalogued) and equipment resolves to real names too
       (11421 armor/charms/weapons/kinsects))
   - Hades                    (games/hades.py + lib/hades_lib.py + data/hades.json)
-  - Hades II                 (games/hades2.py + lib/hades_lib.py + data/hades2.json -
-      Supergiant SGB1 binary format; edit runs, location, heat/fear levels,
-      God Mode, Hell Mode, and view equipped traits/vows)
+  - Hades II                 (games/hades2.py + games/hades_window.py + lib/hades_lib.py +
+      data/hades2.json + data/hades2/ - Supergiant SGB1 binary container with
+      Adler32 checksums, LZ4 block compression, and embedded Luabins state.
+      Full tree/table view, DictTableDialog spreadsheet, Quick Edit shortcuts,
+      item spawner, and a dedicated 9-tab Editor Suite with fine-tuning step
+      buttons and tester presets)
 
 VERSION at the repo root is the single source of truth for cedit's own
 version - shown in the GUI's status bar footer and `cedit.py --version`,
@@ -324,6 +327,38 @@ DREDGE
   That last part - and item names instead of raw ids - needs a generated
   data/dredge/manifest.json; see data/dredge/README.md for how to make one
   from your own local install.
+
+
+
+Hades / Hades II
+  Supergiant SGB1 binary container format (Profile1.sav .. Profile4.sav and
+  Profile1_Temp.sav), decoded and encoded by lib/hades_lib.py with Adler-32
+  checksum verification and LZ4 block compression/decompression for the
+  embedded Luabins game state. Once decompressed, the entire GameState
+  hierarchy (Resources, Arcana MetaUpgradeState, KeepsakeChambers,
+  WeaponsUnlocked, WorldUpgradesAdded, CaughtFish, and CurrentRun Hero stats)
+  is exposed directly in cedit's generic tree and JSON editor, while
+  common currencies (Bones, Ash, Psyche, Fate Fabric, Silver, Darkness, Keys,
+  Gems, Titan Blood) and run counts are wired to the Quick Edit bar.
+  Right-clicking any dictionary node (such as Resources or MetaUpgradeState)
+  and choosing 'View as Table...' opens a spreadsheet dialog (DictTableDialog)
+  with live search filtering and in-place cell editing.
+  For a specialized view matching in-game progression, the toolbar's 'Hades
+  Suite...' button (or Edit > Hades Editor Suite...) opens a dedicated 9-tab
+  editor window (games/hades_window.py): General (God Mode level, Hell Mode,
+  Runs, Grasp, Location), Resources (all 29 common currencies, ores, boss
+  drops, and alchemy reagents), Garden (27 harvested flora, grown crops, and
+  seeds), Gifts & Indulgences (13 affinity items, Obol points, bath salts),
+  Fish Catches (27 regional catches), Arcana Cards (all 25 cards with Rank 1-3
+  and Unlocked status), Keepsakes (all 33 keepsakes with chamber affinity
+  progress), Unlocks & Aspects (all 6 hidden weapon aspects, Crossroads
+  upgrades, and boss difficulty modifiers), and Active Run (live health,
+  magick, death defiances, and rerolls). Every resource row includes fine-tuning
+  step buttons (-100, -10, -1, +1, +10, +100) alongside batch tester presets
+  (+10 All Materials, +1,000 All Currencies, Max Arcana, Unlock Hidden Aspects).
+  Save discovery strictly targets valid Profile*.sav files, filtering out
+  verification cache files (Profile1.v.sav), .bak backups, .sjson configs,
+  and .ctrls files automatically.
 
 
 SAFETY

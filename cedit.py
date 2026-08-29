@@ -118,6 +118,143 @@ def _qt_filter_string(file_patterns):
     return ";;".join(f"{label} ({glob})" for label, glob in file_patterns)
 
 
+
+class DictTableDialog(QDialog):
+    """Spreadsheet-style view for a dictionary container (e.g. Resources, Header, etc.).
+    Shows Key, Description/Name hint, Value, and Type. Allows live editing, filtering,
+    and sorting."""
+
+    def __init__(self, parent_window, dict_value: dict, profile, title="Dictionary"):
+        super().__init__(parent_window)
+        self.parent_window = parent_window
+        self.profile = profile
+        self.dict_value = dict_value
+        self.dirty = False
+        self.show_internal = False
+        self.setWindowTitle(title)
+        self.resize(850, 560)
+
+        layout = QVBoxLayout(self)
+
+        top = QHBoxLayout()
+        top.addWidget(QLabel("Filter:"))
+        self.filter_edit = QLineEdit()
+        self.filter_edit.textChanged.connect(self._apply_filter)
+        top.addWidget(self.filter_edit)
+        self.internal_check = QCheckBox("Show internal (_) keys")
+        self.internal_check.toggled.connect(self._toggle_internal)
+        top.addWidget(self.internal_check)
+        top.addStretch(1)
+        layout.addLayout(top)
+
+        self.table = QTableWidget()
+        self.table.setColumnCount(4)
+        self.table.setHorizontalHeaderLabels(["Key", "Description / Name", "Value", "Type"])
+        self.table.horizontalHeader().setStretchLastSection(False)
+        self.table.itemChanged.connect(self._on_item_changed)
+        layout.addWidget(self.table, stretch=1)
+
+        close_row = QHBoxLayout()
+        close_row.addStretch(1)
+        close_btn = QPushButton("Close")
+        close_btn.clicked.connect(self.accept)
+        close_row.addWidget(close_btn)
+        layout.addLayout(close_row)
+
+        self._keys = []
+        self._populate()
+
+    def _toggle_internal(self, checked):
+        self.show_internal = checked
+        self._populate()
+
+    def _populate(self):
+        self.table.blockSignals(True)
+        raw_keys = list(self.dict_value.keys())
+        if not self.show_internal:
+            self._keys = [k for k in raw_keys if not str(k).startswith("_")]
+        else:
+            self._keys = raw_keys
+
+        self.table.setRowCount(len(self._keys))
+        for row, k in enumerate(self._keys):
+            val = self.dict_value[k]
+            # Column 0: Key
+            k_cell = QTableWidgetItem(str(k))
+            k_cell.setFlags(k_cell.flags() & ~Qt.ItemIsEditable)
+            k_cell.setData(Qt.UserRole, k)
+            self.table.setItem(row, 0, k_cell)
+
+            # Column 1: Description / Hint
+            desc = None
+            if self.profile.describe_entry:
+                try:
+                    desc = self.profile.describe_entry(self.windowTitle().split()[0], k, val)
+                except Exception:
+                    desc = None
+            desc_cell = QTableWidgetItem(str(desc) if desc else "")
+            desc_cell.setFlags(desc_cell.flags() & ~Qt.ItemIsEditable)
+            desc_cell.setForeground(Qt.darkGray)
+            self.table.setItem(row, 1, desc_cell)
+
+            # Column 2: Value
+            if isinstance(val, (dict, list)):
+                v_text = f"{{{len(val)} keys}}" if isinstance(val, dict) else f"[{len(val)} items]"
+                v_cell = QTableWidgetItem(v_text)
+                v_cell.setFlags(v_cell.flags() & ~Qt.ItemIsEditable)
+            else:
+                v_cell = QTableWidgetItem(str(val) if val is not None else "")
+                if self.profile.is_read_only(self.dict_value, k, val) or str(k).startswith("_"):
+                    v_cell.setFlags(v_cell.flags() & ~Qt.ItemIsEditable)
+            v_cell.setData(Qt.UserRole, k)
+            self.table.setItem(row, 2, v_cell)
+
+            # Column 3: Type
+            t_cell = QTableWidgetItem(type(val).__name__)
+            t_cell.setFlags(t_cell.flags() & ~Qt.ItemIsEditable)
+            t_cell.setForeground(Qt.gray)
+            self.table.setItem(row, 3, t_cell)
+
+        self.table.resizeColumnsToContents()
+        self.table.blockSignals(False)
+        self._apply_filter(self.filter_edit.text())
+
+    def _apply_filter(self, text: str):
+        query = text.strip().lower()
+        for row in range(self.table.rowCount()):
+            if not query:
+                self.table.setRowHidden(row, False)
+                continue
+            k_text = self.table.item(row, 0).text().lower()
+            desc_text = self.table.item(row, 1).text().lower()
+            v_text = self.table.item(row, 2).text().lower()
+            match = query in k_text or query in desc_text or query in v_text
+            self.table.setRowHidden(row, not match)
+
+    def _on_item_changed(self, cell):
+        if cell.column() != 2:
+            return
+        key = cell.data(Qt.UserRole)
+        if key is None or key not in self.dict_value:
+            return
+        old_val = self.dict_value[key]
+        if isinstance(old_val, (dict, list)):
+            return
+        new_text = cell.text().strip()
+        try:
+            if isinstance(old_val, bool):
+                new_val = new_text.lower() in ("1", "true", "yes")
+            elif isinstance(old_val, int):
+                new_val = int(float(new_text))
+            elif isinstance(old_val, float):
+                new_val = float(new_text)
+            else:
+                new_val = new_text
+            self.dict_value[key] = new_val
+            self.dirty = True
+        except Exception:
+            cell.setText(str(old_val))
+
 class ListTableDialog(QDialog):
     """Spreadsheet-style view for a list whose items are dicts (an
     inventory, a character roster, a capture list, ...). Paging through
@@ -1008,6 +1145,9 @@ class SaveEditorWindow(QMainWindow):
         self.spawn_item_action.triggered.connect(self.open_inventory_editor)
         self.spawn_item_action.setEnabled(False)  # enabled per-profile in _apply_profile_to_ui
         edit_menu.addAction(self.spawn_item_action)
+        self.hades_suite_action = QAction("Hades Editor Suite...", self)
+        self.hades_suite_action.triggered.connect(self.open_hades_suite)
+        edit_menu.addAction(self.hades_suite_action)
         edit_menu.addSeparator()
         find_action = QAction("Find...", self, shortcut=QKeySequence.Find)
         find_action.triggered.connect(self.focus_search)
@@ -1071,6 +1211,10 @@ class SaveEditorWindow(QMainWindow):
         reload_btn = QPushButton("Reload")
         reload_btn.clicked.connect(self.reload_file)
         row.addWidget(reload_btn)
+        self.hades_suite_btn = QPushButton("Hades Suite...")
+        self.hades_suite_btn.setStyleSheet("color: #2b78e4; font-weight: bold;")
+        self.hades_suite_btn.clicked.connect(self.open_hades_suite)
+        row.addWidget(self.hades_suite_btn)
 
         row.addSpacing(14)
         row.addWidget(QLabel("Find:"))
@@ -1321,6 +1465,11 @@ class SaveEditorWindow(QMainWindow):
             and self.profile.inventory_state is not None
             and self.profile.remove_inventory_item is not None
         )
+        is_hades = self.profile.key in ("hades", "hades2")
+        if hasattr(self, "hades_suite_action"):
+            self.hades_suite_action.setVisible(is_hades)
+        if hasattr(self, "hades_suite_btn"):
+            self.hades_suite_btn.setVisible(is_hades)
         if self.profile.notes:
             self._set_status(self.profile.notes.splitlines()[0])
 
@@ -1745,14 +1894,35 @@ class SaveEditorWindow(QMainWindow):
             return
         container, key = self.node_lookup.get(item, (None, None))
         value = self.data if (container is None and key is None) else container[key]
-        if not isinstance(value, list) or not value:
+        if not isinstance(value, (dict, list)) or not value:
             return
-        if not any(isinstance(v, dict) for v in value):
-            return  # a plain list of scalars gets no extra benefit from a table view
+
         menu = QMenu(self)
         action = menu.addAction("View as Table...")
-        action.triggered.connect(lambda: self._open_list_table(item, value))
+        if isinstance(value, dict):
+            action.triggered.connect(lambda: self._open_dict_table(item, value))
+        elif isinstance(value, list):
+            action.triggered.connect(lambda: self._open_list_table(item, value))
         menu.exec(self.tree.viewport().mapToGlobal(pos))
+
+    def _open_dict_table(self, item, value: dict):
+        pre_edit_snapshot = self._snapshot()
+        title = item.text(0) if item else "Dictionary"
+        dialog = DictTableDialog(self, value, self.profile, title=f"{title} ({len(value)} entries)")
+        dialog.exec()
+        if not dialog.dirty:
+            return
+        self._push_undo(pre_edit_snapshot)
+        item.takeChildren()
+        item.setText(1, f"{{{len(value)} keys}}")
+        if len(value) > 0:
+            placeholder = QTreeWidgetItem([""])
+            placeholder.setData(0, _LAZY_ROLE, True)
+            item.addChild(placeholder)
+        self.refresh_quick_edit()
+        self.refresh_raw_from_tree()
+        self._set_dirty(True)
+        self._set_status("Applied table edits.")
 
     def _open_list_table(self, item, value):
         # Taken before exec(), not after - the table dialog mutates
@@ -1933,6 +2103,14 @@ class SaveEditorWindow(QMainWindow):
         self._set_dirty(True)
         self._set_status(f"Deleted '{key}'")
 
+
+    def open_hades_suite(self):
+        if self.profile.key in ("hades", "hades2"):
+            from games.hades_window import HadesEditorWindow
+            win = HadesEditorWindow(self, game_key=self.profile.key, initial_path=self.file_path)
+            win.exec()
+            if self.file_path and os.path.isfile(self.file_path):
+                self.load_path(self.file_path)
     def open_inventory_editor(self):
         if self.data is None:
             return

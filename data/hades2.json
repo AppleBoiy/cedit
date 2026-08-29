@@ -1,47 +1,44 @@
 {
-  "key": "hades2",
-  "display_name": "Hades II",
-  "default_save_dirs": [
-    "~/Library/Application Support/Supergiant Games/Hades II",
-    "~/Saved Games/Hades II",
-    "~/Documents/Saved Games/Hades II",
-    "~/.local/share/Supergiant Games/Hades II"
-  ],
+  "name": "Hades II",
   "file_patterns": [
     [
       "Hades II Save Files",
-      "Profile*.sav"
+      "Profile1.sav Profile2.sav Profile3.sav Profile4.sav Profile1_Temp.sav Profile2_Temp.sav Profile3_Temp.sav Profile4_Temp.sav"
     ],
     [
       "All Files",
       "*.*"
     ]
   ],
-  "quick_fields": {
-    "Location": [
-      "Header",
-      "Location"
+  "save_dirs": [
+    "~/Library/Application Support/Supergiant Games/Hades II",
+    "%USERPROFILE%/Saved Games/Hades II",
+    "~/.steam/steam/steamapps/compatdata/1145350/pfx/drive_c/users/steamuser/Saved Games/Hades II"
+  ],
+  "quick_edit_fields": [
+    [
+      "Bones (MetaCurrency)",
+      "GameState.Resources.MetaCurrency"
     ],
-    "Runs Count": [
-      "Header",
-      "Runs"
+    [
+      "Ash (MetaCardPointsCommon)",
+      "GameState.Resources.MetaCardPointsCommon"
     ],
-    "Fear / Shrine Points": [
-      "Header",
-      "ShrinePoints"
+    [
+      "Psyche (MemPointsCommon)",
+      "GameState.Resources.MemPointsCommon"
     ],
-    "God Mode (Easy)": [
-      "Header",
-      "EasyMode"
+    [
+      "Fate Fabric (MetaFabric)",
+      "GameState.Resources.MetaFabric"
     ],
-    "Hell Mode (Hard)": [
-      "Header",
-      "HardMode"
+    [
+      "Silver (OreFSilver)",
+      "GameState.Resources.OreFSilver"
     ],
-    "Active Save State": [
-      "Header",
-      "DevSaveName"
+    [
+      "Runs",
+      "Header.Runs"
     ]
-  },
-  "notes": "Hades II (Supergiant Games) binary save profile. Supports editing run count, active location, Fear / Shrine testaments, God Mode, Hell Mode, and inspecting equipped traits/aspects/vows."
+  ]
 }

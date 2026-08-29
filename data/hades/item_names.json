@@ -1,0 +1,22 @@
+{
+  "MetaCurrency": "Darkness",
+  "LockKeys": "Chthonic Keys",
+  "Gems": "Gemstones",
+  "SuperLockKeys": "Titan Blood",
+  "SuperGems": "Diamonds",
+  "SuperGiftPoints": "Ambrosia",
+  "GiftPoints": "Nectar",
+  "Money": "Charon's Obols",
+  "WeaponSword": "Stygian Blade (Sword)",
+  "WeaponSpear": "Eternal Spear",
+  "WeaponShield": "Shield of Chaos",
+  "WeaponBow": "Heart-Seeker Bow",
+  "WeaponFists": "Twin Fists of Malphon",
+  "WeaponGun": "Adamant Rail",
+  "EnemyCountShrineUpgrade": "Jury Summons (+Foes)",
+  "DamageAndHealthShrineUpgrade": "Hard Labor (+Foe Damage)",
+  "ShopPricesShrineUpgrade": "Convenience Fee (+Prices)",
+  "EnemyDamageShrineUpgrade": "Lasting Consequences (-Healing)",
+  "HealingReductionShrineUpgrade": "Calisthenics Program (+Foe HP)",
+  "EnemyShieldShrineUpgrade": "Damage Control (Hit Shields)"
+}
