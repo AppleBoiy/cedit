@@ -25,6 +25,10 @@ Currently supported:
       that belongs in a container, real name, quantity editable in place -
       2774 items catalogued) and equipment resolves to real names too
       (11421 armor/charms/weapons/kinsects))
+  - Hades                    (games/hades.py + lib/hades_lib.py + data/hades.json)
+  - Hades II                 (games/hades2.py + lib/hades_lib.py + data/hades2.json -
+      Supergiant SGB1 binary format; edit runs, location, heat/fear levels,
+      God Mode, Hell Mode, and view equipped traits/vows)
 
 VERSION at the repo root is the single source of truth for cedit's own
 version - shown in the GUI's status bar footer and `cedit.py --version`,
