@@ -529,8 +529,11 @@ class GameProfile:
 
     def find_default_save_dir(self):
         for d in self.default_save_dirs:
-            if d and os.path.isdir(d):
-                return d
+            if not d:
+                continue
+            exp = os.path.expanduser(os.path.expandvars(d))
+            if os.path.isdir(exp):
+                return exp
         return None
 
     def discover_saves(self, limit=200):
@@ -553,9 +556,12 @@ class GameProfile:
             return []
         found = set()
         for base in self.default_save_dirs:
-            if not base or not os.path.isdir(base):
+            if not base:
                 continue
-            for root, _dirs, files in os.walk(base, onerror=lambda e: None):
+            exp_base = os.path.expanduser(os.path.expandvars(base))
+            if not os.path.isdir(exp_base):
+                continue
+            for root, _dirs, files in os.walk(exp_base, onerror=lambda e: None):
                 for name in files:
                     if any(fnmatch.fnmatch(name, pat) for pat in patterns):
                         found.add(os.path.join(root, name))
