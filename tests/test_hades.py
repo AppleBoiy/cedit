@@ -13,7 +13,9 @@ sys.path.insert(0, ROOT)
 sys.path.insert(0, os.path.join(ROOT, "games"))
 
 from lib import hades_lib
+# pyrefly: ignore [missing-import]
 import hades as hades_game
+# pyrefly: ignore [missing-import]
 import hades2 as hades2_game
 
 

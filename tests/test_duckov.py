@@ -24,7 +24,8 @@ ROOT = os.path.join(os.path.dirname(__file__), "..")
 sys.path.insert(0, ROOT)
 sys.path.insert(0, os.path.join(ROOT, "games"))
 
-import duckov as duckov_game  # noqa: E402
+# pyrefly: ignore [missing-import]
+import duckov as duckov_game
 
 
 def fixture():
