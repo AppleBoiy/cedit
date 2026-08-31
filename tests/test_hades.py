@@ -1,3 +1,4 @@
+from pathlib import Path
 """
 Unit tests for games/hades.py, games/hades2.py, and lib/hades_lib.py.
 """
@@ -122,5 +123,53 @@ class TestHadesLib(unittest.TestCase):
         self.assertEqual(reparsed["GameState"]["Resources"]["MetaCurrency"], 5000.0)
 
 
+class TestHades2TextureFix(unittest.TestCase):
+    def setUp(self):
+        import tempfile
+        import shutil
+        self.temp_dir = tempfile.mkdtemp()
+        self.content_dir = Path(self.temp_dir) / "Content"
+        self.movies_1080 = self.content_dir / "Movies" / "1080p"
+        self.movies_720 = self.content_dir / "Movies" / "720p"
+        self.pkg_1080 = self.content_dir / "Packages" / "1080p"
+        self.pkg_720 = self.content_dir / "Packages" / "720p"
+
+        for d in [self.movies_1080, self.movies_720, self.pkg_1080, self.pkg_720]:
+            d.mkdir(parents=True, exist_ok=True)
+
+        # 1080p has larger files in vanilla default
+        (self.pkg_1080 / "Achilles.pkg").write_bytes(b"A" * 1000)
+        (self.pkg_720 / "Achilles.pkg").write_bytes(b"A" * 500)
+        (self.movies_1080 / "AsphodelBacking.bik").write_bytes(b"M" * 1000)
+        (self.movies_720 / "AsphodelBacking.bik").write_bytes(b"M" * 500)
+
+    def tearDown(self):
+        import shutil
+        shutil.rmtree(self.temp_dir, ignore_errors=True)
+
+    def test_detection_and_swap_roundtrip(self):
+        # 1. Initial detection should be default
+        status = hades_lib.get_hades2_texture_status(self.content_dir)
+        self.assertTrue(status["valid"])
+        self.assertFalse(status["is_swapped"])
+
+        # 2. Swap to force high-res
+        ok, msg = hades_lib.swap_hades2_texture_folders(self.content_dir)
+        self.assertTrue(ok)
+
+        # 3. Status should now be swapped
+        status = hades_lib.get_hades2_texture_status(self.content_dir)
+        self.assertTrue(status["is_swapped"])
+        self.assertEqual(len((self.pkg_720 / "Achilles.pkg").read_bytes()), 1000)
+
+        # 4. Swap back to restore default
+        ok, msg = hades_lib.swap_hades2_texture_folders(self.content_dir)
+        self.assertTrue(ok)
+        status = hades_lib.get_hades2_texture_status(self.content_dir)
+        self.assertFalse(status["is_swapped"])
+        self.assertEqual(len((self.pkg_1080 / "Achilles.pkg").read_bytes()), 1000)
+
+
 if __name__ == "__main__":
     unittest.main()
+
