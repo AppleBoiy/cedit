@@ -1,3 +1,5 @@
+import csv
+import datetime
 #!/usr/bin/env python3
 """
 cedit - multi-game save editor
@@ -122,45 +124,67 @@ def _qt_filter_string(file_patterns):
 class DictTableDialog(QDialog):
     """Spreadsheet-style view for a dictionary container (e.g. Resources, Header, etc.).
     Shows Key, Description/Name hint, Value, and Type. Allows live editing, filtering,
-    and sorting."""
+    sorting, breadcrumb drill-down, CSV export/import, and batch multi-row editing."""
 
-    def __init__(self, parent_window, dict_value: dict, profile, title="Dictionary"):
+    def __init__(self, parent_window, dict_value: dict, profile, title="Dictionary", path_stack=None):
         super().__init__(parent_window)
         self.parent_window = parent_window
         self.profile = profile
         self.dict_value = dict_value
         self.dirty = False
         self.show_internal = False
+        self.path_stack = list(path_stack) if path_stack else [title.split()[0]]
         self.setWindowTitle(title)
-        self.resize(850, 560)
+        self.resize(880, 580)
 
         layout = QVBoxLayout(self)
 
+        # Top bar: Breadcrumbs & Filter
         top = QHBoxLayout()
+        bc_text = " ❯ ".join(self.path_stack)
+        bc_label = QLabel(f"<b>Path:</b> <span style='color: #2b78e4;'>{bc_text}</span>")
+        top.addWidget(bc_label)
+        top.addStretch(1)
+
         top.addWidget(QLabel("Filter:"))
         self.filter_edit = QLineEdit()
+        self.filter_edit.setPlaceholderText("Search keys, descriptions, values...")
         self.filter_edit.textChanged.connect(self._apply_filter)
         top.addWidget(self.filter_edit)
+
         self.internal_check = QCheckBox("Show internal (_) keys")
         self.internal_check.toggled.connect(self._toggle_internal)
         top.addWidget(self.internal_check)
-        top.addStretch(1)
         layout.addLayout(top)
 
+        # Main Table
         self.table = QTableWidget()
         self.table.setColumnCount(4)
         self.table.setHorizontalHeaderLabels(["Key", "Description / Name", "Value", "Type"])
         self.table.horizontalHeader().setStretchLastSection(False)
+        self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.table.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        self.table.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.table.customContextMenuRequested.connect(self._show_context_menu)
         self.table.itemChanged.connect(self._on_item_changed)
         self.table.itemDoubleClicked.connect(self._on_item_double_clicked)
         layout.addWidget(self.table, stretch=1)
 
-        close_row = QHBoxLayout()
-        close_row.addStretch(1)
+        # Bottom bar: CSV Tools & Close
+        bot = QHBoxLayout()
+        exp_btn = QPushButton("Export CSV...")
+        exp_btn.clicked.connect(self._export_csv)
+        bot.addWidget(exp_btn)
+
+        imp_btn = QPushButton("Import CSV...")
+        imp_btn.clicked.connect(self._import_csv)
+        bot.addWidget(imp_btn)
+
+        bot.addStretch(1)
         close_btn = QPushButton("Close")
         close_btn.clicked.connect(self.accept)
-        close_row.addWidget(close_btn)
-        layout.addLayout(close_row)
+        bot.addWidget(close_btn)
+        layout.addLayout(bot)
 
         self._keys = []
         self._populate()
@@ -267,56 +291,177 @@ class DictTableDialog(QDialog):
         if key is None or key not in self.dict_value:
             return
         val = self.dict_value[key]
+        sub_stack = self.path_stack + [str(key)]
         if isinstance(val, dict):
-            dialog = DictTableDialog(self, val, self.profile, title=f"{key} ({len(val)} entries)")
+            dialog = DictTableDialog(self, val, self.profile, title=f"{key} ({len(val)} entries)", path_stack=sub_stack)
             dialog.exec()
             if dialog.dirty:
                 self.dirty = True
                 self._populate()
         elif isinstance(val, list):
-            dialog = ListTableDialog(self, val, self.profile, title=f"{key} ({len(val)} items)")
+            dialog = ListTableDialog(self, val, self.profile, title=f"{key} ({len(val)} items)", path_stack=sub_stack)
             dialog.exec()
             if dialog.dirty:
                 self.dirty = True
                 self._populate()
 
+    def _show_context_menu(self, pos):
+        selected_rows = sorted(list(set(item.row() for item in self.table.selectedItems())))
+        if not selected_rows:
+            return
+        menu = QMenu(self)
+        s_suffix = "s" if len(selected_rows) > 1 else ""
+        count_label = f"Selected {len(selected_rows)} row{s_suffix}"
+        info_act = menu.addAction(count_label)
+        info_act.setEnabled(False)
+        menu.addSeparator()
+
+        set_val_act = menu.addAction("Set Value for Selected...")
+        add_num_act = menu.addAction("Add / Subtract Number...")
+        zero_act = menu.addAction("Zero Out Selected (Set to 0)")
+
+        act = menu.exec(self.table.viewport().mapToGlobal(pos))
+        if act == set_val_act:
+            text, ok = QInputDialog.getText(self, "Batch Set Value", f"Enter new value for {len(selected_rows)} items:")
+            if ok and text is not None:
+                for r in selected_rows:
+                    k = self.table.item(r, 0).data(Qt.UserRole)
+                    if k in self.dict_value and not isinstance(self.dict_value[k], (dict, list)):
+                        old = self.dict_value[k]
+                        try:
+                            if isinstance(old, bool):
+                                val = text.lower() in ("1", "true", "yes")
+                            elif isinstance(old, int):
+                                val = int(float(text))
+                            elif isinstance(old, float):
+                                val = float(text)
+                            else:
+                                val = text
+                            self.dict_value[k] = val
+                            self.dirty = True
+                        except Exception:
+                            pass
+                self._populate()
+
+        elif act == add_num_act:
+            delta, ok = QInputDialog.getInt(self, "Add / Subtract Number", f"Enter amount to add (positive or negative):", 0, -9999999, 9999999)
+            if ok:
+                for r in selected_rows:
+                    k = self.table.item(r, 0).data(Qt.UserRole)
+                    if k in self.dict_value and isinstance(self.dict_value[k], (int, float)):
+                        self.dict_value[k] += delta
+                        self.dirty = True
+                self._populate()
+
+        elif act == zero_act:
+            for r in selected_rows:
+                k = self.table.item(r, 0).data(Qt.UserRole)
+                if k in self.dict_value and isinstance(self.dict_value[k], (int, float)):
+                    self.dict_value[k] = 0
+                    self.dirty = True
+            self._populate()
+
+    def _export_csv(self):
+        path, _ = QFileDialog.getSaveFileName(self, "Export Table to CSV", "", "CSV Files (*.csv);;All Files (*.*)")
+        if not path:
+            return
+        try:
+            with open(path, "w", newline="", encoding="utf-8") as f:
+                writer = csv.writer(f)
+                writer.writerow(["Key", "Description", "Value", "Type"])
+                for k in self._keys:
+                    val = self.dict_value[k]
+                    desc = None
+                    if self.profile.describe_entry:
+                        try:
+                            desc = self.profile.describe_entry(self.windowTitle().split()[0], k, val)
+                        except Exception:
+                            desc = None
+                    writer.writerow([str(k), str(desc or ""), str(val), type(val).__name__])
+            QMessageBox.information(self, "Export CSV", f"Successfully exported table to:\n{path}")
+        except Exception as e:
+            QMessageBox.critical(self, "Export Error", f"Failed to export CSV: {e}")
+
+    def _import_csv(self):
+        path, _ = QFileDialog.getOpenFileName(self, "Import Values from CSV", "", "CSV Files (*.csv);;All Files (*.*)")
+        if not path:
+            return
+        try:
+            updated = 0
+            with open(path, "r", encoding="utf-8") as f:
+                reader = csv.reader(f)
+                header = next(reader, None)
+                for row in reader:
+                    if len(row) >= 3:
+                        k, _, v_str = row[0], row[1], row[2]
+                        # Match key in dict
+                        matching_k = None
+                        for ek in self.dict_value.keys():
+                            if str(ek) == k:
+                                matching_k = ek
+                                break
+                        if matching_k is not None:
+                            old = self.dict_value[matching_k]
+                            if not isinstance(old, (dict, list)):
+                                try:
+                                    if isinstance(old, bool):
+                                        nv = v_str.lower() in ("1", "true", "yes")
+                                    elif isinstance(old, int):
+                                        nv = int(float(v_str))
+                                    elif isinstance(old, float):
+                                        nv = float(v_str)
+                                    else:
+                                        nv = v_str
+                                    self.dict_value[matching_k] = nv
+                                    updated += 1
+                                    self.dirty = True
+                                except Exception:
+                                    pass
+            self._populate()
+            QMessageBox.information(self, "Import CSV", f"Successfully updated {updated} entries from CSV.")
+        except Exception as e:
+            QMessageBox.critical(self, "Import Error", f"Failed to import CSV: {e}")
+
+
 class ListTableDialog(QDialog):
-    """Spreadsheet-style view for a list whose items are dicts (an
-    inventory, a character roster, a capture list, ...). Paging through
-    hundreds of "{5 keys}" tree rows one expand-click at a time doesn't
-    scale - this shows every item as one row with its fields as columns,
-    so the whole list can be scanned and edited at once.
+    """Spreadsheet-style view for a list whose items are dicts or primitives.
+    Shows index, fields as columns, allows live editing, filtering, sorting,
+    breadcrumbs, CSV export/import, and batch multi-row operations."""
 
-    Edits are written straight into the live list/dict objects as they're
-    made (same underlying data cedit.py's tree already points at), so
-    nothing extra needs to be synced back afterward except refreshing the
-    tree's own display of that branch."""
-
-    def __init__(self, parent_window, list_value, profile, title="List"):
+    def __init__(self, parent_window, list_value, profile, title="List", path_stack=None):
         super().__init__(parent_window)
         self.profile = profile
         self.list_value = list_value
         self.dirty = False
-        self.show_internal = False  # hide "_"-prefixed bookkeeping columns by default
+        self.show_internal = False
+        self.path_stack = list(path_stack) if path_stack else [title.split()[0]]
         self.setWindowTitle(title)
-        self.resize(920, 560)
+        self.resize(960, 580)
 
         layout = QVBoxLayout(self)
 
+        # Top bar: Breadcrumbs & Filter
         top = QHBoxLayout()
+        bc_text = " ❯ ".join(self.path_stack)
+        bc_label = QLabel(f"<b>Path:</b> <span style='color: #2b78e4;'>{bc_text}</span>")
+        top.addWidget(bc_label)
+        top.addStretch(1)
+
         top.addWidget(QLabel("Filter:"))
         self.filter_edit = QLineEdit()
+        self.filter_edit.setPlaceholderText("Filter rows...")
         self.filter_edit.textChanged.connect(self._apply_filter)
         top.addWidget(self.filter_edit)
+
         self.internal_check = QCheckBox("Show internal (_) fields")
         self.internal_check.toggled.connect(self._toggle_internal)
         top.addWidget(self.internal_check)
-        top.addStretch(1)
+
         if not profile.binary:
             add_btn = QPushButton("Add Row")
             add_btn.clicked.connect(self._add_row)
             top.addWidget(add_btn)
-            del_btn = QPushButton("Delete Selected Row")
+            del_btn = QPushButton("Delete Row")
             del_btn.clicked.connect(self._delete_row)
             top.addWidget(del_btn)
         layout.addLayout(top)
@@ -326,26 +471,33 @@ class ListTableDialog(QDialog):
         self.table.setColumnCount(len(self.columns) + 1)
         self.table.setHorizontalHeaderLabels(["#"] + self.columns)
         self.table.horizontalHeader().setMaximumSectionSize(260)
+        self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.table.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        self.table.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.table.customContextMenuRequested.connect(self._show_context_menu)
         self.table.itemChanged.connect(self._on_item_changed)
         self.table.itemDoubleClicked.connect(self._on_item_double_clicked)
         layout.addWidget(self.table, stretch=1)
 
-        close_row = QHBoxLayout()
-        close_row.addStretch(1)
+        # Bottom bar: CSV Tools & Close
+        bot = QHBoxLayout()
+        exp_btn = QPushButton("Export CSV...")
+        exp_btn.clicked.connect(self._export_csv)
+        bot.addWidget(exp_btn)
+
+        imp_btn = QPushButton("Import CSV...")
+        imp_btn.clicked.connect(self._import_csv)
+        bot.addWidget(imp_btn)
+
+        bot.addStretch(1)
         close_btn = QPushButton("Close")
         close_btn.clicked.connect(self.accept)
-        close_row.addWidget(close_btn)
-        layout.addLayout(close_row)
+        bot.addWidget(close_btn)
+        layout.addLayout(bot)
 
         self._populate()
 
     def _compute_columns(self):
-        """Union of every dict item's keys, in first-seen order, plus a
-        "(value)" column if the list also has non-dict items mixed in.
-        "_"-prefixed keys (offset/bookkeeping internals, e.g. Octopath's
-        "_offsets") are skipped unless "Show internal fields" is checked -
-        they're never editable and their values are usually big nested
-        dicts, so showing them by default just crowds out the real columns."""
         columns = []
         seen = set()
         has_scalar = False
@@ -383,10 +535,6 @@ class ListTableDialog(QDialog):
 
     @staticmethod
     def _display_for(value):
-        """Mirrors the main tree's own display convention: a nested
-        dict/list shows its "{N keys}"/"[N items]" summary, never a raw
-        str() of its full contents - a cell showing the whole thing inline
-        is neither readable nor safely editable as plain text."""
         if isinstance(value, dict):
             return f"{{{len(value)} keys}}"
         if isinstance(value, list):
@@ -406,19 +554,17 @@ class ListTableDialog(QDialog):
             except Exception:
                 display = value
             if isinstance(display, (dict, list)):
-                # Not directly editable here - double-click opens a nested
-                # table (for a list) or shows an info message (for a dict),
-                # same escape hatch the main tree offers.
                 cell = QTableWidgetItem(self._display_for(display))
                 cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)
-                cell.setData(Qt.UserRole + 1, (row, key))  # nested-drill-down marker
+                cell.setForeground(QColor("#2b78e4"))
+                cell.setToolTip("Double-click to inspect nested table...")
+                cell.setData(Qt.UserRole + 1, (row, key))
                 return cell
             cell = QTableWidgetItem(self._short(display))
             if self.profile.is_read_only(item, key, value) or str(key).startswith("_"):
                 cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)
             cell.setData(Qt.UserRole, (row, key))
             return cell
-        # non-dict list item - only the "(value)" column applies to it
         if key == "(value)":
             cell = QTableWidgetItem(self._short(item))
             cell.setData(Qt.UserRole, (row, None))
@@ -433,25 +579,21 @@ class ListTableDialog(QDialog):
         return s if len(s) <= 200 else s[:197] + "..."
 
     def _on_item_double_clicked(self, cell):
-        """Handles the nested-drill-down marker set on dict/list-valued
-        cells (see _make_cell) - a plain click-to-edit doesn't make sense
-        for a nested container, so double-click either opens a further
-        table (for a nested list) or points the user at the field name to
-        expand in the main tree (for a nested dict)."""
         payload = cell.data(Qt.UserRole + 1)
         if not payload:
             return
         row_index, key = payload
         item = self.list_value[row_index]
         value = item.get(key)
+        sub_stack = self.path_stack + [f"[{row_index}]", str(key)]
         if isinstance(value, dict):
-            dialog = DictTableDialog(self, value, self.profile, title=f"{key} ({len(value)} entries)")
+            dialog = DictTableDialog(self, value, self.profile, title=f"{key} ({len(value)} entries)", path_stack=sub_stack)
             dialog.exec()
             if dialog.dirty:
                 self.dirty = True
                 self._populate()
         elif isinstance(value, list):
-            dialog = ListTableDialog(self, value, self.profile, title=f"{key} ({len(value)} items)")
+            dialog = ListTableDialog(self, value, self.profile, title=f"{key} ({len(value)} items)", path_stack=sub_stack)
             dialog.exec()
             if dialog.dirty:
                 self.dirty = True
@@ -464,63 +606,144 @@ class ListTableDialog(QDialog):
         payload = cell.data(Qt.UserRole)
         if not payload:
             return
-        row_index, dict_key = payload
-        if dict_key is None:
-            original = self.list_value[row_index]
-            try:
-                new_value = coerce_value(cell.text(), original)
-            except ValueError as e:
-                QMessageBox.critical(self, APP_TITLE, f"Couldn't apply value:\n{e}")
-                self._populate()
-                return
-            self.list_value[row_index] = new_value
+        row_index, key = payload
+        item = self.list_value[row_index]
+        new_text = cell.text().strip()
+        if key is None:
+            old_value = item
+            target_obj = self.list_value
+            target_key = row_index
         else:
-            item = self.list_value[row_index]
-            original = item.get(dict_key)
-            special = self.profile.find_special_node(item, dict_key, original)
-            try:
-                if special:
-                    item[dict_key] = special.encode(item, dict_key, cell.text())
-                else:
-                    item[dict_key] = coerce_value(cell.text(), original)
-            except ValueError as e:
-                QMessageBox.critical(self, APP_TITLE, f"Couldn't apply value:\n{e}")
-                self._populate()
-                return
-        self.dirty = True
+            old_value = item.get(key)
+            target_obj = item
+            target_key = key
+        special = self.profile.find_special_node(item, key, old_value) if key is not None else None
+        try:
+            if special:
+                coerced = special.encode(new_text, old_value)
+            elif isinstance(old_value, bool):
+                coerced = new_text.lower() in ("1", "true", "yes")
+            elif isinstance(old_value, int):
+                coerced = int(float(new_text))
+            elif isinstance(old_value, float):
+                coerced = float(new_text)
+            else:
+                coerced = new_text
+            target_obj[target_key] = coerced
+            self.dirty = True
+        except Exception:
+            cell.setText(self._short(old_value))
+
+    def _apply_filter(self, text):
+        query = text.strip().lower()
+        for row in range(self.table.rowCount()):
+            if not query:
+                self.table.setRowHidden(row, False)
+                continue
+            row_text = " ".join(
+                self.table.item(row, col).text().lower()
+                for col in range(self.table.columnCount())
+                if self.table.item(row, col)
+            )
+            self.table.setRowHidden(row, query not in row_text)
 
     def _add_row(self):
-        template = {}
-        if self.list_value and isinstance(self.list_value[0], dict):
-            template = {k: None for k in self.list_value[0].keys()}
-        self.list_value.append(template)
+        if self.columns and self.columns != ["(value)"]:
+            new_item = {k: 0 for k in self.columns if k != "(value)"}
+        else:
+            new_item = ""
+        self.list_value.append(new_item)
         self.dirty = True
-        self.columns = self._compute_columns()
-        self.table.setColumnCount(len(self.columns) + 1)
-        self.table.setHorizontalHeaderLabels(["#"] + self.columns)
         self._populate()
+        self.table.scrollToBottom()
 
     def _delete_row(self):
         row = self.table.currentRow()
         if row < 0 or row >= len(self.list_value):
             return
-        if QMessageBox.question(self, APP_TITLE, f"Delete row {row}?") != QMessageBox.Yes:
-            return
         del self.list_value[row]
         self.dirty = True
         self._populate()
 
-    def _apply_filter(self, text):
-        needle = text.strip().lower()
-        for row in range(self.table.rowCount()):
-            if not needle:
-                self.table.setRowHidden(row, False)
-                continue
-            match = any(
-                self.table.item(row, col) and needle in self.table.item(row, col).text().lower()
-                for col in range(self.table.columnCount())
-            )
-            self.table.setRowHidden(row, not match)
+    def _show_context_menu(self, pos):
+        selected_rows = sorted(list(set(item.row() for item in self.table.selectedItems())))
+        if not selected_rows:
+            return
+        menu = QMenu(self)
+        s_suffix = "s" if len(selected_rows) > 1 else ""
+        count_label = f"Selected {len(selected_rows)} row{s_suffix}"
+        info_act = menu.addAction(count_label)
+        info_act.setEnabled(False)
+        menu.addSeparator()
+
+        del_act = menu.addAction("Delete Selected Rows")
+        act = menu.exec(self.table.viewport().mapToGlobal(pos))
+        if act == del_act:
+            for r in reversed(selected_rows):
+                if 0 <= r < len(self.list_value):
+                    del self.list_value[r]
+            self.dirty = True
+            self._populate()
+
+    def _export_csv(self):
+        path, _ = QFileDialog.getSaveFileName(self, "Export Table to CSV", "", "CSV Files (*.csv);;All Files (*.*)")
+        if not path:
+            return
+        try:
+            with open(path, "w", newline="", encoding="utf-8") as f:
+                writer = csv.writer(f)
+                writer.writerow(["#"] + self.columns)
+                for row_idx, item in enumerate(self.list_value):
+                    row_data = [str(row_idx)]
+                    for col_key in self.columns:
+                        if isinstance(item, dict):
+                            v = item.get(col_key, "")
+                        else:
+                            v = item if col_key == "(value)" else ""
+                        row_data.append(str(v))
+                    writer.writerow(row_data)
+            QMessageBox.information(self, "Export CSV", f"Successfully exported table to:\n{path}")
+        except Exception as e:
+            QMessageBox.critical(self, "Export Error", f"Failed to export CSV: {e}")
+
+    def _import_csv(self):
+        path, _ = QFileDialog.getOpenFileName(self, "Import Rows from CSV", "", "CSV Files (*.csv);;All Files (*.*)")
+        if not path:
+            return
+        try:
+            updated = 0
+            with open(path, "r", encoding="utf-8") as f:
+                reader = csv.reader(f)
+                header = next(reader, None)
+                if not header or len(header) < 2:
+                    return
+                col_keys = header[1:]
+                for row in reader:
+                    if len(row) >= 2:
+                        try:
+                            idx = int(row[0])
+                            if 0 <= idx < len(self.list_value):
+                                item = self.list_value[idx]
+                                for c_idx, k in enumerate(col_keys):
+                                    if c_idx + 1 < len(row) and isinstance(item, dict) and k in item:
+                                        raw_v = row[c_idx + 1]
+                                        old = item[k]
+                                        if isinstance(old, bool):
+                                            item[k] = raw_v.lower() in ("1", "true", "yes")
+                                        elif isinstance(old, int):
+                                            item[k] = int(float(raw_v))
+                                        elif isinstance(old, float):
+                                            item[k] = float(raw_v)
+                                        else:
+                                            item[k] = raw_v
+                                updated += 1
+                                self.dirty = True
+                        except Exception:
+                            pass
+            self._populate()
+            QMessageBox.information(self, "Import CSV", f"Successfully imported {updated} rows from CSV.")
+        except Exception as e:
+            QMessageBox.critical(self, "Import Error", f"Failed to import CSV: {e}")
 
 
 class _DiscoveredSavesDialog(QDialog):
@@ -1080,6 +1303,157 @@ class InventoryEditorWindow(QMainWindow):
         return self._target_key, self._item_id, self._quantity
 
 
+
+class BackupManagerDialog(QDialog):
+    """
+    Snapshot & Backup Manager. Lists timestamped .bak files for the current save,
+    allowing 1-click snapshot creation, backup restoration, and inspection.
+    """
+    def __init__(self, parent_window, save_path: str):
+        super().__init__(parent_window)
+        self.parent_window = parent_window
+        self.save_path = save_path
+        self.setWindowTitle(f"Backup & Snapshot Manager - {os.path.basename(save_path)}")
+        self.resize(750, 480)
+        from lib.base import list_backups, backup_file, restore_backup
+        self.list_backups = list_backups
+        self.backup_file = backup_file
+        self.restore_backup = restore_backup
+        self._build_ui()
+        self._refresh()
+
+    def _build_ui(self):
+        layout = QVBoxLayout(self)
+        layout.setSpacing(10)
+
+        info_label = QLabel(
+            "<b>Save File Backups & Snapshots</b><br>"
+            "cedit automatically creates timestamped backups on save. You can also create explicit snapshots "
+            "or restore any previous backup state below."
+        )
+        info_label.setWordWrap(True)
+        layout.addWidget(info_label)
+
+        # Table
+        self.table = QTableWidget()
+        self.table.setColumnCount(4)
+        self.table.setHorizontalHeaderLabels(["Snapshot Filename", "Created Date", "Size", "Path"])
+        self.table.horizontalHeader().setStretchLastSection(True)
+        self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.table.setSelectionMode(QAbstractItemView.SingleSelection)
+        layout.addWidget(self.table, stretch=1)
+
+        # Button row
+        btn_row = QHBoxLayout()
+        snap_btn = QPushButton("Create Snapshot Now")
+        snap_btn.clicked.connect(self._create_snapshot)
+        btn_row.addWidget(snap_btn)
+
+        restore_btn = QPushButton("Restore Selected Snapshot")
+        restore_btn.setStyleSheet("background-color: #d46b08; color: white; font-weight: bold;")
+        restore_btn.clicked.connect(self._restore_selected)
+        btn_row.addWidget(restore_btn)
+
+        del_btn = QPushButton("Delete Selected")
+        del_btn.clicked.connect(self._delete_selected)
+        btn_row.addWidget(del_btn)
+
+        btn_row.addStretch(1)
+
+        open_folder_btn = QPushButton("Open Backup Folder")
+        open_folder_btn.clicked.connect(self._open_folder)
+        btn_row.addWidget(open_folder_btn)
+
+        close_btn = QPushButton("Close")
+        close_btn.clicked.connect(self.accept)
+        btn_row.addWidget(close_btn)
+        layout.addLayout(btn_row)
+
+    def _refresh(self):
+        self.table.blockSignals(True)
+        backups = self.list_backups(self.save_path)
+        self.table.setRowCount(len(backups))
+        for row, b in enumerate(backups):
+            fn_cell = QTableWidgetItem(b["filename"])
+            fn_cell.setData(Qt.UserRole, b["path"])
+            self.table.setItem(row, 0, fn_cell)
+
+            dt = datetime.datetime.fromtimestamp(b["mtime"]).strftime("%Y-%m-%d %H:%M:%S")
+            self.table.setItem(row, 1, QTableWidgetItem(dt))
+
+            size_str = f"{b["size"] / 1024:.1f} KB" if b["size"] >= 1024 else f"{b["size"]} B"
+            self.table.setItem(row, 2, QTableWidgetItem(size_str))
+
+            self.table.setItem(row, 3, QTableWidgetItem(b["path"]))
+        self.table.resizeColumnsToContents()
+        self.table.blockSignals(False)
+
+    def _create_snapshot(self):
+        if not self.save_path or not os.path.isfile(self.save_path):
+            QMessageBox.warning(self, "Create Snapshot", "No valid save file is currently open.")
+            return
+        p = self.backup_file(self.save_path, keep=None)
+        QMessageBox.information(self, "Snapshot Created", f"Created snapshot:\n{os.path.basename(p)}")
+        self._refresh()
+
+    def _restore_selected(self):
+        selected = self.table.selectedItems()
+        if not selected:
+            QMessageBox.warning(self, "Restore Snapshot", "Please select a backup from the list to restore.")
+            return
+        row = selected[0].row()
+        backup_path = self.table.item(row, 0).data(Qt.UserRole)
+        fn = self.table.item(row, 0).text()
+
+        ans = QMessageBox.question(
+            self, "Confirm Restore",
+            f"Are you sure you want to restore snapshot {fn}?\n\n"
+            "Your current save will be safely backed up before overwriting.",
+            QMessageBox.Yes | QMessageBox.No, QMessageBox.No
+        )
+        if ans != QMessageBox.Yes:
+            return
+
+        try:
+            self.restore_backup(backup_path, self.save_path)
+            QMessageBox.information(self, "Restored", f"Successfully restored {fn}. Reloading save file...")
+            if hasattr(self.parent_window, "open_path"):
+                self.parent_window.open_path(self.save_path)
+            self.accept()
+        except Exception as e:
+            QMessageBox.critical(self, "Restore Error", f"Failed to restore backup: {e}")
+
+    def _delete_selected(self):
+        selected = self.table.selectedItems()
+        if not selected:
+            return
+        row = selected[0].row()
+        backup_path = self.table.item(row, 0).data(Qt.UserRole)
+        fn = self.table.item(row, 0).text()
+
+        ans = QMessageBox.question(
+            self, "Confirm Delete",
+            f"Delete backup file {fn} permanently?",
+            QMessageBox.Yes | QMessageBox.No, QMessageBox.No
+        )
+        if ans == QMessageBox.Yes:
+            try:
+                os.remove(backup_path)
+                self._refresh()
+            except Exception as e:
+                QMessageBox.critical(self, "Delete Error", f"Failed to delete backup: {e}")
+
+    def _open_folder(self):
+        import subprocess
+        d = os.path.dirname(self.save_path) or "."
+        if sys.platform == "darwin":
+            subprocess.Popen(["open", d])
+        elif sys.platform.startswith("win"):
+            os.startfile(d)
+        else:
+            subprocess.Popen(["xdg-open", d])
+
+
 class SaveEditorWindow(QMainWindow):
     def __init__(self, profile):
         super().__init__()
@@ -1130,6 +1504,9 @@ class SaveEditorWindow(QMainWindow):
         discover_action = QAction("Discover Saves...", self)
         discover_action.triggered.connect(self.discover_saves)
         file_menu.addAction(discover_action)
+        manage_backups_action = QAction("Manage Backups...", self)
+        manage_backups_action.triggered.connect(self.open_backup_manager)
+        file_menu.addAction(manage_backups_action)
         self.recent_menu = QMenu("Open Recent", self)
         file_menu.addMenu(self.recent_menu)
         file_menu.addSeparator()
@@ -1567,6 +1944,13 @@ class SaveEditorWindow(QMainWindow):
                     self.fix_texture_action.setText("Fix Texture (Hades II) [HD: OFF]...")
             else:
                 self.fix_texture_action.setText("Fix Texture (Hades II)...")
+
+    def open_backup_manager(self):
+        if not self.current_path:
+            QMessageBox.information(self, "Manage Backups", "Please open a save file first.")
+            return
+        dialog = BackupManagerDialog(self, self.current_path)
+        dialog.exec()
 
     def open_default_folder(self):
         d = self.profile.find_default_save_dir()

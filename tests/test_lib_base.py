@@ -301,3 +301,31 @@ class TestFileIO(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+    def test_list_and_restore_backups(self):
+        import tempfile
+        import os
+        from lib.base import backup_file, list_backups, restore_backup
+
+        with tempfile.TemporaryDirectory() as td:
+            save_path = os.path.join(td, "Save_1.sav")
+            with open(save_path, "w") as f:
+                f.write("original_data")
+
+            # Create backup
+            b1 = backup_file(save_path)
+            self.assertTrue(os.path.isfile(b1))
+
+            backups = list_backups(save_path)
+            self.assertEqual(len(backups), 1)
+            self.assertEqual(backups[0]["filename"], os.path.basename(b1))
+
+            # Modify save
+            with open(save_path, "w") as f:
+                f.write("modified_data")
+
+            # Restore backup
+            restore_backup(b1, save_path)
+            with open(save_path, "r") as f:
+                self.assertEqual(f.read(), "original_data")
+

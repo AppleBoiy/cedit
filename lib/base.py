@@ -620,3 +620,39 @@ class GameProfile:
             special_nodes=special_nodes,
             notes=cfg.get("notes", ""),
         )
+
+
+def list_backups(path):
+    """Find all timestamped .bak files for the given save file path, sorted newest first."""
+    if not path:
+        return []
+    directory = os.path.dirname(path) or "."
+    prefix = os.path.basename(path) + "."
+    results = []
+    try:
+        for name in os.listdir(directory):
+            if name.startswith(prefix) and name.endswith(".bak"):
+                full = os.path.join(directory, name)
+                if os.path.isfile(full):
+                    stat = os.stat(full)
+                    results.append({
+                        "path": full,
+                        "filename": name,
+                        "size": stat.st_size,
+                        "mtime": stat.st_mtime,
+                    })
+    except Exception:
+        pass
+    results.sort(key=lambda x: x["mtime"], reverse=True)
+    return results
+
+
+def restore_backup(backup_path, target_path):
+    """Safely restore a backup file to the target save path (backing up current first)."""
+    if not os.path.isfile(backup_path):
+        raise FileNotFoundError(f"Backup file not found: {backup_path}")
+    # Create safety backup of current target if it exists
+    if os.path.isfile(target_path):
+        backup_file(target_path)
+    shutil.copy2(backup_path, target_path)
+    return True

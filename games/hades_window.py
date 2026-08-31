@@ -518,6 +518,47 @@ class HadesEditorWindow(QDialog):
         layout = QVBoxLayout(widget)
 
         for group_title, items in groups:
+            if group_title.startswith("Arcana Cards") and len(items) == 25:
+                # 5x5 Altar of Ashes Grid Layout
+                grid_widget = QWidget()
+                grid_layout = QGridLayout(grid_widget)
+                grid_layout.setSpacing(8)
+                for idx, (field_key, display_name, field_type, min_v, max_v) in enumerate(items):
+                    r = idx // 5
+                    c = idx % 5
+                    card_box = QGroupBox(display_name)
+                    card_box.setStyleSheet(
+                        "QGroupBox { font-weight: bold; border: 1px solid #444; border-radius: 6px; margin-top: 6px; padding-top: 10px; background-color: rgba(255,255,255,0.02); } "
+                        "QGroupBox::title { subcontrol-origin: margin; left: 8px; color: #2b78e4; }"
+                    )
+                    c_layout = QVBoxLayout(card_box)
+                    c_layout.setSpacing(4)
+
+                    key_lbl = QLabel(f"<code>{field_key}</code>")
+                    key_lbl.setStyleSheet("color: #777; font-size: 11px;")
+                    c_layout.addWidget(key_lbl)
+
+                    row_ctrl = QHBoxLayout()
+                    row_ctrl.addWidget(QLabel("Rank:"))
+                    spin = QSpinBox()
+                    spin.setRange(1, 3)
+                    spin.setValue(1)
+                    spin.setFixedWidth(50)
+                    row_ctrl.addWidget(spin)
+
+                    chk = QCheckBox("Unlocked")
+                    row_ctrl.addWidget(chk)
+                    c_layout.addLayout(row_ctrl)
+
+                    self._inputs[field_key] = ("arcana_card", (spin, chk))
+                    grid_layout.addWidget(card_box, r, c)
+
+                group_box = QGroupBox(group_title)
+                gb_layout = QVBoxLayout(group_box)
+                gb_layout.addWidget(grid_widget)
+                layout.addWidget(group_box)
+                continue
+
             group_box = QGroupBox(group_title)
             grid = QGridLayout(group_box)
             grid.setHorizontalSpacing(16)
