@@ -980,6 +980,30 @@ class HadesEditorWindow(QDialog):
                 spin.setValue(3)
                 chk.setChecked(True)
 
+    def _batch_max_aspects(self):
+        for field_key, (f_type, widget) in self._inputs.items():
+            if f_type == "aspect_rank":
+                widget.setValue(5)
+            elif f_type == "weapon_unlock":
+                widget.setChecked(True)
+
+    def _batch_max_familiars(self):
+        for field_key, (f_type, widget) in self._inputs.items():
+            if f_type == "familiar_rank":
+                widget.setValue(5)
+            elif f_type == "familiar_bool":
+                widget.setChecked(True)
+
+    def _batch_max_affinity(self):
+        for field_key, (f_type, widget) in self._inputs.items():
+            if f_type == "gift_tier":
+                widget.setValue(10)
+
+    def _batch_unlock_incantations(self):
+        for field_key, (f_type, widget) in self._inputs.items():
+            if f_type == "world_upgrade":
+                widget.setChecked(True)
+
     def _batch_unlock_aspects(self):
         for field_key, (f_type, widget) in self._inputs.items():
             if f_type in ("weapon_unlock", "world_upgrade"):
