@@ -6,3 +6,4 @@
 # CLI build with no Qt dependency at all (see its own comment).
 pyinstaller
 pycryptodome
+lz4

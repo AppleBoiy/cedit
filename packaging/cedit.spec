@@ -69,7 +69,7 @@ a = Analysis(
     # games/dredge.py imports games.dredge_window lazily (inside a function,
     # not at module level - see its own docstring for why), so PyInstaller's
     # static import scan can miss it; spell it out explicitly here.
-    hiddenimports=["games.dredge_window"],
+    hiddenimports=["games.dredge_window", "lz4", "lz4.block"],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
