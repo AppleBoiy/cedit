@@ -37,12 +37,12 @@ HADES2_SECTIONS = [
     {
         "title": "General",
         "groups": [
-            ("Settings", [
+            ("Settings & Progress", [
                 ("EasyModeLevel", "God Mode Level (0-30)", "state_num", 0, 30),
                 ("EasyMode", "God Mode Active", "header_bool", 0, 1),
                 ("HardMode", "Hell Mode Active", "header_bool", 0, 1),
                 ("Runs", "Total Runs Count", "header_int", 0, 99999),
-                ("Grasp", "Grasp Capacity", "header_int", 0, 100),
+                ("Grasp", "Grasp Capacity (Altar Points)", "header_int", 0, 100),
                 ("Location", "Active Room / Location", "header_str", 0, 0),
             ])
         ]
@@ -50,115 +50,250 @@ HADES2_SECTIONS = [
     {
         "title": "Resources",
         "groups": [
-            ("Common Currencies", [
-                ("MetaCurrency", "Bones", "res", 0, 999999),
+            ("Major Currencies & Points", [
+                ("MetaCurrency", "Bones", "res", 0, 99999),
                 ("MemPointsCommon", "Psyche", "res", 0, 99999),
                 ("MetaCardPointsCommon", "Ash", "res", 0, 99999),
                 ("MetaFabric", "Fate Fabric", "res", 0, 9999),
                 ("CardUpgradePoints", "Moon Dust", "res", 0, 9999),
-                ("GemPoints", "Gemstones", "res", 0, 99999),
-                ("TrashPoints", "Rubbish", "res", 0, 9999),
+                ("CardUpgradePointsAdd", "Star Dust", "res", 0, 9999),
+                ("TalentPoints", "Shadow", "res", 0, 9999),
+                ("MajorTalentPoints", "Zodiac Sand", "res", 0, 9999),
+                ("TrashPoints", "Garbage", "res", 0, 999),
             ]),
-            ("Ores & Minerals", [
-                ("OreFSilver", "Silver", "res", 0, 999),
-                ("OreGLime", "Limestone", "res", 0, 999),
-                ("OreHGlassrock", "Glassrock", "res", 0, 999),
-                ("OreIMarble", "Marble", "res", 0, 999),
-                ("OreNBronze", "Bronze", "res", 0, 999),
-                ("OreOIron", "Iron", "res", 0, 999),
-                ("OrePAdamant", "Adamant", "res", 0, 999),
-                ("OreQScales", "Serpent Scales", "res", 0, 999),
-                ("OreChaosProtoplasm", "Flux", "res", 0, 999),
+            ("Mining Ores & Minerals", [
+                ("OreFSilver", "Silver (Erebus)", "res", 0, 999),
+                ("OreGLime", "Limestone (Oceanus)", "res", 0, 999),
+                ("OreHGlassrock", "Glassrock (Fields)", "res", 0, 999),
+                ("OreIMarble", "Marble (Tartarus)", "res", 0, 999),
+                ("OreJBronze", "Bronze (Ephyra)", "res", 0, 999),
+                ("OreKIron", "Iron (Thessaly)", "res", 0, 999),
+                ("OreLAdamant", "Adamant (Olympus)", "res", 0, 999),
+                ("OreMScales", "Scales (Summit)", "res", 0, 999),
+                ("OreNFlux", "Flux (Surface)", "res", 0, 999),
             ]),
-            ("Boss Rewards", [
+            ("Boss Reagents & Trophies", [
                 ("MixerFBoss", "Cinder (Hecate)", "res", 0, 999),
-                ("MixerGBoss", "Pearl (Scylla)", "res", 0, 999),
-                ("MixerHBoss", "Tears (Cerberus)", "res", 0, 999),
-                ("MixerIBoss", "Zodiac Sand (Chronos)", "res", 0, 999),
-                ("MixerNBoss", "Wool (Polyphemus)", "res", 0, 999),
-                ("MixerOBoss", "Golden Apple (Eris)", "res", 0, 999),
-                ("MixerPBoss", "Feather (Prometheus)", "res", 0, 999),
-                ("MixerQBoss", "Void Lens (Typhon)", "res", 0, 999),
+                ("MixerGBoss", "Pearl / Tears (Scylla)", "res", 0, 999),
+                ("MixerHBoss", "Wool (Polyphemus)", "res", 0, 999),
+                ("MixerIBoss", "Golden Apple (Eris)", "res", 0, 999),
+                ("MixerJBoss", "Entropy (Chronos)", "res", 0, 999),
+                ("MixerPBase", "Moss", "res", 0, 999),
+            ])
+        ]
+    },
+    {
+        "title": "Aspects & Weapons",
+        "groups": [
+            ("Descura - Witch's Staff", [
+                ("StaffMelinoeAspect", "Aspect of Melinoë (Staff)", "aspect_rank", 1, 5),
+                ("StaffCirceAspect", "Aspect of Circe", "aspect_rank", 1, 5),
+                ("StaffMomusAspect", "Aspect of Momus", "aspect_rank", 1, 5),
+                ("StaffRaiseDeadAspect", "Aspect of Anubis (Hidden)", "aspect_rank", 1, 5),
             ]),
-            ("Alchemy Materials", [
-                ("WeaponPointsRare", "Nightmare", "res", 0, 999),
-                ("Mixer5Common", "Star Dust", "res", 0, 999),
-                ("Mixer6Common", "Darkness", "res", 0, 999),
-                ("MixerShadow", "Shadow", "res", 0, 999),
-                ("MixerMythic", "Entropy", "res", 0, 999),
+            ("Lim and Oros - Sister Blades", [
+                ("DaggerMelinoeAspect", "Aspect of Melinoë (Daggers)", "aspect_rank", 1, 5),
+                ("DaggerArtemisAspect", "Aspect of Artemis", "aspect_rank", 1, 5),
+                ("DaggerPanAspect", "Aspect of Pan", "aspect_rank", 1, 5),
+                ("DaggerTripleAspect", "Aspect of the Morrigan (Hidden)", "aspect_rank", 1, 5),
+            ]),
+            ("Ygnium - Umbral Flames", [
+                ("TorchMelinoeAspect", "Aspect of Melinoë (Torches)", "aspect_rank", 1, 5),
+                ("TorchMorosAspect", "Aspect of Moros", "aspect_rank", 1, 5),
+                ("TorchEosAspect", "Aspect of Eos", "aspect_rank", 1, 5),
+                ("TorchAutofireAspect", "Aspect of Supay (Hidden)", "aspect_rank", 1, 5),
+            ]),
+            ("Zorephet - Moonstone Axe", [
+                ("AxeMelinoeAspect", "Aspect of Melinoë (Axe)", "aspect_rank", 1, 5),
+                ("AxeCharonAspect", "Aspect of Charon", "aspect_rank", 1, 5),
+                ("AxeThanatosAspect", "Aspect of Thanatos", "aspect_rank", 1, 5),
+                ("AxeRallyAspect", "Aspect of Nergal (Hidden)", "aspect_rank", 1, 5),
+            ]),
+            ("Revaal - Argent Skull", [
+                ("LobMelinoeAspect", "Aspect of Melinoë (Skull)", "aspect_rank", 1, 5),
+                ("LobMedeaAspect", "Aspect of Medea", "aspect_rank", 1, 5),
+                ("LobPersephoneAspect", "Aspect of Persephone", "aspect_rank", 1, 5),
+                ("LobGunAspect", "Aspect of Hel (Hidden)", "aspect_rank", 1, 5),
+            ]),
+            ("Althea - Black Coat", [
+                ("SuitMelinoeAspect", "Aspect of Melinoë (Coat)", "aspect_rank", 1, 5),
+                ("SuitNyxAspect", "Aspect of Nyx", "aspect_rank", 1, 5),
+                ("SuitSeleneAspect", "Aspect of Selene", "aspect_rank", 1, 5),
+                ("SuitComboAspect", "Aspect of Shiva (Hidden)", "aspect_rank", 1, 5),
+            ])
+        ]
+    },
+    {
+        "title": "Familiars",
+        "groups": [
+            ("Frinos the Frog", [
+                ("FrogBondLevel", "Frinos Bond Level (1-5)", "familiar_rank", 1, 5),
+                ("FrogUnlocked", "Recruited / Unlocked", "familiar_bool", 0, 1),
+                ("FrogHealthBonus", "Maximum Health Perk Level", "familiar_rank", 1, 5),
+                ("FrogBlockMissiles", "Block Projectiles Perk Level", "familiar_rank", 1, 5),
+            ]),
+            ("Toula the Cat", [
+                ("CatBondLevel", "Toula Bond Level (1-5)", "familiar_rank", 1, 5),
+                ("CatUnlocked", "Recruited / Unlocked", "familiar_bool", 0, 1),
+                ("CatRevive", "Extra Death Defiance Perk Level", "familiar_rank", 1, 5),
+                ("CatDamageClaw", "Claw Strike Attack Perk Level", "familiar_rank", 1, 5),
+                ("CatFishingFish", "Bonus Fishing Catches Perk Level", "familiar_rank", 1, 5),
+            ]),
+            ("Raki the Raven", [
+                ("RavenBondLevel", "Raki Bond Level (1-5)", "familiar_rank", 1, 5),
+                ("RavenUnlocked", "Recruited / Unlocked", "familiar_bool", 0, 1),
+                ("RavenPeckCrit", "Critical Chance Perk Level", "familiar_rank", 1, 5),
+                ("RavenCollectSeeds", "Auto Forage & Seeds Perk Level", "familiar_rank", 1, 5),
+            ]),
+            ("Gale the Polecat", [
+                ("PolecatBondLevel", "Gale Bond Level (1-5)", "familiar_rank", 1, 5),
+                ("PolecatUnlocked", "Recruited / Unlocked", "familiar_bool", 0, 1),
+                ("PolecatDodgeSpeed", "Dodge & Sprint Perk Level", "familiar_rank", 1, 5),
+                ("PolecatResourceSniff", "Resource Sniffer Perk Level", "familiar_rank", 1, 5),
+            ]),
+            ("Beast Loyalty & Treats", [
+                ("SuperGiftPoints", "Witch's Delight (Beast Treats)", "res", 0, 999),
+            ])
+        ]
+    },
+    {
+        "title": "Relationships",
+        "groups": [
+            ("Crossroads Residents (Affinity & Hearts)", [
+                ("NPC_Hecate_01", "Headmistress Hecate", "gift_tier", 0, 10),
+                ("NPC_Odysseus_01", "Odysseus", "gift_tier", 0, 10),
+                ("NPC_Dora_01", "Dora the Shade", "gift_tier", 0, 10),
+                ("NPC_Nemesis_01", "Nemesis (Retribution)", "gift_tier", 0, 10),
+                ("NPC_Moros_01", "Moros (Doom)", "gift_tier", 0, 10),
+                ("NPC_Eris_01", "Eris (Strife)", "gift_tier", 0, 10),
+                ("NPC_Charon_01", "Charon the Boatman", "gift_tier", 0, 10),
+                ("NPC_Skelly_01", "Commander Schelemeus (Skelly)", "gift_tier", 0, 10),
+                ("NPC_Chronos_01", "Chronos (Titan of Time)", "gift_tier", 0, 10),
+                ("NPC_Arachne_01", "Arachne the Weaver", "gift_tier", 0, 10),
+                ("NPC_Narcissus_01", "Narcissus", "gift_tier", 0, 10),
+                ("NPC_Echo_01", "Echo the Nymph", "gift_tier", 0, 10),
+                ("NPC_Medea_01", "Medea", "gift_tier", 0, 10),
+                ("NPC_Circe_01", "Circe the Sorceress", "gift_tier", 0, 10),
+                ("NPC_Icarus_01", "Icarus", "gift_tier", 0, 10),
+                ("NPC_Artemis_01", "Artemis (Huntress)", "gift_tier", 0, 10),
+                ("NPC_Heracles_01", "Heracles", "gift_tier", 0, 10),
+                ("NPC_Selene_01", "Selene (Moon)", "gift_tier", 0, 10),
+                ("NPC_Hermes_01", "Hermes (Messenger)", "gift_tier", 0, 10),
+                ("NPC_Chaos_01", "Primordial Chaos", "gift_tier", 0, 10),
+            ]),
+            ("Gift Items & Indulgences", [
+                ("GiftPointsCommon", "Nectar", "res", 0, 999),
+                ("GiftPointsRare", "Ambrosia", "res", 0, 999),
+                ("BathSalt", "Bath Salts (Hot Springs)", "res", 0, 999),
+                ("TwinLure", "Twin Lures (Fishing Pier)", "res", 0, 999),
+                ("BathingGifts", "Herbal Tea (Taverna)", "res", 0, 999),
+                ("BlindBoxPoints", "Obol Points", "res", 0, 999),
+            ])
+        ]
+    },
+    {
+        "title": "Oath & Fear",
+        "groups": [
+            ("Vows of the Night (Pacts of Punishment)", [
+                ("EnemyDamageShrineUpgrade", "Vow of Blood (Enemy Damage +20%/Rank)", "shrine_vow", 0, 3),
+                ("EnemyHealthShrineUpgrade", "Vow of Dominance (Enemy Health +10%/Rank)", "shrine_vow", 0, 3),
+                ("HealingReductionShrineUpgrade", "Vow of Scars (Healing Reduction -25%/Rank)", "shrine_vow", 0, 3),
+                ("EnemySpeedShrineUpgrade", "Vow of Frenzy (Enemy Move & Attack Speed)", "shrine_vow", 0, 3),
+                ("EnemyCountShrineUpgrade", "Vow of Hordes (Enemy Pack Density)", "shrine_vow", 0, 3),
+                ("ShopPriceShrineUpgrade", "Vow of Arrogance (Shop Price Increase)", "shrine_vow", 0, 3),
+                ("EnemyShieldShrineUpgrade", "Vow of Barrier (Enemy Blue Armor Shields)", "shrine_vow", 0, 3),
+                ("BoonRerollShrineUpgrade", "Vow of Forsaking (Boon Choices Banished)", "shrine_vow", 0, 3),
+                ("TimeLimitShrineUpgrade", "Vow of Desperation (Strict Room Timer)", "shrine_vow", 0, 3),
+                ("BiomeSpeedShrineUpgrade", "Vow of Panic (Faster Hazard Timers)", "shrine_vow", 0, 3),
+                ("ManaBurnShrineUpgrade", "Vow of Hubris (Magick Cost Prime)", "shrine_vow", 0, 3),
+                ("SpawnMinionShrineUpgrade", "Vow of Haunting (Revenant Spirits)", "shrine_vow", 0, 3),
+            ])
+        ]
+    },
+    {
+        "title": "Cauldron & Incantations",
+        "groups": [
+            ("Crossroads Infrastructure Incantations", [
+                ("WorldUpgradeTaverna", "Woodland Cleansing (Taverna / Bar)", "world_upgrade", 0, 1),
+                ("WorldUpgradeBathHouse", "Spring of Purity (Hot Springs)", "world_upgrade", 0, 1),
+                ("WorldUpgradeFishingPier", "Watery Haven (Fishing Pier)", "world_upgrade", 0, 1),
+                ("WorldUpgradeFountainChambers", "Fonts of Cleansing (Fountain Rooms)", "world_upgrade", 0, 1),
+                ("WorldUpgradeAltars", "Attunement of the Altar (Expanded Grasp)", "world_upgrade", 0, 1),
+                ("WorldUpgradeShadowExtraction", "Extraction of Shadow (Cauldron Alchemy)", "world_upgrade", 0, 1),
+                ("WorldUpgradeAutoHarvestOnExit", "Greatest Gift of Gaia (Auto Harvest)", "world_upgrade", 0, 1),
+            ]),
+            ("Surface & Boss Difficulty Incantations", [
+                ("WorldUpgradeSurfaceWards", "Permeating Modiste (Survive Surface Curse)", "world_upgrade", 0, 1),
+                ("WorldUpgradeBossDifficultyT2", "Rivals of Depth and Sea (Scylla T2)", "world_upgrade", 0, 1),
+                ("WorldUpgradeBossDifficultyT3", "Rivals of Plain and Peak (Cerberus T3)", "world_upgrade", 0, 1),
+                ("WorldUpgradeBossDifficultyT4", "Rivals of Old and Rot (Chronos T4)", "world_upgrade", 0, 1),
             ])
         ]
     },
     {
         "title": "Garden",
         "groups": [
-            ("Harvested Plants & Flora", [
-                ("PlantFMoly", "Moly", "res", 0, 999),
+            ("Seeds & Harvest Spores", [
+                ("PlantFNightshadeSeed", "Nightshade Seeds", "res", 0, 999),
+                ("PlantGLotusSeed", "Lotus Seeds", "res", 0, 999),
+                ("PlantHMyrtleSeed", "Myrtle Seeds", "res", 0, 999),
+                ("PlantIShaderotSeed", "Shaderot Spores", "res", 0, 999),
+                ("PlantJCattailSeed", "Cattail Seeds", "res", 0, 999),
+                ("PlantKWheatSeed", "Wheat Seeds", "res", 0, 999),
+                ("PlantLPoppySeed", "Poppy Seeds", "res", 0, 999),
+                ("PlantMAlgaeSeed", "Algae Spores", "res", 0, 999),
+                ("PlantNGarlicSeed", "Garlic Tubers", "res", 0, 999),
+                ("PlantFMolySeed", "Moly Seeds", "res", 0, 999),
+                ("PlantFMandrakeSeed", "Mandrake Seeds", "res", 0, 999),
+                ("PlantFThalamusSeed", "Origin Seeds", "res", 0, 999),
+            ]),
+            ("Harvested Flora", [
+                ("PlantFNightshade", "Nightshade", "res", 0, 999),
                 ("PlantGLotus", "Lotus", "res", 0, 999),
                 ("PlantHMyrtle", "Myrtle", "res", 0, 999),
                 ("PlantIShaderot", "Shaderot", "res", 0, 999),
-                ("PlantNMoss", "Moss", "res", 0, 999),
-                ("PlantODriftwood", "Driftwood", "res", 0, 999),
-                ("PlantPIris", "Iris", "res", 0, 999),
-                ("PlantQFang", "Fangs", "res", 0, 999),
-            ]),
-            ("Grown Crops", [
-                ("PlantFNightshade", "Nightshade", "res", 0, 999),
-                ("PlantGCattail", "Cattail", "res", 0, 999),
-                ("PlantHWheat", "Wheat", "res", 0, 999),
-                ("PlantIPoppy", "Poppy", "res", 0, 999),
+                ("PlantJCattail", "Cattail", "res", 0, 999),
+                ("PlantKWheat", "Wheat", "res", 0, 999),
+                ("PlantLPoppy", "Poppy", "res", 0, 999),
+                ("PlantMAlgae", "Algae", "res", 0, 999),
                 ("PlantNGarlic", "Garlic", "res", 0, 999),
-                ("PlantOMandrake", "Mandrake Root", "res", 0, 999),
-                ("PlantPOlive", "Olive", "res", 0, 999),
-                ("PlantQSnakereed", "Snake-reed", "res", 0, 999),
-                ("PlantChaosThalamus", "Thalamus", "res", 0, 999),
-            ]),
-            ("Garden Seeds", [
-                ("PlantChaosThalamusSeed", "Origin Seeds", "res", 0, 999),
-                ("PlantFNightshadeSeed", "Nightshade Seeds", "res", 0, 999),
-                ("PlantGCattailSeed", "Cattail Seeds", "res", 0, 999),
-                ("PlantHWheatSeed", "Wheat Seeds", "res", 0, 999),
-                ("PlantIPoppySeed", "Poppy Seeds", "res", 0, 999),
-                ("PlantNGarlicSeed", "Garlic Cloves", "res", 0, 999),
-                ("PlantOMandrakeSeed", "Mandrake Seeds", "res", 0, 999),
-                ("PlantPOliveSeed", "Olive Branch", "res", 0, 999),
-                ("PlantQSnakereedSeed", "Plankton", "res", 0, 999),
-                ("SeedMystery", "Mystery Seeds", "res", 0, 999),
-            ])
-        ]
-    },
-    {
-        "title": "Gifts & Indulgences",
-        "groups": [
-            ("Affinity Gifts", [
-                ("GiftPoints", "Nectar", "res", 0, 999),
-                ("GiftPointsRare", "Bath Salts", "res", 0, 999),
-                ("GiftPointsEpic", "Twin Lures", "res", 0, 999),
-                ("SuperGiftPoints", "Ambrosia", "res", 0, 999),
-                ("FamiliarPoints", "Witch's Delight", "res", 0, 999),
-                ("CharonPoints", "Obol Points", "res", 0, 999),
-                ("MedeaPoints", "Tears, Vaporized", "res", 0, 999),
-                ("IcarusPoints", "Ectoplasmic Draught", "res", 0, 999),
-                ("HadesSpearPoints", "Gigaros", "res", 0, 999),
-                ("DeathAreaPoints", "House Soot", "res", 0, 999),
-                ("HypnosPoints", "Dream Vapors", "res", 0, 999),
-                ("DreamPoints", "Shiny Stars", "res", 0, 999),
-                ("CosmeticsPoints", "Kudos", "res", 0, 999),
+                ("PlantFMoly", "Moly", "res", 0, 999),
+                ("PlantFMandrake", "Mandrake", "res", 0, 999),
+                ("PlantFThalamus", "Thalamus", "res", 0, 999),
             ])
         ]
     },
     {
         "title": "Fish Catches",
         "groups": [
-            ("Erebus", [("FishFCommon", "Moper", "res", 0, 99), ("FishFRare", "Figment", "res", 0, 99), ("FishFLegendary", "Soulbelly", "res", 0, 99)]),
-            ("Oceanus", [("FishGCommon", "Chiton", "res", 0, 99), ("FishGRare", "Gutterpop", "res", 0, 99), ("FishGLegendary", "Stalkfin", "res", 0, 99)]),
-            ("Fields of Mourning", [("FishHCommon", "Soby", "res", 0, 99), ("FishHRare", "Anguish", "res", 0, 99), ("FishHLegendary", "Tearjerker", "res", 0, 99)]),
-            ("Tartarus", [("FishICommon", "Jiffy", "res", 0, 99), ("FishIRare", "Goldfish", "res", 0, 99), ("FishILegendary", "Styxeon", "res", 0, 99)]),
-            ("City of Ephyra", [("FishNCommon", "Ribeye", "res", 0, 99), ("FishNRare", "Zeel", "res", 0, 99), ("FishNLegendary", "Neckbiter", "res", 0, 99)]),
-            ("Rift of Thessaly", [("FishOCommon", "Shrimp", "res", 0, 99), ("FishORare", "Chrab", "res", 0, 99), ("FishOLegendary", "Squid", "res", 0, 99)]),
-            ("Mount Olympus", [("FishPCommon", "Pillartop", "res", 0, 99), ("FishPRare", "Chrestle", "res", 0, 99), ("FishPLegendary", "Starsailor", "res", 0, 99)]),
-            ("The Summit", [("FishQCommon", "Lamprey", "res", 0, 99), ("FishQRare", "Stormgullet", "res", 0, 99), ("FishQLegendary", "Chimaerid", "res", 0, 99)]),
-            ("Chaos", [("FishChaosCommon", "Mati", "res", 0, 99), ("FishChaosRare", "Projelly", "res", 0, 99), ("FishChaosLegendary", "Voidskate", "res", 0, 99)]),
+            ("Underworld Catches", [
+                ("FishFCommon", "Moper (Erebus)", "res", 0, 99),
+                ("FishFRare", "Figment (Erebus)", "res", 0, 99),
+                ("FishFLegendary", "Soulbelly (Erebus)", "res", 0, 99),
+                ("FishGCommon", "Chiton (Oceanus)", "res", 0, 99),
+                ("FishGRare", "Gutterpop (Oceanus)", "res", 0, 99),
+                ("FishGLegendary", "Stalkfin (Oceanus)", "res", 0, 99),
+                ("FishHCommon", "Soby (Fields)", "res", 0, 99),
+                ("FishHRare", "Anguish (Fields)", "res", 0, 99),
+                ("FishHLegendary", "Tearjerker (Fields)", "res", 0, 99),
+                ("FishICommon", "Jiffy (Tartarus)", "res", 0, 99),
+                ("FishIRare", "Goldfish (Tartarus)", "res", 0, 99),
+                ("FishILegendary", "Styxeon (Tartarus)", "res", 0, 99),
+            ]),
+            ("Surface & Chaos Catches", [
+                ("FishNCommon", "Ribeye (Ephyra)", "res", 0, 99),
+                ("FishNRare", "Zeel (Ephyra)", "res", 0, 99),
+                ("FishNLegendary", "Neckbiter (Ephyra)", "res", 0, 99),
+                ("FishOCommon", "Shrimp (Thessaly)", "res", 0, 99),
+                ("FishORare", "Chrab (Thessaly)", "res", 0, 99),
+                ("FishOLegendary", "Squid (Thessaly)", "res", 0, 99),
+                ("FishPCommon", "Pillartop (Olympus)", "res", 0, 99),
+                ("FishPRare", "Chrestle (Olympus)", "res", 0, 99),
+                ("FishPLegendary", "Starsailor (Olympus)", "res", 0, 99),
+                ("FishChaosCommon", "Mati (Chaos)", "res", 0, 99),
+                ("FishChaosRare", "Projelly (Chaos)", "res", 0, 99),
+                ("FishChaosLegendary", "Voidskate (Chaos)", "res", 0, 99),
+            ])
         ]
     },
     {
@@ -234,25 +369,6 @@ HADES2_SECTIONS = [
         ]
     },
     {
-        "title": "Unlocks & Aspects",
-        "groups": [
-            ("Weapons & Hidden Aspects", [
-                ("StaffRaiseDeadAspect", "Aspect of Anubis (Witch's Staff)", "weapon_unlock", 0, 1),
-                ("DaggerTripleAspect", "Aspect of the Morrigan (Sister Blades)", "weapon_unlock", 0, 1),
-                ("TorchAutofireAspect", "Aspect of Supay (Umbral Flames)", "weapon_unlock", 0, 1),
-                ("AxeRallyAspect", "Aspect of Nergal (Moonstone Axe)", "weapon_unlock", 0, 1),
-                ("LobGunAspect", "Aspect of Hel (Argent Skull)", "weapon_unlock", 0, 1),
-                ("SuitComboAspect", "Aspect of Shiva (Black Coat)", "weapon_unlock", 0, 1),
-            ]),
-            ("Crossroads Upgrades", [
-                ("WorldUpgradeBossDifficultyT2", "Rivals of Depth and Sea (Scylla T2)", "world_upgrade", 0, 1),
-                ("WorldUpgradeBossDifficultyT3", "Rivals of Plain and Peak (Cerberus T3)", "world_upgrade", 0, 1),
-                ("WorldUpgradeBossDifficultyT4", "Rivals of Old and Rot (Chronos T4)", "world_upgrade", 0, 1),
-                ("WorldUpgradeAutoHarvestOnExit", "Greatest Gift of Gaia (Auto Harvest)", "world_upgrade", 0, 1),
-            ])
-        ]
-    },
-    {
         "title": "Active Run",
         "groups": [
             ("Current Run Hero Stats", [
@@ -266,7 +382,6 @@ HADES2_SECTIONS = [
         ]
     }
 ]
-
 
 
 class FixTextureDialog(QDialog):
@@ -506,9 +621,21 @@ class HadesEditorWindow(QDialog):
         btn_max_arcana.clicked.connect(self._batch_max_arcana)
         tester_bar.addWidget(btn_max_arcana)
 
-        btn_unlock_aspects = QPushButton("Unlock All Hidden Aspects")
-        btn_unlock_aspects.clicked.connect(self._batch_unlock_aspects)
-        tester_bar.addWidget(btn_unlock_aspects)
+        btn_max_aspects = QPushButton("Max All Aspects (Rank 5)")
+        btn_max_aspects.clicked.connect(self._batch_max_aspects)
+        tester_bar.addWidget(btn_max_aspects)
+
+        btn_max_familiars = QPushButton("Max All Familiars")
+        btn_max_familiars.clicked.connect(self._batch_max_familiars)
+        tester_bar.addWidget(btn_max_familiars)
+
+        btn_max_affinity = QPushButton("Max Relationships (10 Hearts)")
+        btn_max_affinity.clicked.connect(self._batch_max_affinity)
+        tester_bar.addWidget(btn_max_affinity)
+
+        btn_unlock_incantations = QPushButton("Complete All Incantations")
+        btn_unlock_incantations.clicked.connect(self._batch_unlock_incantations)
+        tester_bar.addWidget(btn_unlock_incantations)
 
         tester_bar.addStretch(1)
         root.addLayout(tester_bar)
@@ -558,21 +685,30 @@ class HadesEditorWindow(QDialog):
                     grid.addWidget(ctrl_widget, row, 2)
                     grid.addWidget(QLabel(""), row, 3)
 
-                elif field_type in ("res", "keepsake", "state_num", "header_int", "run_hero", "run_meta"):
+                elif field_type in ("res", "keepsake", "state_num", "header_int", "run_hero", "run_meta", "aspect_rank", "familiar_rank", "gift_tier", "shrine_vow"):
                     spin = QSpinBox()
                     spin.setRange(min_v, max_v)
-                    spin.setValue(0)
-                    spin.setFixedWidth(110)
+                    spin.setValue(min_v)
+                    spin.setFixedWidth(110 if max_v > 100 else 70)
                     self._inputs[field_key] = (field_type, spin)
 
                     btn_box = QHBoxLayout()
                     btn_box.setSpacing(4)
-                    deltas = [-10, -1, 1, 10, 100] if max_v > 10 else [-1, 1]
+                    if max_v > 10:
+                        deltas = [-10, -1, 1, 10, 100] if max_v > 100 else [-10, -1, 1, 10]
+                    else:
+                        deltas = [-1, 1]
                     for d in deltas:
                         btn = QPushButton(f"+{d}" if d > 0 else str(d))
-                        btn.setFixedWidth(40)
-                        btn.clicked.connect(lambda _, s=spin, delta=d: s.setValue(max(0, s.value() + delta)))
+                        btn.setFixedWidth(36)
+                        btn.clicked.connect(lambda _, s=spin, delta=d: s.setValue(max(min_v, min(max_v, s.value() + delta))))
                         btn_box.addWidget(btn)
+
+                    if max_v <= 10:
+                        max_btn = QPushButton(f"Max ({max_v})")
+                        max_btn.setFixedWidth(64)
+                        max_btn.clicked.connect(lambda _, s=spin, mv=max_v: s.setValue(mv))
+                        btn_box.addWidget(max_btn)
 
                     btn_widget = QWidget()
                     btn_widget.setLayout(btn_box)
@@ -582,7 +718,7 @@ class HadesEditorWindow(QDialog):
                     grid.addWidget(spin, row, 2)
                     grid.addWidget(btn_widget, row, 3)
 
-                elif field_type in ("header_bool", "weapon_unlock", "world_upgrade"):
+                elif field_type in ("header_bool", "weapon_unlock", "world_upgrade", "familiar_bool"):
                     chk = QCheckBox("Active / Unlocked")
                     self._inputs[field_key] = (field_type, chk)
                     grid.addWidget(name_lbl, row, 0)
@@ -672,6 +808,14 @@ class HadesEditorWindow(QDialog):
         weapons_unlocked = game_state.get("WeaponsUnlocked", {})
         world_upgrades = game_state.get("WorldUpgradesAdded", {})
 
+        aspect_ranks = game_state.get("WeaponAspectRanks", {})
+        familiar_levels = game_state.get("FamiliarLevels", {})
+        familiar_status = game_state.get("FamiliarStatus", {})
+        gift_data = game_state.get("GiftData", {})
+        npc_data = game_state.get("NPCData", {})
+        shrine_data = game_state.get("ShrinePointData", {})
+        active_pacts = game_state.get("ActivePacts", {})
+
         for field_key, (f_type, widget) in self._inputs.items():
             if f_type == "res":
                 widget.setValue(int(resources.get(field_key, 0)))
@@ -686,6 +830,21 @@ class HadesEditorWindow(QDialog):
                     unlocked = bool(card)
                 spin.setValue(max(1, min(3, level)))
                 chk.setChecked(unlocked)
+            elif f_type == "aspect_rank":
+                val = aspect_ranks.get(field_key, 1)
+                widget.setValue(max(1, min(5, int(val))))
+            elif f_type == "familiar_rank":
+                val = familiar_levels.get(field_key, familiar_status.get(field_key, {}).get("Level", 1) if isinstance(familiar_status.get(field_key), dict) else 1)
+                widget.setValue(max(1, min(5, int(val))))
+            elif f_type == "familiar_bool":
+                unlocked = bool(familiar_status.get(field_key, {}).get("Unlocked", False) if isinstance(familiar_status.get(field_key), dict) else familiar_status.get(field_key, False))
+                widget.setChecked(unlocked)
+            elif f_type == "gift_tier":
+                val = gift_data.get(field_key, {}).get("Value", npc_data.get(field_key, {}).get("Value", 0)) if isinstance(gift_data.get(field_key), dict) else gift_data.get(field_key, 0)
+                widget.setValue(max(0, min(10, int(val))))
+            elif f_type == "shrine_vow":
+                val = shrine_data.get(field_key, active_pacts.get(field_key, 0))
+                widget.setValue(max(0, min(3, int(val))))
             elif f_type == "keepsake":
                 widget.setValue(int(keepsake_chambers.get(field_key, 0)))
             elif f_type == "weapon_unlock":
@@ -721,6 +880,12 @@ class HadesEditorWindow(QDialog):
         weapons_unlocked = game_state.setdefault("WeaponsUnlocked", {})
         world_upgrades = game_state.setdefault("WorldUpgradesAdded", {})
 
+        aspect_ranks = game_state.setdefault("WeaponAspectRanks", {})
+        familiar_levels = game_state.setdefault("FamiliarLevels", {})
+        familiar_status = game_state.setdefault("FamiliarStatus", {})
+        gift_data = game_state.setdefault("GiftData", {})
+        shrine_data = game_state.setdefault("ShrinePointData", {})
+
         for field_key, (f_type, widget) in self._inputs.items():
             if f_type == "res":
                 resources[field_key] = float(widget.value())
@@ -732,6 +897,25 @@ class HadesEditorWindow(QDialog):
                     arcana_state[field_key] = card
                 card["Level"] = float(spin.value())
                 card["Unlocked"] = chk.isChecked()
+            elif f_type == "aspect_rank":
+                aspect_ranks[field_key] = float(widget.value())
+                weapons_unlocked[field_key] = True
+            elif f_type == "familiar_rank":
+                familiar_levels[field_key] = float(widget.value())
+            elif f_type == "familiar_bool":
+                fam = familiar_status.setdefault(field_key, {})
+                if isinstance(fam, dict):
+                    fam["Unlocked"] = widget.isChecked()
+                else:
+                    familiar_status[field_key] = widget.isChecked()
+            elif f_type == "gift_tier":
+                entry = gift_data.setdefault(field_key, {})
+                if isinstance(entry, dict):
+                    entry["Value"] = float(widget.value())
+                else:
+                    gift_data[field_key] = float(widget.value())
+            elif f_type == "shrine_vow":
+                shrine_data[field_key] = float(widget.value())
             elif f_type == "keepsake":
                 val = widget.value()
                 keepsake_chambers[field_key] = float(val)
