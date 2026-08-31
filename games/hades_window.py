@@ -31,6 +31,8 @@ from lib import hades_lib
 from games import hades2 as hades2_profile
 from games import hades as hades_profile
 
+
+
 HADES2_SECTIONS = [
     {
         "title": "General",
@@ -518,47 +520,6 @@ class HadesEditorWindow(QDialog):
         layout = QVBoxLayout(widget)
 
         for group_title, items in groups:
-            if ("Altar of Ashes" in group_title or "Arcana" in group_title) and len(items) == 25:
-                # 5x5 Altar of Ashes Grid Layout
-                grid_widget = QWidget()
-                grid_layout = QGridLayout(grid_widget)
-                grid_layout.setSpacing(8)
-                for idx, (field_key, display_name, field_type, min_v, max_v) in enumerate(items):
-                    r = idx // 5
-                    c = idx % 5
-                    card_box = QGroupBox(display_name)
-                    card_box.setStyleSheet(
-                        "QGroupBox { font-weight: bold; border: 1px solid #444; border-radius: 6px; margin-top: 6px; padding-top: 10px; background-color: rgba(255,255,255,0.02); } "
-                        "QGroupBox::title { subcontrol-origin: margin; left: 8px; color: #2b78e4; }"
-                    )
-                    c_layout = QVBoxLayout(card_box)
-                    c_layout.setSpacing(4)
-
-                    key_lbl = QLabel(f"<code>{field_key}</code>")
-                    key_lbl.setStyleSheet("color: #777; font-size: 11px;")
-                    c_layout.addWidget(key_lbl)
-
-                    row_ctrl = QHBoxLayout()
-                    row_ctrl.addWidget(QLabel("Rank:"))
-                    spin = QSpinBox()
-                    spin.setRange(1, 3)
-                    spin.setValue(1)
-                    spin.setFixedWidth(50)
-                    row_ctrl.addWidget(spin)
-
-                    chk = QCheckBox("Unlocked")
-                    row_ctrl.addWidget(chk)
-                    c_layout.addLayout(row_ctrl)
-
-                    self._inputs[field_key] = ("arcana_card", (spin, chk))
-                    grid_layout.addWidget(card_box, r, c)
-
-                group_box = QGroupBox(group_title)
-                gb_layout = QVBoxLayout(group_box)
-                gb_layout.addWidget(grid_widget)
-                layout.addWidget(group_box)
-                continue
-
             group_box = QGroupBox(group_title)
             grid = QGridLayout(group_box)
             grid.setHorizontalSpacing(16)
@@ -642,157 +603,6 @@ class HadesEditorWindow(QDialog):
         layout.addStretch(1)
         scroll.setWidget(widget)
         return scroll
-
-    def _discover_and_load_default(self):
-        found = self.profile.discover_saves()
-        self.discover_combo.blockSignals(True)
-        self.discover_combo.clear()
-        self.discover_combo.addItem("Discovered Saves...")
-        for s in found:
-            self.discover_combo.addItem(os.path.basename(s), s)
-        self.discover_combo.blockSignals(False)
-
-        if found:
-            self._load_file(found[0])
-
-    def _on_discover_selected(self, index: int):
-        if index > 0:
-            path = self.discover_combo.itemData(index)
-            if path and os.path.isfile(path):
-                self._load_file(path)
-
-    def _open_fix_textures(self):
-        dialog = FixTextureDialog(self)
-        dialog.exec()
-        self._update_fix_texture_btn()
-
-    def _update_fix_texture_btn(self):
-        if hasattr(self, "fix_tex_btn") and self.game_key == "hades2":
-            content_dir = hades_lib.resolve_hades2_content_dir()
-            if content_dir:
-                status = hades_lib.get_hades2_texture_status(content_dir)
-                if status.get("is_swapped"):
-                    self.fix_tex_btn.setText("Fix Textures [HD: ON]")
-                    self.fix_tex_btn.setStyleSheet("background-color: #1e4620; color: #73d13d; font-weight: bold;")
-                else:
-                    self.fix_tex_btn.setText("Fix Textures [HD: OFF]")
-                    self.fix_tex_btn.setStyleSheet("")
-
-    def _browse_save(self):
-        start_dir = self.profile.find_default_save_dir() or str(Path.home())
-        path, _ = QFileDialog.getOpenFileName(self, "Open Hades Save File", start_dir, "Hades Saves (*.sav);;All Files (*.*)")
-        if path:
-            self._load_file(path)
-
-    def _load_file(self, path: str):
-        try:
-            with open(path, "rb") as f:
-                raw = f.read()
-            self.data = self.profile.loads(raw)
-            self.current_path = path
-            self.file_label.setText(f"Save File: {path}")
-            self._populate_ui()
-        except Exception as e:
-            QMessageBox.critical(self, "Error Loading Save", f"Failed to load {path}: {e}")
-
-    def _populate_ui(self):
-        if not self.data:
-            return
-
-        header = self.data.get("Header", {})
-        luabin = self.data.get("_luabin", [{}])
-        root = luabin[0] if luabin else {}
-        game_state = root.get("GameState", {})
-        current_run = root.get("CurrentRun", {})
-        hero = current_run.get("Hero", {})
-        resources = game_state.get("Resources", {})
-        arcana_state = game_state.get("MetaUpgradeState", {})
-        keepsake_chambers = game_state.get("KeepsakeChambers", {})
-        weapons_unlocked = game_state.get("WeaponsUnlocked", {})
-        world_upgrades = game_state.get("WorldUpgradesAdded", {})
-
-        for field_key, (f_type, widget) in self._inputs.items():
-            if f_type == "res":
-                widget.setValue(int(resources.get(field_key, 0)))
-            elif f_type == "arcana_card":
-                spin, chk = widget
-                card = arcana_state.get(field_key, {})
-                if isinstance(card, dict):
-                    level = int(card.get("Level", 1))
-                    unlocked = bool(card.get("Unlocked", False))
-                else:
-                    level = 1
-                    unlocked = bool(card)
-                spin.setValue(max(1, min(3, level)))
-                chk.setChecked(unlocked)
-            elif f_type == "keepsake":
-                widget.setValue(int(keepsake_chambers.get(field_key, 0)))
-            elif f_type == "weapon_unlock":
-                widget.setChecked(bool(weapons_unlocked.get(field_key, False)))
-            elif f_type == "world_upgrade":
-                widget.setChecked(bool(world_upgrades.get(field_key, False)))
-            elif f_type == "state_num":
-                widget.setValue(int(game_state.get(field_key, 0)))
-            elif f_type == "run_hero":
-                widget.setValue(int(hero.get(field_key, 0)))
-            elif f_type == "run_meta":
-                widget.setValue(int(current_run.get(field_key, 0)))
-            elif f_type == "header_int":
-                widget.setValue(int(header.get(field_key, 0)))
-            elif f_type == "header_bool":
-                widget.setChecked(bool(header.get(field_key, False)))
-            elif f_type == "header_str":
-                widget.setText(str(header.get(field_key, "")))
-
-    def _collect_ui_to_data(self):
-        if not self.data:
-            return
-
-        header = self.data.setdefault("Header", {})
-        luabin = self.data.setdefault("_luabin", [{}])
-        root = luabin[0] if luabin else {}
-        game_state = root.setdefault("GameState", {})
-        current_run = root.setdefault("CurrentRun", {})
-        hero = current_run.setdefault("Hero", {})
-        resources = game_state.setdefault("Resources", {})
-        arcana_state = game_state.setdefault("MetaUpgradeState", {})
-        keepsake_chambers = game_state.setdefault("KeepsakeChambers", {})
-        weapons_unlocked = game_state.setdefault("WeaponsUnlocked", {})
-        world_upgrades = game_state.setdefault("WorldUpgradesAdded", {})
-
-        for field_key, (f_type, widget) in self._inputs.items():
-            if f_type == "res":
-                resources[field_key] = float(widget.value())
-            elif f_type == "arcana_card":
-                spin, chk = widget
-                card = arcana_state.setdefault(field_key, {})
-                if not isinstance(card, dict):
-                    card = {}
-                    arcana_state[field_key] = card
-                card["Level"] = float(spin.value())
-                card["Unlocked"] = chk.isChecked()
-            elif f_type == "keepsake":
-                val = widget.value()
-                keepsake_chambers[field_key] = float(val)
-            elif f_type == "weapon_unlock":
-                weapons_unlocked[field_key] = widget.isChecked()
-            elif f_type == "world_upgrade":
-                world_upgrades[field_key] = widget.isChecked()
-            elif f_type == "state_num":
-                game_state[field_key] = float(widget.value())
-            elif f_type == "run_hero":
-                hero[field_key] = float(widget.value())
-            elif f_type == "run_meta":
-                current_run[field_key] = float(widget.value())
-            elif f_type == "header_int":
-                header[field_key] = widget.value()
-            elif f_type == "header_bool":
-                header[field_key] = widget.isChecked()
-            elif f_type == "header_str":
-                header[field_key] = widget.text().strip()
-
-        # Keep top-level Resources dictionary synchronized
-        self.data["Resources"] = resources
 
     def _save_file(self):
         if not self.current_path or not self.data:
