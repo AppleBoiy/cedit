@@ -560,17 +560,12 @@ class HadesEditorWindow(QDialog):
             self._discover_and_load_default()
 
     def _build_ui(self):
-        from PySide6.QtWidgets import QMenu, QStackedWidget
         root = QVBoxLayout(self)
-        root.setContentsMargins(12, 12, 12, 12)
-        root.setSpacing(10)
 
-        # ------------------------------------------------------------- Top Bar
+        # Top Bar
         top_bar = QHBoxLayout()
-        top_bar.setSpacing(8)
-
         self.file_label = QLabel("Save File: (none)")
-        self.file_label.setStyleSheet("font-weight: 600; color: #333;")
+        self.file_label.setStyleSheet("font-weight: bold;")
         top_bar.addWidget(self.file_label, stretch=1)
 
         open_btn = QPushButton("Open...")
@@ -587,295 +582,163 @@ class HadesEditorWindow(QDialog):
         top_bar.addWidget(reload_btn)
 
         if self.game_key == "hades2":
-            self.fix_tex_btn = QPushButton("Fix Textures [HD: ...]")
+            self.fix_tex_btn = QPushButton("Fix Textures...")
+            self.fix_tex_btn.setToolTip("Force 1080p high-resolution textures on low VRAM / Apple Silicon devices")
             self.fix_tex_btn.clicked.connect(self._open_fix_textures)
             top_bar.addWidget(self.fix_tex_btn)
             self._update_fix_texture_btn()
 
-        # Quick Presets Menu (Clean text only)
-        preset_btn = QPushButton("Quick Presets")
-        preset_menu = QMenu(self)
-
-        act_mat = preset_menu.addAction("+10 All Materials")
-        act_mat.triggered.connect(lambda: self._batch_add_resources(10))
-
-        act_curr = preset_menu.addAction("+1,000 All Currencies")
-        act_curr.triggered.connect(lambda: self._batch_add_currencies(1000))
-
-        preset_menu.addSeparator()
-
-        act_arc = preset_menu.addAction("Max All Arcana Cards (Rank 3)")
-        act_arc.triggered.connect(self._batch_max_arcana)
-
-        act_asp = preset_menu.addAction("Max All Weapon Aspects (Rank 5)")
-        act_asp.triggered.connect(self._batch_max_aspects)
-
-        act_fam = preset_menu.addAction("Max All Familiars (Rank 5 & Unlocked)")
-        act_fam.triggered.connect(self._batch_max_familiars)
-
-        act_rel = preset_menu.addAction("Max All Relationships (10 Hearts)")
-        act_rel.triggered.connect(self._batch_max_affinity)
-
-        act_inc = preset_menu.addAction("Complete All Incantations")
-        act_inc.triggered.connect(self._batch_unlock_incantations)
-
-        preset_btn.setMenu(preset_menu)
-        top_bar.addWidget(preset_btn)
-
         save_btn = QPushButton("Save Changes")
-        save_btn.setStyleSheet("background-color: #2b78e4; color: white; font-weight: bold; padding: 6px 16px; border-radius: 4px;")
+        save_btn.setStyleSheet("background-color: #2b78e4; color: white; font-weight: bold; padding: 6px 14px;")
         save_btn.clicked.connect(self._save_file)
         top_bar.addWidget(save_btn)
 
         root.addLayout(top_bar)
 
-        # ------------------------------------------------------------- Master-Detail Splitter
-        splitter = QSplitter(Qt.Horizontal)
-        splitter.setChildrenCollapsible(False)
+        # Main Tabs
+        self.tabs = QTabWidget()
+        root.addWidget(self.tabs, stretch=1)
 
-        # Left Navigation Sidebar (Clean text only)
-        self.sidebar = QListWidget()
-        self.sidebar.setFixedWidth(200)
-        self.sidebar.setStyleSheet(
-            """
-            QListWidget {
-                border: 1px solid #d0d7de;
-                border-radius: 6px;
-                background-color: #f6f8fa;
-                padding: 4px;
-            }
-            QListWidget::item {
-                padding: 9px 12px;
-                border-radius: 6px;
-                font-size: 13px;
-                font-weight: 500;
-                color: #24292f;
-                margin-bottom: 2px;
-            }
-            QListWidget::item:hover {
-                background-color: #eaeef2;
-            }
-            QListWidget::item:selected {
-                background-color: #2b78e4;
-                color: white;
-                font-weight: bold;
-            }
-            """
-        )
+        for sec in self.sections:
+            tab = self._build_section_tab(sec["groups"])
+            self.tabs.addTab(tab, sec["title"])
 
-        self.stacked_pages = QStackedWidget()
+        # Tester Bar
+        tester_bar = QHBoxLayout()
+        tester_label = QLabel("Tester Quick Presets:")
+        tester_label.setStyleSheet("font-weight: bold; color: #777;")
+        tester_bar.addWidget(tester_label)
 
-        for idx, sec in enumerate(self.sections):
-            item = QListWidgetItem(sec["title"])
-            self.sidebar.addItem(item)
+        btn_add10_all = QPushButton("+10 All Materials")
+        btn_add10_all.clicked.connect(lambda: self._batch_add_resources(10))
+        tester_bar.addWidget(btn_add10_all)
 
-            page_widget = self._build_section_page(sec)
-            self.stacked_pages.addWidget(page_widget)
+        btn_add100_curr = QPushButton("+1,000 All Currencies")
+        btn_add100_curr.clicked.connect(lambda: self._batch_add_currencies(1000))
+        tester_bar.addWidget(btn_add100_curr)
 
-        self.sidebar.currentRowChanged.connect(self.stacked_pages.setCurrentIndex)
-        self.sidebar.setCurrentRow(0)
+        btn_max_arcana = QPushButton("Max All Arcana (Rank 3)")
+        btn_max_arcana.clicked.connect(self._batch_max_arcana)
+        tester_bar.addWidget(btn_max_arcana)
 
-        splitter.addWidget(self.sidebar)
-        splitter.addWidget(self.stacked_pages)
-        splitter.setStretchFactor(0, 0)
-        splitter.setStretchFactor(1, 1)
+        btn_max_aspects = QPushButton("Max All Aspects (Rank 5)")
+        btn_max_aspects.clicked.connect(self._batch_max_aspects)
+        tester_bar.addWidget(btn_max_aspects)
 
-        root.addWidget(splitter, stretch=1)
+        btn_max_familiars = QPushButton("Max All Familiars")
+        btn_max_familiars.clicked.connect(self._batch_max_familiars)
+        tester_bar.addWidget(btn_max_familiars)
 
-    def _build_section_page(self, sec: Dict[str, Any]) -> QWidget:
-        page = QWidget()
-        page_layout = QVBoxLayout(page)
-        page_layout.setContentsMargins(6, 0, 0, 0)
-        page_layout.setSpacing(8)
+        btn_max_affinity = QPushButton("Max Relationships (10 Hearts)")
+        btn_max_affinity.clicked.connect(self._batch_max_affinity)
+        tester_bar.addWidget(btn_max_affinity)
 
-        # Section Header with Search Bar
-        hdr = QHBoxLayout()
-        title_lbl = QLabel(f"<b><span style='font-size: 15px; color: #1f2328;'>{sec['title']}</span></b>")
-        hdr.addWidget(title_lbl)
-        hdr.addStretch(1)
+        btn_unlock_incantations = QPushButton("Complete All Incantations")
+        btn_unlock_incantations.clicked.connect(self._batch_unlock_incantations)
+        tester_bar.addWidget(btn_unlock_incantations)
 
-        search_edit = QLineEdit()
-        search_edit.setPlaceholderText(f"Search {sec['title']}...")
-        search_edit.setFixedWidth(220)
-        search_edit.setClearButtonEnabled(True)
-        hdr.addWidget(search_edit)
-        page_layout.addLayout(hdr)
+        tester_bar.addStretch(1)
+        root.addLayout(tester_bar)
 
-        # Scrollable Area
+    def _build_section_tab(self, groups: List[Tuple[str, List[Tuple]]]) -> QWidget:
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
-        scroll.setFrameShape(QFrame.NoFrame)
+        widget = QWidget()
+        layout = QVBoxLayout(widget)
 
-        container = QWidget()
-        container_layout = QVBoxLayout(container)
-        container_layout.setSpacing(12)
-        container_layout.setContentsMargins(0, 0, 6, 0)
+        for group_title, items in groups:
+            group_box = QGroupBox(group_title)
+            grid = QGridLayout(group_box)
+            grid.setHorizontalSpacing(16)
+            grid.setVerticalSpacing(8)
 
-        card_widgets_list = []
+            grid.addWidget(QLabel("<b>Field / Item</b>"), 0, 0)
+            grid.addWidget(QLabel("<b>Internal Key</b>"), 0, 1)
+            grid.addWidget(QLabel("<b>Value / State</b>"), 0, 2)
+            grid.addWidget(QLabel("<b>Quick Adjustments</b>"), 0, 3)
 
-        for group_title, items in sec["groups"]:
-            gb = QGroupBox(group_title)
-            gb.setStyleSheet(
-                """
-                QGroupBox {
-                    font-weight: bold;
-                    border: 1px solid #d0d7de;
-                    border-radius: 6px;
-                    margin-top: 8px;
-                    padding-top: 14px;
-                    background-color: #ffffff;
-                }
-                QGroupBox::title {
-                    subcontrol-origin: margin;
-                    left: 10px;
-                    padding: 0 4px;
-                    color: #2b78e4;
-                }
-                """
-            )
-            gb_grid = QGridLayout(gb)
-            gb_grid.setHorizontalSpacing(10)
-            gb_grid.setVerticalSpacing(8)
-            gb_grid.setContentsMargins(10, 10, 10, 10)
+            for row, (field_key, display_name, field_type, min_v, max_v) in enumerate(items, start=1):
+                name_lbl = QLabel(display_name)
+                name_lbl.setStyleSheet("font-weight: 500;")
+                key_lbl = QLabel(f"<code>{field_key}</code>")
+                key_lbl.setStyleSheet("color: #777;")
 
-            # 2-Column Responsive Card Grid: 2 items per row
-            for idx, (field_key, display_name, field_type, min_v, max_v) in enumerate(items):
-                card = self._build_item_card(field_key, display_name, field_type, min_v, max_v)
-                r = idx // 2
-                c = idx % 2
-                gb_grid.addWidget(card, r, c)
-                card_widgets_list.append((display_name.lower(), field_key.lower(), card))
+                if field_type == "arcana_card":
+                    spin = QSpinBox()
+                    spin.setRange(1, 3)
+                    spin.setValue(1)
+                    spin.setFixedWidth(70)
 
-            container_layout.addWidget(gb)
+                    chk = QCheckBox("Unlocked")
+                    self._inputs[field_key] = ("arcana_card", (spin, chk))
 
-        container_layout.addStretch(1)
-        scroll.setWidget(container)
-        page_layout.addWidget(scroll, stretch=1)
+                    ctrl_box = QHBoxLayout()
+                    ctrl_box.addWidget(QLabel("Rank:"))
+                    ctrl_box.addWidget(spin)
+                    ctrl_box.addWidget(chk)
+                    ctrl_box.addStretch(1)
+                    ctrl_widget = QWidget()
+                    ctrl_widget.setLayout(ctrl_box)
 
-        # Connect live search filter for this section
-        def _filter_cards(text: str):
-            query = text.strip().lower()
-            for disp_lower, key_lower, card_w in card_widgets_list:
-                match = not query or (query in disp_lower) or (query in key_lower)
-                card_w.setVisible(match)
+                    grid.addWidget(name_lbl, row, 0)
+                    grid.addWidget(key_lbl, row, 1)
+                    grid.addWidget(ctrl_widget, row, 2)
+                    grid.addWidget(QLabel(""), row, 3)
 
-        search_edit.textChanged.connect(_filter_cards)
-        return page
+                elif field_type in ("res", "keepsake", "state_num", "header_int", "run_hero", "run_meta", "aspect_rank", "familiar_rank", "gift_tier", "shrine_vow"):
+                    spin = QSpinBox()
+                    spin.setRange(min_v, max_v)
+                    spin.setValue(min_v)
+                    spin.setFixedWidth(110 if max_v > 100 else 70)
+                    self._inputs[field_key] = (field_type, spin)
 
-    def _build_item_card(self, field_key: str, display_name: str, field_type: str, min_v: int, max_v: int) -> QWidget:
-        card = QFrame()
-        card.setFrameShape(QFrame.StyledPanel)
-        card.setStyleSheet(
-            """
-            QFrame {
-                border: 1px solid #e1e4e8;
-                border-radius: 6px;
-                background-color: #fafbfc;
-                padding: 4px;
-            }
-            QFrame:hover {
-                border-color: #b0c4de;
-                background-color: #f3f6fa;
-            }
-            """
-        )
+                    btn_box = QHBoxLayout()
+                    btn_box.setSpacing(4)
+                    if max_v > 10:
+                        deltas = [-10, -1, 1, 10, 100] if max_v > 100 else [-10, -1, 1, 10]
+                    else:
+                        deltas = [-1, 1]
+                    for d in deltas:
+                        btn = QPushButton(f"+{d}" if d > 0 else str(d))
+                        btn.setFixedWidth(36)
+                        btn.clicked.connect(lambda _, s=spin, delta=d: s.setValue(max(min_v, min(max_v, s.value() + delta))))
+                        btn_box.addWidget(btn)
 
-        c_layout = QHBoxLayout(card)
-        c_layout.setContentsMargins(8, 6, 8, 6)
-        c_layout.setSpacing(8)
+                    if max_v <= 10:
+                        max_btn = QPushButton(f"Max ({max_v})")
+                        max_btn.setFixedWidth(64)
+                        max_btn.clicked.connect(lambda _, s=spin, mv=max_v: s.setValue(mv))
+                        btn_box.addWidget(max_btn)
 
-        # Left Info: Display Name + Key
-        info_layout = QVBoxLayout()
-        info_layout.setSpacing(2)
-        name_lbl = QLabel(f"<b>{display_name}</b>")
-        name_lbl.setStyleSheet("font-size: 13px; color: #24292f;")
-        key_lbl = QLabel(f"<code>{field_key}</code>")
-        key_lbl.setStyleSheet("font-size: 11px; color: #6a737d;")
-        info_layout.addWidget(name_lbl)
-        info_layout.addWidget(key_lbl)
-        c_layout.addLayout(info_layout, stretch=1)
+                    btn_widget = QWidget()
+                    btn_widget.setLayout(btn_box)
 
-        # Right Controls: Value + Adjustment buttons
-        ctrl_layout = QHBoxLayout()
-        ctrl_layout.setSpacing(4)
+                    grid.addWidget(name_lbl, row, 0)
+                    grid.addWidget(key_lbl, row, 1)
+                    grid.addWidget(spin, row, 2)
+                    grid.addWidget(btn_widget, row, 3)
 
-        if field_type in ("aspect_rank", "familiar_rank", "arcana_card"):
-            spin = QSpinBox()
-            spin.setRange(1, max_v if max_v else 5)
-            spin.setValue(1)
-            spin.setFixedWidth(52)
+                elif field_type in ("header_bool", "weapon_unlock", "world_upgrade", "familiar_bool"):
+                    chk = QCheckBox("Active / Unlocked")
+                    self._inputs[field_key] = (field_type, chk)
+                    grid.addWidget(name_lbl, row, 0)
+                    grid.addWidget(key_lbl, row, 1)
+                    grid.addWidget(chk, row, 2)
+                    grid.addWidget(QLabel(""), row, 3)
 
-            if field_type == "arcana_card":
-                chk = QCheckBox("Unlocked")
-                self._inputs[field_key] = ("arcana_card", (spin, chk))
-                ctrl_layout.addWidget(QLabel("Rank:"))
-                ctrl_layout.addWidget(spin)
-                ctrl_layout.addWidget(chk)
-            else:
-                self._inputs[field_key] = (field_type, spin)
-                ctrl_layout.addWidget(QLabel("Rank:"))
-                ctrl_layout.addWidget(spin)
-                max_btn = QPushButton(f"Max ({max_v})")
-                max_btn.setFixedWidth(58)
-                max_btn.clicked.connect(lambda _, s=spin, mv=max_v: s.setValue(mv))
-                ctrl_layout.addWidget(max_btn)
+                elif field_type == "header_str":
+                    line = QLineEdit()
+                    self._inputs[field_key] = (field_type, line)
+                    grid.addWidget(name_lbl, row, 0)
+                    grid.addWidget(key_lbl, row, 1)
+                    grid.addWidget(line, row, 2)
+                    grid.addWidget(QLabel(""), row, 3)
 
-        elif field_type == "gift_tier":
-            spin = QSpinBox()
-            spin.setRange(0, 10)
-            spin.setValue(0)
-            spin.setFixedWidth(50)
-            self._inputs[field_key] = (field_type, spin)
-            ctrl_layout.addWidget(QLabel("Hearts:"))
-            ctrl_layout.addWidget(spin)
-            max_btn = QPushButton("Max 10")
-            max_btn.setFixedWidth(54)
-            max_btn.clicked.connect(lambda _, s=spin: s.setValue(10))
-            ctrl_layout.addWidget(max_btn)
+            layout.addWidget(group_box)
 
-        elif field_type == "shrine_vow":
-            spin = QSpinBox()
-            spin.setRange(0, 3)
-            spin.setValue(0)
-            spin.setFixedWidth(46)
-            self._inputs[field_key] = (field_type, spin)
-            ctrl_layout.addWidget(QLabel("Rank:"))
-            ctrl_layout.addWidget(spin)
-            max_btn = QPushButton("Max 3")
-            max_btn.setFixedWidth(50)
-            max_btn.clicked.connect(lambda _, s=spin: s.setValue(3))
-            ctrl_layout.addWidget(max_btn)
-
-        elif field_type in ("res", "keepsake", "state_num", "header_int", "run_hero", "run_meta"):
-            spin = QSpinBox()
-            spin.setRange(min_v, max_v)
-            spin.setValue(0)
-            spin.setFixedWidth(76 if max_v > 1000 else 60)
-            self._inputs[field_key] = (field_type, spin)
-            ctrl_layout.addWidget(spin)
-
-            deltas = [-10, +10] if max_v >= 100 else [-1, +1]
-            for d in deltas:
-                btn = QPushButton(f"+{d}" if d > 0 else str(d))
-                btn.setFixedWidth(34)
-                btn.clicked.connect(lambda _, s=spin, delta=d, mv=max_v, miv=min_v: s.setValue(max(miv, min(mv, s.value() + delta))))
-                ctrl_layout.addWidget(btn)
-
-        elif field_type in ("header_bool", "weapon_unlock", "world_upgrade", "familiar_bool"):
-            chk = QCheckBox("Active")
-            chk.setStyleSheet("font-weight: 500;")
-            self._inputs[field_key] = (field_type, chk)
-            ctrl_layout.addWidget(chk)
-
-        elif field_type == "header_str":
-            line = QLineEdit()
-            line.setFixedWidth(130)
-            self._inputs[field_key] = (field_type, line)
-            ctrl_layout.addWidget(line)
-
-        c_layout.addLayout(ctrl_layout)
-        return card
-
+        layout.addStretch(1)
+        scroll.setWidget(widget)
+        return scroll
 
     def _discover_and_load_default(self):
         found = self.profile.discover_saves()
