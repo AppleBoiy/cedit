@@ -399,173 +399,17 @@ class FixTextureDialog(QDialog):
         self._refresh_status()
 
     def _build_ui(self):
-        layout = QVBoxLayout(self)
-        layout.setSpacing(10)
-
-        # Header Info Banner
-        info_group = QGroupBox("Why this fix exists")
-        info_layout = QVBoxLayout(info_group)
-        info_label = QLabel(
-            "When running on devices with lower VRAM, Apple Silicon, or integrated graphics, "
-            "Hades II automatically forces 720p textures and video packages to prevent memory pressure, "
-            "even if in-game graphics settings are set to High.<br><br>"
-            "This fix swaps the <b>720p</b> and <b>1080p</b> directories inside <code>Content/Movies</code> "
-            "and <code>Content/Packages</code>, ensuring the game engine loads the full 1080p high-resolution "
-            "assets whenever it attempts to load downscaled assets."
-        )
-        info_label.setWordWrap(True)
-        info_layout.addWidget(info_label)
-        layout.addWidget(info_group)
-
-        # Path Selection Group
-        path_box = QGroupBox("Hades II Content Directory")
-        path_layout = QHBoxLayout(path_box)
-        self.path_edit = QLineEdit()
-        self.path_edit.setText(str(self.content_dir) if self.content_dir else "")
-        self.path_edit.textChanged.connect(self._on_path_changed)
-        path_layout.addWidget(self.path_edit)
-
-        browse_btn = QPushButton("Browse...")
-        browse_btn.clicked.connect(self._browse_folder)
-        path_layout.addWidget(browse_btn)
-        layout.addWidget(path_box)
-
-        # Status & Diagnostics Box
-        self.status_box = QGroupBox("Current Asset Status")
-        status_layout = QVBoxLayout(self.status_box)
-
-        self.badge_label = QLabel()
-        self.badge_label.setStyleSheet("font-size: 13px; font-weight: bold; padding: 6px; border-radius: 4px;")
-        status_layout.addWidget(self.badge_label)
-
-        self.details_label = QLabel()
-        self.details_label.setWordWrap(True)
-        status_layout.addWidget(self.details_label)
-        layout.addWidget(self.status_box)
-
-        # Action Buttons
-        btn_layout = QHBoxLayout()
-        self.swap_btn = QPushButton()
-        self.swap_btn.setStyleSheet("font-weight: bold; padding: 8px 16px;")
-        self.swap_btn.clicked.connect(self._toggle_swap)
-        btn_layout.addWidget(self.swap_btn, stretch=1)
-
-        close_btn = QPushButton("Close")
-        close_btn.clicked.connect(self.accept)
-        btn_layout.addWidget(close_btn)
-        layout.addLayout(btn_layout)
-
-    def _on_path_changed(self):
-        txt = self.path_edit.text().strip()
-        self.content_dir = hades_lib.resolve_hades2_content_dir(txt)
-        self._refresh_status()
-
-    def _browse_folder(self):
-        d = QFileDialog.getExistingDirectory(self, "Select Hades II Content or Game Folder", str(self.content_dir or ""))
-        if d:
-            self.path_edit.setText(d)
-
-    def _refresh_status(self):
-        if not self.content_dir or not self.content_dir.is_dir():
-            self.badge_label.setText("CONTENT DIRECTORY NOT FOUND")
-            self.badge_label.setStyleSheet("background-color: #552222; color: #ff9999; padding: 6px; font-weight: bold;")
-            self.details_label.setText("Please click Browse... to locate your Hades II installation folder.")
-            self.swap_btn.setEnabled(False)
-            self.swap_btn.setText("Force High-Res (Unavailable)")
-            return
-
-        status = hades_lib.get_hades2_texture_status(self.content_dir)
-        if not status.get("valid"):
-            self.badge_label.setText("INVALID CONTENT DIRECTORY")
-            self.badge_label.setStyleSheet("background-color: #552222; color: #ff9999; padding: 6px; font-weight: bold;")
-            self.details_label.setText(f"Error: {status.get("error")}")
-            self.swap_btn.setEnabled(False)
-            self.swap_btn.setText("Force High-Res (Unavailable)")
-            return
-
-        self.swap_btn.setEnabled(True)
-        if status.get("is_swapped"):
-            self.badge_label.setText("ACTIVE: HIGH-RES 1080p FORCING IS ENABLED")
-            self.badge_label.setStyleSheet("background-color: #1e4620; color: #73d13d; border: 1px solid #389e0d; padding: 6px; font-weight: bold;")
-            self.details_label.setText(
-                "<b>Asset Mapping:</b><br>"
-                "• <code>Content/Movies/720p</code> ➔ contains <b>1080p</b> high-res movies<br>"
-                "• <code>Content/Packages/720p</code> ➔ contains <b>1080p</b> high-res textures & sprites<br>"
-                "<i>When the game requests 720p graphics for low VRAM, it automatically receives 1080p assets.</i>"
-            )
-            self.swap_btn.setText("Restore Default Textures (Revert to Vanilla 720p/1080p)")
-            self.swap_btn.setStyleSheet("background-color: #d46b08; color: white; font-weight: bold; padding: 8px 16px;")
-        else:
-            self.badge_label.setText("INACTIVE: DEFAULT (VANILLA) MAPPING")
-            self.badge_label.setStyleSheet("background-color: #2b303b; color: #d8dee9; border: 1px solid #4c566a; padding: 6px; font-weight: bold;")
-            self.details_label.setText(
-                "<b>Asset Mapping:</b><br>"
-                "• <code>Content/Movies/720p</code> ➔ contains 720p standard movies<br>"
-                "• <code>Content/Packages/720p</code> ➔ contains 720p downscaled textures<br>"
-                "<i>Low VRAM or integrated graphics will load lower resolution textures.</i>"
-            )
-            self.swap_btn.setText("Force High-Res Textures (Swap 720p <-> 1080p)")
-            self.swap_btn.setStyleSheet("background-color: #2b78e4; color: white; font-weight: bold; padding: 8px 16px;")
-
-    def _toggle_swap(self):
-        if not self.content_dir:
-            return
-        was_swapped = hades_lib.get_hades2_texture_status(self.content_dir).get("is_swapped", False)
-        ok, msg = hades_lib.swap_hades2_texture_folders(self.content_dir)
-        if ok:
-            now_swapped = hades_lib.get_hades2_texture_status(self.content_dir).get("is_swapped", False)
-            if now_swapped:
-                notice = (
-                    "<b>High-Res 1080p Textures are now FORCED!</b><br><br>"
-                    "<b>What was changed:</b><br>"
-                    "• <code>Movies/720p</code> and <code>Movies/1080p</code> folders have been swapped.<br>"
-                    "• <code>Packages/720p</code> and <code>Packages/1080p</code> folders have been swapped.<br><br>"
-                    "<b>Effect:</b><br>"
-                    "Hades II will now display full 1080p high-resolution textures, sprites, and videos.<br><br>"
-                    "<b>Important:</b> Please restart Hades II if it is currently running."
-                )
-            else:
-                notice = (
-                    "<b>Default Texture Mapping Restored!</b><br><br>"
-                    "<b>What was changed:</b><br>"
-                    "• <code>Movies</code> and <code>Packages</code> folders have been restored to vanilla layout.<br><br>"
-                    "<b>Important:</b> Please restart Hades II if it is currently running."
-                )
-            QMessageBox.information(self, "Fix Texture Status", notice)
-        else:
-            QMessageBox.critical(self, "Fix Texture Error", msg)
-        self._refresh_status()
-
-
-class HadesEditorWindow(QDialog):
-    def __init__(self, parent=None, game_key="hades2", initial_path=None):
-        super().__init__(parent)
-        self.game_key = game_key
-        self.profile = hades2_profile.PROFILE if game_key == "hades2" else hades_profile.PROFILE
-        self.sections = HADES2_SECTIONS
-
-        self.setWindowTitle(f"{self.profile.display_name} Save Editor Suite")
-        self.resize(*GAME_WINDOW_SIZE)
-        self.setMinimumSize(*GAME_WINDOW_MIN)
-
-        self.current_path = initial_path
-        self.data: Optional[Dict[str, Any]] = None
-        self._inputs: Dict[str, Tuple[str, QWidget]] = {}
-
-        self._build_ui()
-
-        if self.current_path and os.path.isfile(self.current_path):
-            self._load_file(self.current_path)
-        else:
-            self._discover_and_load_default()
-
-    def _build_ui(self):
+        from PySide6.QtWidgets import QMenu, QStackedWidget
         root = QVBoxLayout(self)
+        root.setContentsMargins(12, 12, 12, 12)
+        root.setSpacing(10)
 
-        # Top Bar
+        # ------------------------------------------------------------- Top Bar
         top_bar = QHBoxLayout()
+        top_bar.setSpacing(8)
+
         self.file_label = QLabel("Save File: (none)")
-        self.file_label.setStyleSheet("font-weight: bold;")
+        self.file_label.setStyleSheet("font-weight: 600; color: #333;")
         top_bar.addWidget(self.file_label, stretch=1)
 
         open_btn = QPushButton("Open...")
@@ -582,362 +426,294 @@ class HadesEditorWindow(QDialog):
         top_bar.addWidget(reload_btn)
 
         if self.game_key == "hades2":
-            self.fix_tex_btn = QPushButton("Fix Textures...")
-            self.fix_tex_btn.setToolTip("Force 1080p high-resolution textures on low VRAM / Apple Silicon devices")
+            self.fix_tex_btn = QPushButton("Fix Textures [HD: ...]")
             self.fix_tex_btn.clicked.connect(self._open_fix_textures)
             top_bar.addWidget(self.fix_tex_btn)
             self._update_fix_texture_btn()
 
+        # Quick Presets Menu (Clean text only)
+        preset_btn = QPushButton("Quick Presets")
+        preset_menu = QMenu(self)
+
+        act_mat = preset_menu.addAction("+10 All Materials")
+        act_mat.triggered.connect(lambda: self._batch_add_resources(10))
+
+        act_curr = preset_menu.addAction("+1,000 All Currencies")
+        act_curr.triggered.connect(lambda: self._batch_add_currencies(1000))
+
+        preset_menu.addSeparator()
+
+        act_arc = preset_menu.addAction("Max All Arcana Cards (Rank 3)")
+        act_arc.triggered.connect(self._batch_max_arcana)
+
+        act_asp = preset_menu.addAction("Max All Weapon Aspects (Rank 5)")
+        act_asp.triggered.connect(self._batch_max_aspects)
+
+        act_fam = preset_menu.addAction("Max All Familiars (Rank 5 & Unlocked)")
+        act_fam.triggered.connect(self._batch_max_familiars)
+
+        act_rel = preset_menu.addAction("Max All Relationships (10 Hearts)")
+        act_rel.triggered.connect(self._batch_max_affinity)
+
+        act_inc = preset_menu.addAction("Complete All Incantations")
+        act_inc.triggered.connect(self._batch_unlock_incantations)
+
+        preset_btn.setMenu(preset_menu)
+        top_bar.addWidget(preset_btn)
+
         save_btn = QPushButton("Save Changes")
-        save_btn.setStyleSheet("background-color: #2b78e4; color: white; font-weight: bold; padding: 6px 14px;")
+        save_btn.setStyleSheet("background-color: #2b78e4; color: white; font-weight: bold; padding: 6px 16px; border-radius: 4px;")
         save_btn.clicked.connect(self._save_file)
         top_bar.addWidget(save_btn)
 
         root.addLayout(top_bar)
 
-        # Main Tabs
-        self.tabs = QTabWidget()
-        root.addWidget(self.tabs, stretch=1)
+        # ------------------------------------------------------------- Master-Detail Splitter
+        splitter = QSplitter(Qt.Horizontal)
+        splitter.setChildrenCollapsible(False)
 
-        for sec in self.sections:
-            tab = self._build_section_tab(sec["groups"])
-            self.tabs.addTab(tab, sec["title"])
+        # Left Navigation Sidebar (Clean text only)
+        self.sidebar = QListWidget()
+        self.sidebar.setFixedWidth(200)
+        self.sidebar.setStyleSheet(
+            """
+            QListWidget {
+                border: 1px solid #d0d7de;
+                border-radius: 6px;
+                background-color: #f6f8fa;
+                padding: 4px;
+            }
+            QListWidget::item {
+                padding: 9px 12px;
+                border-radius: 6px;
+                font-size: 13px;
+                font-weight: 500;
+                color: #24292f;
+                margin-bottom: 2px;
+            }
+            QListWidget::item:hover {
+                background-color: #eaeef2;
+            }
+            QListWidget::item:selected {
+                background-color: #2b78e4;
+                color: white;
+                font-weight: bold;
+            }
+            """
+        )
 
-        # Tester Bar
-        tester_bar = QHBoxLayout()
-        tester_label = QLabel("Tester Quick Presets:")
-        tester_label.setStyleSheet("font-weight: bold; color: #777;")
-        tester_bar.addWidget(tester_label)
+        self.stacked_pages = QStackedWidget()
 
-        btn_add10_all = QPushButton("+10 All Materials")
-        btn_add10_all.clicked.connect(lambda: self._batch_add_resources(10))
-        tester_bar.addWidget(btn_add10_all)
+        for idx, sec in enumerate(self.sections):
+            item = QListWidgetItem(sec["title"])
+            self.sidebar.addItem(item)
 
-        btn_add100_curr = QPushButton("+1,000 All Currencies")
-        btn_add100_curr.clicked.connect(lambda: self._batch_add_currencies(1000))
-        tester_bar.addWidget(btn_add100_curr)
+            page_widget = self._build_section_page(sec)
+            self.stacked_pages.addWidget(page_widget)
 
-        btn_max_arcana = QPushButton("Max All Arcana (Rank 3)")
-        btn_max_arcana.clicked.connect(self._batch_max_arcana)
-        tester_bar.addWidget(btn_max_arcana)
+        self.sidebar.currentRowChanged.connect(self.stacked_pages.setCurrentIndex)
+        self.sidebar.setCurrentRow(0)
 
-        btn_max_aspects = QPushButton("Max All Aspects (Rank 5)")
-        btn_max_aspects.clicked.connect(self._batch_max_aspects)
-        tester_bar.addWidget(btn_max_aspects)
+        splitter.addWidget(self.sidebar)
+        splitter.addWidget(self.stacked_pages)
+        splitter.setStretchFactor(0, 0)
+        splitter.setStretchFactor(1, 1)
 
-        btn_max_familiars = QPushButton("Max All Familiars")
-        btn_max_familiars.clicked.connect(self._batch_max_familiars)
-        tester_bar.addWidget(btn_max_familiars)
+        root.addWidget(splitter, stretch=1)
 
-        btn_max_affinity = QPushButton("Max Relationships (10 Hearts)")
-        btn_max_affinity.clicked.connect(self._batch_max_affinity)
-        tester_bar.addWidget(btn_max_affinity)
+    def _build_section_page(self, sec: Dict[str, Any]) -> QWidget:
+        page = QWidget()
+        page_layout = QVBoxLayout(page)
+        page_layout.setContentsMargins(6, 0, 0, 0)
+        page_layout.setSpacing(8)
 
-        btn_unlock_incantations = QPushButton("Complete All Incantations")
-        btn_unlock_incantations.clicked.connect(self._batch_unlock_incantations)
-        tester_bar.addWidget(btn_unlock_incantations)
+        # Section Header with Search Bar
+        hdr = QHBoxLayout()
+        title_lbl = QLabel(f"<b><span style='font-size: 15px; color: #1f2328;'>{sec['title']}</span></b>")
+        hdr.addWidget(title_lbl)
+        hdr.addStretch(1)
 
-        tester_bar.addStretch(1)
-        root.addLayout(tester_bar)
+        search_edit = QLineEdit()
+        search_edit.setPlaceholderText(f"Search {sec['title']}...")
+        search_edit.setFixedWidth(220)
+        search_edit.setClearButtonEnabled(True)
+        hdr.addWidget(search_edit)
+        page_layout.addLayout(hdr)
 
-    def _build_section_tab(self, groups: List[Tuple[str, List[Tuple]]]) -> QWidget:
+        # Scrollable Area
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
-        widget = QWidget()
-        layout = QVBoxLayout(widget)
+        scroll.setFrameShape(QFrame.NoFrame)
 
-        for group_title, items in groups:
-            group_box = QGroupBox(group_title)
-            grid = QGridLayout(group_box)
-            grid.setHorizontalSpacing(16)
-            grid.setVerticalSpacing(8)
+        container = QWidget()
+        container_layout = QVBoxLayout(container)
+        container_layout.setSpacing(12)
+        container_layout.setContentsMargins(0, 0, 6, 0)
 
-            grid.addWidget(QLabel("<b>Field / Item</b>"), 0, 0)
-            grid.addWidget(QLabel("<b>Internal Key</b>"), 0, 1)
-            grid.addWidget(QLabel("<b>Value / State</b>"), 0, 2)
-            grid.addWidget(QLabel("<b>Quick Adjustments</b>"), 0, 3)
+        card_widgets_list = []
 
-            for row, (field_key, display_name, field_type, min_v, max_v) in enumerate(items, start=1):
-                name_lbl = QLabel(display_name)
-                name_lbl.setStyleSheet("font-weight: 500;")
-                key_lbl = QLabel(f"<code>{field_key}</code>")
-                key_lbl.setStyleSheet("color: #777;")
+        for group_title, items in sec["groups"]:
+            gb = QGroupBox(group_title)
+            gb.setStyleSheet(
+                """
+                QGroupBox {
+                    font-weight: bold;
+                    border: 1px solid #d0d7de;
+                    border-radius: 6px;
+                    margin-top: 8px;
+                    padding-top: 14px;
+                    background-color: #ffffff;
+                }
+                QGroupBox::title {
+                    subcontrol-origin: margin;
+                    left: 10px;
+                    padding: 0 4px;
+                    color: #2b78e4;
+                }
+                """
+            )
+            gb_grid = QGridLayout(gb)
+            gb_grid.setHorizontalSpacing(10)
+            gb_grid.setVerticalSpacing(8)
+            gb_grid.setContentsMargins(10, 10, 10, 10)
 
-                if field_type == "arcana_card":
-                    spin = QSpinBox()
-                    spin.setRange(1, 3)
-                    spin.setValue(1)
-                    spin.setFixedWidth(70)
+            # 2-Column Responsive Card Grid: 2 items per row
+            for idx, (field_key, display_name, field_type, min_v, max_v) in enumerate(items):
+                card = self._build_item_card(field_key, display_name, field_type, min_v, max_v)
+                r = idx // 2
+                c = idx % 2
+                gb_grid.addWidget(card, r, c)
+                card_widgets_list.append((display_name.lower(), field_key.lower(), card))
 
-                    chk = QCheckBox("Unlocked")
-                    self._inputs[field_key] = ("arcana_card", (spin, chk))
+            container_layout.addWidget(gb)
 
-                    ctrl_box = QHBoxLayout()
-                    ctrl_box.addWidget(QLabel("Rank:"))
-                    ctrl_box.addWidget(spin)
-                    ctrl_box.addWidget(chk)
-                    ctrl_box.addStretch(1)
-                    ctrl_widget = QWidget()
-                    ctrl_widget.setLayout(ctrl_box)
+        container_layout.addStretch(1)
+        scroll.setWidget(container)
+        page_layout.addWidget(scroll, stretch=1)
 
-                    grid.addWidget(name_lbl, row, 0)
-                    grid.addWidget(key_lbl, row, 1)
-                    grid.addWidget(ctrl_widget, row, 2)
-                    grid.addWidget(QLabel(""), row, 3)
+        # Connect live search filter for this section
+        def _filter_cards(text: str):
+            query = text.strip().lower()
+            for disp_lower, key_lower, card_w in card_widgets_list:
+                match = not query or (query in disp_lower) or (query in key_lower)
+                card_w.setVisible(match)
 
-                elif field_type in ("res", "keepsake", "state_num", "header_int", "run_hero", "run_meta", "aspect_rank", "familiar_rank", "gift_tier", "shrine_vow"):
-                    spin = QSpinBox()
-                    spin.setRange(min_v, max_v)
-                    spin.setValue(min_v)
-                    spin.setFixedWidth(110 if max_v > 100 else 70)
-                    self._inputs[field_key] = (field_type, spin)
+        search_edit.textChanged.connect(_filter_cards)
+        return page
 
-                    btn_box = QHBoxLayout()
-                    btn_box.setSpacing(4)
-                    if max_v > 10:
-                        deltas = [-10, -1, 1, 10, 100] if max_v > 100 else [-10, -1, 1, 10]
-                    else:
-                        deltas = [-1, 1]
-                    for d in deltas:
-                        btn = QPushButton(f"+{d}" if d > 0 else str(d))
-                        btn.setFixedWidth(36)
-                        btn.clicked.connect(lambda _, s=spin, delta=d: s.setValue(max(min_v, min(max_v, s.value() + delta))))
-                        btn_box.addWidget(btn)
+    def _build_item_card(self, field_key: str, display_name: str, field_type: str, min_v: int, max_v: int) -> QWidget:
+        card = QFrame()
+        card.setFrameShape(QFrame.StyledPanel)
+        card.setStyleSheet(
+            """
+            QFrame {
+                border: 1px solid #e1e4e8;
+                border-radius: 6px;
+                background-color: #fafbfc;
+                padding: 4px;
+            }
+            QFrame:hover {
+                border-color: #b0c4de;
+                background-color: #f3f6fa;
+            }
+            """
+        )
 
-                    if max_v <= 10:
-                        max_btn = QPushButton(f"Max ({max_v})")
-                        max_btn.setFixedWidth(64)
-                        max_btn.clicked.connect(lambda _, s=spin, mv=max_v: s.setValue(mv))
-                        btn_box.addWidget(max_btn)
+        c_layout = QHBoxLayout(card)
+        c_layout.setContentsMargins(8, 6, 8, 6)
+        c_layout.setSpacing(8)
 
-                    btn_widget = QWidget()
-                    btn_widget.setLayout(btn_box)
+        # Left Info: Display Name + Key
+        info_layout = QVBoxLayout()
+        info_layout.setSpacing(2)
+        name_lbl = QLabel(f"<b>{display_name}</b>")
+        name_lbl.setStyleSheet("font-size: 13px; color: #24292f;")
+        key_lbl = QLabel(f"<code>{field_key}</code>")
+        key_lbl.setStyleSheet("font-size: 11px; color: #6a737d;")
+        info_layout.addWidget(name_lbl)
+        info_layout.addWidget(key_lbl)
+        c_layout.addLayout(info_layout, stretch=1)
 
-                    grid.addWidget(name_lbl, row, 0)
-                    grid.addWidget(key_lbl, row, 1)
-                    grid.addWidget(spin, row, 2)
-                    grid.addWidget(btn_widget, row, 3)
+        # Right Controls: Value + Adjustment buttons
+        ctrl_layout = QHBoxLayout()
+        ctrl_layout.setSpacing(4)
 
-                elif field_type in ("header_bool", "weapon_unlock", "world_upgrade", "familiar_bool"):
-                    chk = QCheckBox("Active / Unlocked")
-                    self._inputs[field_key] = (field_type, chk)
-                    grid.addWidget(name_lbl, row, 0)
-                    grid.addWidget(key_lbl, row, 1)
-                    grid.addWidget(chk, row, 2)
-                    grid.addWidget(QLabel(""), row, 3)
+        if field_type in ("aspect_rank", "familiar_rank", "arcana_card"):
+            spin = QSpinBox()
+            spin.setRange(1, max_v if max_v else 5)
+            spin.setValue(1)
+            spin.setFixedWidth(52)
 
-                elif field_type == "header_str":
-                    line = QLineEdit()
-                    self._inputs[field_key] = (field_type, line)
-                    grid.addWidget(name_lbl, row, 0)
-                    grid.addWidget(key_lbl, row, 1)
-                    grid.addWidget(line, row, 2)
-                    grid.addWidget(QLabel(""), row, 3)
+            if field_type == "arcana_card":
+                chk = QCheckBox("Unlocked")
+                self._inputs[field_key] = ("arcana_card", (spin, chk))
+                ctrl_layout.addWidget(QLabel("Rank:"))
+                ctrl_layout.addWidget(spin)
+                ctrl_layout.addWidget(chk)
+            else:
+                self._inputs[field_key] = (field_type, spin)
+                ctrl_layout.addWidget(QLabel("Rank:"))
+                ctrl_layout.addWidget(spin)
+                max_btn = QPushButton(f"Max ({max_v})")
+                max_btn.setFixedWidth(58)
+                max_btn.clicked.connect(lambda _, s=spin, mv=max_v: s.setValue(mv))
+                ctrl_layout.addWidget(max_btn)
 
-            layout.addWidget(group_box)
+        elif field_type == "gift_tier":
+            spin = QSpinBox()
+            spin.setRange(0, 10)
+            spin.setValue(0)
+            spin.setFixedWidth(50)
+            self._inputs[field_key] = (field_type, spin)
+            ctrl_layout.addWidget(QLabel("Hearts:"))
+            ctrl_layout.addWidget(spin)
+            max_btn = QPushButton("Max 10")
+            max_btn.setFixedWidth(54)
+            max_btn.clicked.connect(lambda _, s=spin: s.setValue(10))
+            ctrl_layout.addWidget(max_btn)
 
-        layout.addStretch(1)
-        scroll.setWidget(widget)
-        return scroll
+        elif field_type == "shrine_vow":
+            spin = QSpinBox()
+            spin.setRange(0, 3)
+            spin.setValue(0)
+            spin.setFixedWidth(46)
+            self._inputs[field_key] = (field_type, spin)
+            ctrl_layout.addWidget(QLabel("Rank:"))
+            ctrl_layout.addWidget(spin)
+            max_btn = QPushButton("Max 3")
+            max_btn.setFixedWidth(50)
+            max_btn.clicked.connect(lambda _, s=spin: s.setValue(3))
+            ctrl_layout.addWidget(max_btn)
 
-    def _discover_and_load_default(self):
-        found = self.profile.discover_saves()
-        self.discover_combo.blockSignals(True)
-        self.discover_combo.clear()
-        self.discover_combo.addItem("Discovered Saves...")
-        for s in found:
-            self.discover_combo.addItem(os.path.basename(s), s)
-        self.discover_combo.blockSignals(False)
+        elif field_type in ("res", "keepsake", "state_num", "header_int", "run_hero", "run_meta"):
+            spin = QSpinBox()
+            spin.setRange(min_v, max_v)
+            spin.setValue(0)
+            spin.setFixedWidth(76 if max_v > 1000 else 60)
+            self._inputs[field_key] = (field_type, spin)
+            ctrl_layout.addWidget(spin)
 
-        if found:
-            self._load_file(found[0])
+            deltas = [-10, +10] if max_v >= 100 else [-1, +1]
+            for d in deltas:
+                btn = QPushButton(f"+{d}" if d > 0 else str(d))
+                btn.setFixedWidth(34)
+                btn.clicked.connect(lambda _, s=spin, delta=d, mv=max_v, miv=min_v: s.setValue(max(miv, min(mv, s.value() + delta))))
+                ctrl_layout.addWidget(btn)
 
-    def _on_discover_selected(self, index: int):
-        if index > 0:
-            path = self.discover_combo.itemData(index)
-            if path and os.path.isfile(path):
-                self._load_file(path)
+        elif field_type in ("header_bool", "weapon_unlock", "world_upgrade", "familiar_bool"):
+            chk = QCheckBox("Active")
+            chk.setStyleSheet("font-weight: 500;")
+            self._inputs[field_key] = (field_type, chk)
+            ctrl_layout.addWidget(chk)
 
-    def _open_fix_textures(self):
-        dialog = FixTextureDialog(self)
-        dialog.exec()
-        self._update_fix_texture_btn()
+        elif field_type == "header_str":
+            line = QLineEdit()
+            line.setFixedWidth(130)
+            self._inputs[field_key] = (field_type, line)
+            ctrl_layout.addWidget(line)
 
-    def _update_fix_texture_btn(self):
-        if hasattr(self, "fix_tex_btn") and self.game_key == "hades2":
-            content_dir = hades_lib.resolve_hades2_content_dir()
-            if content_dir:
-                status = hades_lib.get_hades2_texture_status(content_dir)
-                if status.get("is_swapped"):
-                    self.fix_tex_btn.setText("Fix Textures [HD: ON]")
-                    self.fix_tex_btn.setStyleSheet("background-color: #1e4620; color: #73d13d; font-weight: bold;")
-                else:
-                    self.fix_tex_btn.setText("Fix Textures [HD: OFF]")
-                    self.fix_tex_btn.setStyleSheet("")
-
-    def _browse_save(self):
-        start_dir = self.profile.find_default_save_dir() or str(Path.home())
-        path, _ = QFileDialog.getOpenFileName(self, "Open Hades Save File", start_dir, "Hades Saves (*.sav);;All Files (*.*)")
-        if path:
-            self._load_file(path)
-
-    def _load_file(self, path: str):
-        try:
-            with open(path, "rb") as f:
-                raw = f.read()
-            self.data = self.profile.loads(raw)
-            self.current_path = path
-            self.file_label.setText(f"Save File: {path}")
-            self._populate_ui()
-        except Exception as e:
-            QMessageBox.critical(self, "Error Loading Save", f"Failed to load {path}: {e}")
-
-    def _populate_ui(self):
-        if not self.data:
-            return
-
-        header = self.data.get("Header", {})
-        luabin = self.data.get("_luabin", [{}])
-        root = luabin[0] if luabin else {}
-        game_state = root.get("GameState", {})
-        current_run = root.get("CurrentRun", {})
-        hero = current_run.get("Hero", {})
-        resources = game_state.get("Resources", {})
-        arcana_state = game_state.get("MetaUpgradeState", {})
-        keepsake_chambers = game_state.get("KeepsakeChambers", {})
-        weapons_unlocked = game_state.get("WeaponsUnlocked", {})
-        world_upgrades = game_state.get("WorldUpgradesAdded", {})
-
-        aspect_ranks = game_state.get("WeaponAspectRanks", {})
-        familiar_levels = game_state.get("FamiliarLevels", {})
-        familiar_status = game_state.get("FamiliarStatus", {})
-        gift_data = game_state.get("GiftData", {})
-        npc_data = game_state.get("NPCData", {})
-        shrine_data = game_state.get("ShrinePointData", {})
-        active_pacts = game_state.get("ActivePacts", {})
-
-        for field_key, (f_type, widget) in self._inputs.items():
-            if f_type == "res":
-                widget.setValue(int(resources.get(field_key, 0)))
-            elif f_type == "arcana_card":
-                spin, chk = widget
-                card = arcana_state.get(field_key, {})
-                if isinstance(card, dict):
-                    level = int(card.get("Level", 1))
-                    unlocked = bool(card.get("Unlocked", False))
-                else:
-                    level = 1
-                    unlocked = bool(card)
-                spin.setValue(max(1, min(3, level)))
-                chk.setChecked(unlocked)
-            elif f_type == "aspect_rank":
-                val = aspect_ranks.get(field_key, 1)
-                widget.setValue(max(1, min(5, int(val))))
-            elif f_type == "familiar_rank":
-                val = familiar_levels.get(field_key, familiar_status.get(field_key, {}).get("Level", 1) if isinstance(familiar_status.get(field_key), dict) else 1)
-                widget.setValue(max(1, min(5, int(val))))
-            elif f_type == "familiar_bool":
-                unlocked = bool(familiar_status.get(field_key, {}).get("Unlocked", False) if isinstance(familiar_status.get(field_key), dict) else familiar_status.get(field_key, False))
-                widget.setChecked(unlocked)
-            elif f_type == "gift_tier":
-                val = gift_data.get(field_key, {}).get("Value", npc_data.get(field_key, {}).get("Value", 0)) if isinstance(gift_data.get(field_key), dict) else gift_data.get(field_key, 0)
-                widget.setValue(max(0, min(10, int(val))))
-            elif f_type == "shrine_vow":
-                val = shrine_data.get(field_key, active_pacts.get(field_key, 0))
-                widget.setValue(max(0, min(3, int(val))))
-            elif f_type == "keepsake":
-                widget.setValue(int(keepsake_chambers.get(field_key, 0)))
-            elif f_type == "weapon_unlock":
-                widget.setChecked(bool(weapons_unlocked.get(field_key, False)))
-            elif f_type == "world_upgrade":
-                widget.setChecked(bool(world_upgrades.get(field_key, False)))
-            elif f_type == "state_num":
-                widget.setValue(int(game_state.get(field_key, 0)))
-            elif f_type == "run_hero":
-                widget.setValue(int(hero.get(field_key, 0)))
-            elif f_type == "run_meta":
-                widget.setValue(int(current_run.get(field_key, 0)))
-            elif f_type == "header_int":
-                widget.setValue(int(header.get(field_key, 0)))
-            elif f_type == "header_bool":
-                widget.setChecked(bool(header.get(field_key, False)))
-            elif f_type == "header_str":
-                widget.setText(str(header.get(field_key, "")))
-
-    def _collect_ui_to_data(self):
-        if not self.data:
-            return
-
-        header = self.data.setdefault("Header", {})
-        luabin = self.data.setdefault("_luabin", [{}])
-        root = luabin[0] if luabin else {}
-        game_state = root.setdefault("GameState", {})
-        current_run = root.setdefault("CurrentRun", {})
-        hero = current_run.setdefault("Hero", {})
-        resources = game_state.setdefault("Resources", {})
-        arcana_state = game_state.setdefault("MetaUpgradeState", {})
-        keepsake_chambers = game_state.setdefault("KeepsakeChambers", {})
-        weapons_unlocked = game_state.setdefault("WeaponsUnlocked", {})
-        world_upgrades = game_state.setdefault("WorldUpgradesAdded", {})
-
-        aspect_ranks = game_state.setdefault("WeaponAspectRanks", {})
-        familiar_levels = game_state.setdefault("FamiliarLevels", {})
-        familiar_status = game_state.setdefault("FamiliarStatus", {})
-        gift_data = game_state.setdefault("GiftData", {})
-        shrine_data = game_state.setdefault("ShrinePointData", {})
-
-        for field_key, (f_type, widget) in self._inputs.items():
-            if f_type == "res":
-                resources[field_key] = float(widget.value())
-            elif f_type == "arcana_card":
-                spin, chk = widget
-                card = arcana_state.setdefault(field_key, {})
-                if not isinstance(card, dict):
-                    card = {}
-                    arcana_state[field_key] = card
-                card["Level"] = float(spin.value())
-                card["Unlocked"] = chk.isChecked()
-            elif f_type == "aspect_rank":
-                aspect_ranks[field_key] = float(widget.value())
-                weapons_unlocked[field_key] = True
-            elif f_type == "familiar_rank":
-                familiar_levels[field_key] = float(widget.value())
-            elif f_type == "familiar_bool":
-                fam = familiar_status.setdefault(field_key, {})
-                if isinstance(fam, dict):
-                    fam["Unlocked"] = widget.isChecked()
-                else:
-                    familiar_status[field_key] = widget.isChecked()
-            elif f_type == "gift_tier":
-                entry = gift_data.setdefault(field_key, {})
-                if isinstance(entry, dict):
-                    entry["Value"] = float(widget.value())
-                else:
-                    gift_data[field_key] = float(widget.value())
-            elif f_type == "shrine_vow":
-                shrine_data[field_key] = float(widget.value())
-            elif f_type == "keepsake":
-                val = widget.value()
-                keepsake_chambers[field_key] = float(val)
-            elif f_type == "weapon_unlock":
-                weapons_unlocked[field_key] = widget.isChecked()
-            elif f_type == "world_upgrade":
-                world_upgrades[field_key] = widget.isChecked()
-            elif f_type == "state_num":
-                game_state[field_key] = float(widget.value())
-            elif f_type == "run_hero":
-                hero[field_key] = float(widget.value())
-            elif f_type == "run_meta":
-                current_run[field_key] = float(widget.value())
-            elif f_type == "header_int":
-                header[field_key] = widget.value()
-            elif f_type == "header_bool":
-                header[field_key] = widget.isChecked()
-            elif f_type == "header_str":
-                header[field_key] = widget.text().strip()
-
-        # Keep top-level Resources dictionary synchronized
-        self.data["Resources"] = resources
+        c_layout.addLayout(ctrl_layout)
+        return card
 
 
     def _save_file(self):
