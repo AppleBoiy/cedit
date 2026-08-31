@@ -266,6 +266,160 @@ HADES2_SECTIONS = [
 ]
 
 
+
+class FixTextureDialog(QDialog):
+    """
+    Utility to fix the Hades II low-VRAM automatic texture downscaling bug.
+    Swaps 1080p and 720p directories in Movies and Packages so the game loads
+    high-res assets even on integrated/low VRAM GPUs.
+    """
+    def __init__(self, parent=None, initial_path=None):
+        super().__init__(parent)
+        self.setWindowTitle("Fix Texture - Hades II Resolution Fix")
+        self.resize(650, 420)
+        self.content_dir = hades_lib.resolve_hades2_content_dir(initial_path)
+        self._build_ui()
+        self._refresh_status()
+
+    def _build_ui(self):
+        layout = QVBoxLayout(self)
+        layout.setSpacing(10)
+
+        # Header Info Banner
+        info_group = QGroupBox("Why this fix exists")
+        info_layout = QVBoxLayout(info_group)
+        info_label = QLabel(
+            "When running on devices with lower VRAM, Apple Silicon, or integrated graphics, "
+            "Hades II automatically forces 720p textures and video packages to prevent memory pressure, "
+            "even if in-game graphics settings are set to High.<br><br>"
+            "This fix swaps the <b>720p</b> and <b>1080p</b> directories inside <code>Content/Movies</code> "
+            "and <code>Content/Packages</code>, ensuring the game engine loads the full 1080p high-resolution "
+            "assets whenever it attempts to load downscaled assets."
+        )
+        info_label.setWordWrap(True)
+        info_layout.addWidget(info_label)
+        layout.addWidget(info_group)
+
+        # Path Selection Group
+        path_box = QGroupBox("Hades II Content Directory")
+        path_layout = QHBoxLayout(path_box)
+        self.path_edit = QLineEdit()
+        self.path_edit.setText(str(self.content_dir) if self.content_dir else "")
+        self.path_edit.textChanged.connect(self._on_path_changed)
+        path_layout.addWidget(self.path_edit)
+
+        browse_btn = QPushButton("Browse...")
+        browse_btn.clicked.connect(self._browse_folder)
+        path_layout.addWidget(browse_btn)
+        layout.addWidget(path_box)
+
+        # Status & Diagnostics Box
+        self.status_box = QGroupBox("Current Asset Status")
+        status_layout = QVBoxLayout(self.status_box)
+
+        self.badge_label = QLabel()
+        self.badge_label.setStyleSheet("font-size: 13px; font-weight: bold; padding: 6px; border-radius: 4px;")
+        status_layout.addWidget(self.badge_label)
+
+        self.details_label = QLabel()
+        self.details_label.setWordWrap(True)
+        status_layout.addWidget(self.details_label)
+        layout.addWidget(self.status_box)
+
+        # Action Buttons
+        btn_layout = QHBoxLayout()
+        self.swap_btn = QPushButton()
+        self.swap_btn.setStyleSheet("font-weight: bold; padding: 8px 16px;")
+        self.swap_btn.clicked.connect(self._toggle_swap)
+        btn_layout.addWidget(self.swap_btn, stretch=1)
+
+        close_btn = QPushButton("Close")
+        close_btn.clicked.connect(self.accept)
+        btn_layout.addWidget(close_btn)
+        layout.addLayout(btn_layout)
+
+    def _on_path_changed(self):
+        txt = self.path_edit.text().strip()
+        self.content_dir = hades_lib.resolve_hades2_content_dir(txt)
+        self._refresh_status()
+
+    def _browse_folder(self):
+        d = QFileDialog.getExistingDirectory(self, "Select Hades II Content or Game Folder", str(self.content_dir or ""))
+        if d:
+            self.path_edit.setText(d)
+
+    def _refresh_status(self):
+        if not self.content_dir or not self.content_dir.is_dir():
+            self.badge_label.setText("CONTENT DIRECTORY NOT FOUND")
+            self.badge_label.setStyleSheet("background-color: #552222; color: #ff9999; padding: 6px; font-weight: bold;")
+            self.details_label.setText("Please click Browse... to locate your Hades II installation folder.")
+            self.swap_btn.setEnabled(False)
+            self.swap_btn.setText("Force High-Res (Unavailable)")
+            return
+
+        status = hades_lib.get_hades2_texture_status(self.content_dir)
+        if not status.get("valid"):
+            self.badge_label.setText("INVALID CONTENT DIRECTORY")
+            self.badge_label.setStyleSheet("background-color: #552222; color: #ff9999; padding: 6px; font-weight: bold;")
+            self.details_label.setText(f"Error: {status.get("error")}")
+            self.swap_btn.setEnabled(False)
+            self.swap_btn.setText("Force High-Res (Unavailable)")
+            return
+
+        self.swap_btn.setEnabled(True)
+        if status.get("is_swapped"):
+            self.badge_label.setText("ACTIVE: HIGH-RES 1080p FORCING IS ENABLED")
+            self.badge_label.setStyleSheet("background-color: #1e4620; color: #73d13d; border: 1px solid #389e0d; padding: 6px; font-weight: bold;")
+            self.details_label.setText(
+                "<b>Asset Mapping:</b><br>"
+                "• <code>Content/Movies/720p</code> ➔ contains <b>1080p</b> high-res movies<br>"
+                "• <code>Content/Packages/720p</code> ➔ contains <b>1080p</b> high-res textures & sprites<br>"
+                "<i>When the game requests 720p graphics for low VRAM, it automatically receives 1080p assets.</i>"
+            )
+            self.swap_btn.setText("Restore Default Textures (Revert to Vanilla 720p/1080p)")
+            self.swap_btn.setStyleSheet("background-color: #d46b08; color: white; font-weight: bold; padding: 8px 16px;")
+        else:
+            self.badge_label.setText("INACTIVE: DEFAULT (VANILLA) MAPPING")
+            self.badge_label.setStyleSheet("background-color: #2b303b; color: #d8dee9; border: 1px solid #4c566a; padding: 6px; font-weight: bold;")
+            self.details_label.setText(
+                "<b>Asset Mapping:</b><br>"
+                "• <code>Content/Movies/720p</code> ➔ contains 720p standard movies<br>"
+                "• <code>Content/Packages/720p</code> ➔ contains 720p downscaled textures<br>"
+                "<i>Low VRAM or integrated graphics will load lower resolution textures.</i>"
+            )
+            self.swap_btn.setText("Force High-Res Textures (Swap 720p <-> 1080p)")
+            self.swap_btn.setStyleSheet("background-color: #2b78e4; color: white; font-weight: bold; padding: 8px 16px;")
+
+    def _toggle_swap(self):
+        if not self.content_dir:
+            return
+        was_swapped = hades_lib.get_hades2_texture_status(self.content_dir).get("is_swapped", False)
+        ok, msg = hades_lib.swap_hades2_texture_folders(self.content_dir)
+        if ok:
+            now_swapped = hades_lib.get_hades2_texture_status(self.content_dir).get("is_swapped", False)
+            if now_swapped:
+                notice = (
+                    "<b>High-Res 1080p Textures are now FORCED!</b><br><br>"
+                    "<b>What was changed:</b><br>"
+                    "• <code>Movies/720p</code> and <code>Movies/1080p</code> folders have been swapped.<br>"
+                    "• <code>Packages/720p</code> and <code>Packages/1080p</code> folders have been swapped.<br><br>"
+                    "<b>Effect:</b><br>"
+                    "Hades II will now display full 1080p high-resolution textures, sprites, and videos.<br><br>"
+                    "<b>Important:</b> Please restart Hades II if it is currently running."
+                )
+            else:
+                notice = (
+                    "<b>Default Texture Mapping Restored!</b><br><br>"
+                    "<b>What was changed:</b><br>"
+                    "• <code>Movies</code> and <code>Packages</code> folders have been restored to vanilla layout.<br><br>"
+                    "<b>Important:</b> Please restart Hades II if it is currently running."
+                )
+            QMessageBox.information(self, "Fix Texture Status", notice)
+        else:
+            QMessageBox.critical(self, "Fix Texture Error", msg)
+        self._refresh_status()
+
+
 class HadesEditorWindow(QDialog):
     def __init__(self, parent=None, game_key="hades2", initial_path=None):
         super().__init__(parent)
@@ -309,6 +463,13 @@ class HadesEditorWindow(QDialog):
         reload_btn = QPushButton("Reload")
         reload_btn.clicked.connect(self._reload_file)
         top_bar.addWidget(reload_btn)
+
+        if self.game_key == "hades2":
+            self.fix_tex_btn = QPushButton("Fix Textures...")
+            self.fix_tex_btn.setToolTip("Force 1080p high-resolution textures on low VRAM / Apple Silicon devices")
+            self.fix_tex_btn.clicked.connect(self._open_fix_textures)
+            top_bar.addWidget(self.fix_tex_btn)
+            self._update_fix_texture_btn()
 
         save_btn = QPushButton("Save Changes")
         save_btn.setStyleSheet("background-color: #2b78e4; color: white; font-weight: bold; padding: 6px 14px;")
@@ -458,6 +619,23 @@ class HadesEditorWindow(QDialog):
             path = self.discover_combo.itemData(index)
             if path and os.path.isfile(path):
                 self._load_file(path)
+
+    def _open_fix_textures(self):
+        dialog = FixTextureDialog(self)
+        dialog.exec()
+        self._update_fix_texture_btn()
+
+    def _update_fix_texture_btn(self):
+        if hasattr(self, "fix_tex_btn") and self.game_key == "hades2":
+            content_dir = hades_lib.resolve_hades2_content_dir()
+            if content_dir:
+                status = hades_lib.get_hades2_texture_status(content_dir)
+                if status.get("is_swapped"):
+                    self.fix_tex_btn.setText("Fix Textures [HD: ON]")
+                    self.fix_tex_btn.setStyleSheet("background-color: #1e4620; color: #73d13d; font-weight: bold;")
+                else:
+                    self.fix_tex_btn.setText("Fix Textures [HD: OFF]")
+                    self.fix_tex_btn.setStyleSheet("")
 
     def _browse_save(self):
         start_dir = self.profile.find_default_save_dir() or str(Path.home())

@@ -13,6 +13,7 @@ import io
 import struct
 import zlib
 from typing import Any, Dict, List, Optional, Tuple
+from pathlib import Path
 
 import lz4.block
 
@@ -345,3 +346,130 @@ def serialize_sgb1_save(data: Dict[str, Any], original_raw: Optional[bytes] = No
     output[4:8] = struct.pack("<I", calc_chk)
 
     return bytes(output)
+
+
+# ----------------------------------------------------------------------
+# Hades II Texture Resolution Fix
+# ----------------------------------------------------------------------
+
+DEFAULT_HADES2_CONTENT_DIRS = [
+    # macOS Steam
+    "~/Library/Application Support/Steam/steamapps/common/Hades II/Hades II.app/Contents/Resources/Content",
+    "~/Library/Application Support/Steam/steamapps/common/Hades II/Content",
+    # macOS Epic / Standalone
+    "~/Library/Application Support/Epic/Hades II/Content",
+    "/Applications/Hades II.app/Contents/Resources/Content",
+    # Windows Steam
+    "%ProgramFiles(x86)%/Steam/steamapps/common/Hades II/Content",
+    "%ProgramFiles%/Steam/steamapps/common/Hades II/Content",
+    "%USERPROFILE%/AppData/Local/Steam/steamapps/common/Hades II/Content",
+    # Windows Epic
+    "%ProgramFiles%/Epic Games/HadesII/Content",
+    # Linux / Steam Deck / Proton
+    "~/.steam/steam/steamapps/common/Hades II/Content",
+    "~/.local/share/Steam/steamapps/common/Hades II/Content",
+    "~/.var/app/com.valvesoftware.Steam/data/Steam/steamapps/common/Hades II/Content",
+]
+
+
+def resolve_hades2_content_dir(custom_path=None):
+    import os
+    if custom_path:
+        p = Path(os.path.expandvars(os.path.expanduser(str(custom_path))))
+        if (p / "Movies").is_dir() and (p / "Packages").is_dir():
+            return p
+        if (p / "Content" / "Movies").is_dir() and (p / "Content" / "Packages").is_dir():
+            return p / "Content"
+        if (p / "Contents" / "Resources" / "Content" / "Movies").is_dir():
+            return p / "Contents" / "Resources" / "Content"
+        if p.is_dir():
+            return p
+
+    for entry in DEFAULT_HADES2_CONTENT_DIRS:
+        p = Path(os.path.expandvars(os.path.expanduser(entry)))
+        if (p / "Movies").is_dir() and (p / "Packages").is_dir():
+            return p
+    return None
+
+
+def get_hades2_texture_status(content_dir):
+    content_dir = Path(content_dir)
+    movies_dir = content_dir / "Movies"
+    packages_dir = content_dir / "Packages"
+
+    if not movies_dir.is_dir() or not packages_dir.is_dir():
+        return {
+            "valid": False,
+            "is_swapped": False,
+            "error": "Movies or Packages directory not found in content path.",
+        }
+
+    m_1080 = movies_dir / "1080p"
+    m_720 = movies_dir / "720p"
+    p_1080 = packages_dir / "1080p"
+    p_720 = packages_dir / "720p"
+
+    if not (m_1080.is_dir() and m_720.is_dir() and p_1080.is_dir() and p_720.is_dir()):
+        return {
+            "valid": False,
+            "is_swapped": False,
+            "error": "Missing 1080p or 720p folders in Movies/Packages.",
+        }
+
+    # Detect by checking file size of known packages
+    # In default/normal state, 1080p/Achilles.pkg (~15MB) > 720p/Achilles.pkg (~8MB)
+    pkg_1080 = p_1080 / "Achilles.pkg"
+    pkg_720 = p_720 / "Achilles.pkg"
+
+    is_swapped = False
+    if pkg_1080.is_file() and pkg_720.is_file():
+        is_swapped = pkg_720.stat().st_size > pkg_1080.stat().st_size
+    else:
+        # Fallback to AsphodelBacking.bik in Movies
+        mov_1080 = m_1080 / "AsphodelBacking.bik"
+        mov_720 = m_720 / "AsphodelBacking.bik"
+        if mov_1080.is_file() and mov_720.is_file():
+            is_swapped = mov_720.stat().st_size > mov_1080.stat().st_size
+
+    return {
+        "valid": True,
+        "is_swapped": is_swapped,
+        "movies_path": str(movies_dir),
+        "packages_path": str(packages_dir),
+        "status_text": "High-Res Forced (1080p swapped into 720p)" if is_swapped else "Default (Normal 1080p/720p)",
+    }
+
+
+def swap_hades2_texture_folders(content_dir):
+    content_dir = Path(content_dir)
+    status = get_hades2_texture_status(content_dir)
+    if not status.get("valid"):
+        return False, status.get("error", "Invalid directory structure.")
+
+    for folder_name in ["Movies", "Packages"]:
+        target = content_dir / folder_name
+        d_1080 = target / "1080p"
+        d_720 = target / "720p"
+        d_temp = target / "_temp_swap_cedit"
+
+        if d_temp.exists():
+            return False, f"Temporary folder {d_temp} already exists. Please resolve manually."
+
+        try:
+            d_1080.rename(d_temp)
+            d_720.rename(d_1080)
+            d_temp.rename(d_720)
+        except Exception as e:
+            # Attempt to roll back if possible
+            if d_temp.exists() and not d_1080.exists():
+                try:
+                    d_temp.rename(d_1080)
+                except Exception:
+                    pass
+            return False, f"Failed to swap {folder_name} folders: {e}"
+
+    new_status = get_hades2_texture_status(content_dir)
+    if new_status.get("is_swapped"):
+        return True, "Successfully forced High-Res textures (1080p assets loaded for 720p requests)."
+    else:
+        return True, "Successfully restored default texture mapping (1080p / 720p standard)."

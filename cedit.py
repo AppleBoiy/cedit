@@ -1120,6 +1120,10 @@ class SaveEditorWindow(QMainWindow):
         reload_action.triggered.connect(self.reload_file)
         file_menu.addAction(reload_action)
         file_menu.addSeparator()
+        self.fix_texture_action = QAction("Fix Texture (Hades II)...", self)
+        self.fix_texture_action.triggered.connect(self.open_fix_texture_dialog)
+        file_menu.addAction(self.fix_texture_action)
+        file_menu.addSeparator()
         quit_action = QAction("Quit", self, shortcut=QKeySequence.Quit)
         quit_action.triggered.connect(self.close)
         file_menu.addAction(quit_action)
@@ -1470,6 +1474,10 @@ class SaveEditorWindow(QMainWindow):
             self.hades_suite_action.setVisible(is_hades)
         if hasattr(self, "hades_suite_btn"):
             self.hades_suite_btn.setVisible(is_hades)
+        if hasattr(self, "fix_texture_action"):
+            self.fix_texture_action.setVisible(self.profile.key == "hades2")
+            if self.profile.key == "hades2":
+                self._update_fix_texture_menu()
         if self.profile.notes:
             self._set_status(self.profile.notes.splitlines()[0])
 
@@ -1516,6 +1524,25 @@ class SaveEditorWindow(QMainWindow):
         self._set_dirty(False)
         self._apply_profile_to_ui()
         self._set_status(f"Switched to {profile.display_name}.")
+
+    def open_fix_texture_dialog(self):
+        from games.hades_window import FixTextureDialog
+        dialog = FixTextureDialog(self)
+        dialog.exec()
+        self._update_fix_texture_menu()
+
+    def _update_fix_texture_menu(self):
+        if hasattr(self, "fix_texture_action") and self.profile.key == "hades2":
+            from lib import hades_lib
+            content_dir = hades_lib.resolve_hades2_content_dir()
+            if content_dir:
+                status = hades_lib.get_hades2_texture_status(content_dir)
+                if status.get("is_swapped"):
+                    self.fix_texture_action.setText("Fix Texture (Hades II) [HD: ON]...")
+                else:
+                    self.fix_texture_action.setText("Fix Texture (Hades II) [HD: OFF]...")
+            else:
+                self.fix_texture_action.setText("Fix Texture (Hades II)...")
 
     def open_default_folder(self):
         d = self.profile.find_default_save_dir()

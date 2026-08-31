@@ -359,6 +359,13 @@ Hades / Hades II
   Save discovery strictly targets valid Profile*.sav files, filtering out
   verification cache files (Profile1.v.sav), .bak backups, .sjson configs,
   and .ctrls files automatically.
+  Additionally, File > Fix Texture (Hades II)... (also accessible via the
+  Fix Textures... button in the Hades Editor Suite) provides an integrated
+  resolution fix for devices with integrated graphics or lower VRAM (including
+  Apple Silicon and handheld PCs), where Hades II automatically downscales to
+  720p assets even on High settings. The fix swaps the 720p and 1080p asset
+  directories in Content/Movies and Content/Packages to force full 1080p high-
+  resolution graphics.
 
 
 SAFETY
