@@ -152,6 +152,7 @@ class DictTableDialog(QDialog):
         self.table.setHorizontalHeaderLabels(["Key", "Description / Name", "Value", "Type"])
         self.table.horizontalHeader().setStretchLastSection(False)
         self.table.itemChanged.connect(self._on_item_changed)
+        self.table.itemDoubleClicked.connect(self._on_item_double_clicked)
         layout.addWidget(self.table, stretch=1)
 
         close_row = QHBoxLayout()
@@ -202,6 +203,8 @@ class DictTableDialog(QDialog):
                 v_text = f"{{{len(val)} keys}}" if isinstance(val, dict) else f"[{len(val)} items]"
                 v_cell = QTableWidgetItem(v_text)
                 v_cell.setFlags(v_cell.flags() & ~Qt.ItemIsEditable)
+                v_cell.setForeground(QColor("#2b78e4"))
+                v_cell.setToolTip("Double-click to inspect nested table...")
             else:
                 v_cell = QTableWidgetItem(str(val) if val is not None else "")
                 if self.profile.is_read_only(self.dict_value, k, val) or str(k).startswith("_"):
@@ -254,6 +257,28 @@ class DictTableDialog(QDialog):
             self.dirty = True
         except Exception:
             cell.setText(str(old_val))
+
+    def _on_item_double_clicked(self, cell):
+        row = cell.row()
+        key_cell = self.table.item(row, 0)
+        if not key_cell:
+            return
+        key = key_cell.data(Qt.UserRole)
+        if key is None or key not in self.dict_value:
+            return
+        val = self.dict_value[key]
+        if isinstance(val, dict):
+            dialog = DictTableDialog(self, val, self.profile, title=f"{key} ({len(val)} entries)")
+            dialog.exec()
+            if dialog.dirty:
+                self.dirty = True
+                self._populate()
+        elif isinstance(val, list):
+            dialog = ListTableDialog(self, val, self.profile, title=f"{key} ({len(val)} items)")
+            dialog.exec()
+            if dialog.dirty:
+                self.dirty = True
+                self._populate()
 
 class ListTableDialog(QDialog):
     """Spreadsheet-style view for a list whose items are dicts (an
@@ -419,19 +444,18 @@ class ListTableDialog(QDialog):
         row_index, key = payload
         item = self.list_value[row_index]
         value = item.get(key)
-        if isinstance(value, list) and value and any(isinstance(v, dict) for v in value):
+        if isinstance(value, dict):
+            dialog = DictTableDialog(self, value, self.profile, title=f"{key} ({len(value)} entries)")
+            dialog.exec()
+            if dialog.dirty:
+                self.dirty = True
+                self._populate()
+        elif isinstance(value, list):
             dialog = ListTableDialog(self, value, self.profile, title=f"{key} ({len(value)} items)")
             dialog.exec()
             if dialog.dirty:
                 self.dirty = True
                 self._populate()
-        elif isinstance(value, (dict, list)):
-            QMessageBox.information(
-                self, APP_TITLE,
-                f"'{key}' is a nested {'dict' if isinstance(value, dict) else 'list'} without a "
-                "table-friendly shape here - expand row "
-                f"{row_index}'s entry in the main tree instead to edit it.",
-            )
 
     def _on_item_changed(self, cell):
         col = cell.column()
