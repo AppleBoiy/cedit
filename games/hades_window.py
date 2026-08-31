@@ -399,6 +399,167 @@ class FixTextureDialog(QDialog):
         self._refresh_status()
 
     def _build_ui(self):
+        layout = QVBoxLayout(self)
+        layout.setSpacing(10)
+
+        # Header Info Banner
+        info_group = QGroupBox("Why this fix exists")
+        info_layout = QVBoxLayout(info_group)
+        info_label = QLabel(
+            "When running on devices with lower VRAM, Apple Silicon, or integrated graphics, "
+            "Hades II automatically forces 720p textures and video packages to prevent memory pressure, "
+            "even if in-game graphics settings are set to High.<br><br>"
+            "This fix swaps the <b>720p</b> and <b>1080p</b> directories inside <code>Content/Movies</code> "
+            "and <code>Content/Packages</code>, ensuring the game engine loads the full 1080p high-resolution "
+            "assets whenever it attempts to load downscaled assets."
+        )
+        info_label.setWordWrap(True)
+        info_layout.addWidget(info_label)
+        layout.addWidget(info_group)
+
+        # Path Selection Group
+        path_box = QGroupBox("Hades II Content Directory")
+        path_layout = QHBoxLayout(path_box)
+        self.path_edit = QLineEdit()
+        self.path_edit.setText(str(self.content_dir) if self.content_dir else "")
+        self.path_edit.textChanged.connect(self._on_path_changed)
+        path_layout.addWidget(self.path_edit)
+
+        browse_btn = QPushButton("Browse...")
+        browse_btn.clicked.connect(self._browse_folder)
+        path_layout.addWidget(browse_btn)
+        layout.addWidget(path_box)
+
+        # Status & Diagnostics Box
+        self.status_box = QGroupBox("Current Asset Status")
+        status_layout = QVBoxLayout(self.status_box)
+
+        self.badge_label = QLabel()
+        self.badge_label.setStyleSheet("font-size: 13px; font-weight: bold; padding: 6px; border-radius: 4px;")
+        status_layout.addWidget(self.badge_label)
+
+        self.details_label = QLabel()
+        self.details_label.setWordWrap(True)
+        status_layout.addWidget(self.details_label)
+        layout.addWidget(self.status_box)
+
+        # Action Buttons
+        btn_layout = QHBoxLayout()
+        self.swap_btn = QPushButton()
+        self.swap_btn.setStyleSheet("font-weight: bold; padding: 8px 16px;")
+        self.swap_btn.clicked.connect(self._toggle_swap)
+        btn_layout.addWidget(self.swap_btn, stretch=1)
+
+        close_btn = QPushButton("Close")
+        close_btn.clicked.connect(self.accept)
+        btn_layout.addWidget(close_btn)
+        layout.addLayout(btn_layout)
+
+    def _on_path_changed(self):
+        txt = self.path_edit.text().strip()
+        self.content_dir = hades_lib.resolve_hades2_content_dir(txt)
+        self._refresh_status()
+
+    def _browse_folder(self):
+        d = QFileDialog.getExistingDirectory(self, "Select Hades II Content or Game Folder", str(self.content_dir or ""))
+        if d:
+            self.path_edit.setText(d)
+
+    def _refresh_status(self):
+        if not self.content_dir or not self.content_dir.is_dir():
+            self.badge_label.setText("CONTENT DIRECTORY NOT FOUND")
+            self.badge_label.setStyleSheet("background-color: #552222; color: #ff9999; padding: 6px; font-weight: bold;")
+            self.details_label.setText("Please click Browse... to locate your Hades II installation folder.")
+            self.swap_btn.setEnabled(False)
+            self.swap_btn.setText("Force High-Res (Unavailable)")
+            return
+
+        status = hades_lib.get_hades2_texture_status(self.content_dir)
+        if not status.get("valid"):
+            self.badge_label.setText("INVALID CONTENT DIRECTORY")
+            self.badge_label.setStyleSheet("background-color: #552222; color: #ff9999; padding: 6px; font-weight: bold;")
+            self.details_label.setText(f"Error: {status.get("error")}")
+            self.swap_btn.setEnabled(False)
+            self.swap_btn.setText("Force High-Res (Unavailable)")
+            return
+
+        self.swap_btn.setEnabled(True)
+        if status.get("is_swapped"):
+            self.badge_label.setText("ACTIVE: HIGH-RES 1080p FORCING IS ENABLED")
+            self.badge_label.setStyleSheet("background-color: #1e4620; color: #73d13d; border: 1px solid #389e0d; padding: 6px; font-weight: bold;")
+            self.details_label.setText(
+                "<b>Asset Mapping:</b><br>"
+                "• <code>Content/Movies/720p</code> ➔ contains <b>1080p</b> high-res movies<br>"
+                "• <code>Content/Packages/720p</code> ➔ contains <b>1080p</b> high-res textures & sprites<br>"
+                "<i>When the game requests 720p graphics for low VRAM, it automatically receives 1080p assets.</i>"
+            )
+            self.swap_btn.setText("Restore Default Textures (Revert to Vanilla 720p/1080p)")
+            self.swap_btn.setStyleSheet("background-color: #d46b08; color: white; font-weight: bold; padding: 8px 16px;")
+        else:
+            self.badge_label.setText("INACTIVE: DEFAULT (VANILLA) MAPPING")
+            self.badge_label.setStyleSheet("background-color: #2b303b; color: #d8dee9; border: 1px solid #4c566a; padding: 6px; font-weight: bold;")
+            self.details_label.setText(
+                "<b>Asset Mapping:</b><br>"
+                "• <code>Content/Movies/720p</code> ➔ contains 720p standard movies<br>"
+                "• <code>Content/Packages/720p</code> ➔ contains 720p downscaled textures<br>"
+                "<i>Low VRAM or integrated graphics will load lower resolution textures.</i>"
+            )
+            self.swap_btn.setText("Force High-Res Textures (Swap 720p <-> 1080p)")
+            self.swap_btn.setStyleSheet("background-color: #2b78e4; color: white; font-weight: bold; padding: 8px 16px;")
+
+    def _toggle_swap(self):
+        if not self.content_dir:
+            return
+        was_swapped = hades_lib.get_hades2_texture_status(self.content_dir).get("is_swapped", False)
+        ok, msg = hades_lib.swap_hades2_texture_folders(self.content_dir)
+        if ok:
+            now_swapped = hades_lib.get_hades2_texture_status(self.content_dir).get("is_swapped", False)
+            if now_swapped:
+                notice = (
+                    "<b>High-Res 1080p Textures are now FORCED!</b><br><br>"
+                    "<b>What was changed:</b><br>"
+                    "• <code>Movies/720p</code> and <code>Movies/1080p</code> folders have been swapped.<br>"
+                    "• <code>Packages/720p</code> and <code>Packages/1080p</code> folders have been swapped.<br><br>"
+                    "<b>Effect:</b><br>"
+                    "Hades II will now display full 1080p high-resolution textures, sprites, and videos.<br><br>"
+                    "<b>Important:</b> Please restart Hades II if it is currently running."
+                )
+            else:
+                notice = (
+                    "<b>Default Texture Mapping Restored!</b><br><br>"
+                    "<b>What was changed:</b><br>"
+                    "• <code>Movies</code> and <code>Packages</code> folders have been restored to vanilla layout.<br><br>"
+                    "<b>Important:</b> Please restart Hades II if it is currently running."
+                )
+            QMessageBox.information(self, "Fix Texture Status", notice)
+        else:
+            QMessageBox.critical(self, "Fix Texture Error", msg)
+        self._refresh_status()
+
+
+class HadesEditorWindow(QDialog):
+    def __init__(self, parent=None, game_key="hades2", initial_path=None):
+        super().__init__(parent)
+        self.game_key = game_key
+        self.profile = hades2_profile.PROFILE if game_key == "hades2" else hades_profile.PROFILE
+        self.sections = HADES2_SECTIONS
+
+        self.setWindowTitle(f"{self.profile.display_name} Save Editor Suite")
+        self.resize(*GAME_WINDOW_SIZE)
+        self.setMinimumSize(*GAME_WINDOW_MIN)
+
+        self.current_path = initial_path
+        self.data: Optional[Dict[str, Any]] = None
+        self._inputs: Dict[str, Tuple[str, QWidget]] = {}
+
+        self._build_ui()
+
+        if self.current_path and os.path.isfile(self.current_path):
+            self._load_file(self.current_path)
+        else:
+            self._discover_and_load_default()
+
+    def _build_ui(self):
         from PySide6.QtWidgets import QMenu, QStackedWidget
         root = QVBoxLayout(self)
         root.setContentsMargins(12, 12, 12, 12)
@@ -714,6 +875,206 @@ class FixTextureDialog(QDialog):
 
         c_layout.addLayout(ctrl_layout)
         return card
+
+
+    def _discover_and_load_default(self):
+        found = self.profile.discover_saves()
+        self.discover_combo.blockSignals(True)
+        self.discover_combo.clear()
+        self.discover_combo.addItem("Discovered Saves...")
+        for s in found:
+            self.discover_combo.addItem(os.path.basename(s), s)
+        self.discover_combo.blockSignals(False)
+
+        if found:
+            self._load_file(found[0])
+
+    def _on_discover_selected(self, index: int):
+        if index > 0:
+            path = self.discover_combo.itemData(index)
+            if path and os.path.isfile(path):
+                self._load_file(path)
+
+    def _open_fix_textures(self):
+        dialog = FixTextureDialog(self)
+        dialog.exec()
+        self._update_fix_texture_btn()
+
+    def _update_fix_texture_btn(self):
+        if hasattr(self, "fix_tex_btn") and self.game_key == "hades2":
+            content_dir = hades_lib.resolve_hades2_content_dir()
+            if content_dir:
+                status = hades_lib.get_hades2_texture_status(content_dir)
+                if status.get("is_swapped"):
+                    self.fix_tex_btn.setText("Fix Textures [HD: ON]")
+                    self.fix_tex_btn.setStyleSheet("background-color: #1e4620; color: #73d13d; font-weight: bold;")
+                else:
+                    self.fix_tex_btn.setText("Fix Textures [HD: OFF]")
+                    self.fix_tex_btn.setStyleSheet("")
+
+    def _browse_save(self):
+        start_dir = self.profile.find_default_save_dir() or str(Path.home())
+        path, _ = QFileDialog.getOpenFileName(self, "Open Hades Save File", start_dir, "Hades Saves (*.sav);;All Files (*.*)")
+        if path:
+            self._load_file(path)
+
+    def _load_file(self, path: str):
+        try:
+            with open(path, "rb") as f:
+                raw = f.read()
+            self.data = self.profile.loads(raw)
+            self.current_path = path
+            self.file_label.setText(f"Save File: {path}")
+            self._populate_ui()
+        except Exception as e:
+            QMessageBox.critical(self, "Error Loading Save", f"Failed to load {path}: {e}")
+
+    def _populate_ui(self):
+        if not self.data:
+            return
+
+        header = self.data.get("Header", {})
+        luabin = self.data.get("_luabin", [{}])
+        root = luabin[0] if luabin else {}
+        game_state = root.get("GameState", {})
+        current_run = root.get("CurrentRun", {})
+        hero = current_run.get("Hero", {})
+        resources = game_state.get("Resources", {})
+        arcana_state = game_state.get("MetaUpgradeState", {})
+        keepsake_chambers = game_state.get("KeepsakeChambers", {})
+        weapons_unlocked = game_state.get("WeaponsUnlocked", {})
+        world_upgrades = game_state.get("WorldUpgradesAdded", {})
+
+        aspect_ranks = game_state.get("WeaponAspectRanks", {})
+        familiar_levels = game_state.get("FamiliarLevels", {})
+        familiar_status = game_state.get("FamiliarStatus", {})
+        gift_data = game_state.get("GiftData", {})
+        npc_data = game_state.get("NPCData", {})
+        shrine_data = game_state.get("ShrinePointData", {})
+        active_pacts = game_state.get("ActivePacts", {})
+
+        for field_key, (f_type, widget) in self._inputs.items():
+            if f_type == "res":
+                widget.setValue(int(resources.get(field_key, 0)))
+            elif f_type == "arcana_card":
+                spin, chk = widget
+                card = arcana_state.get(field_key, {})
+                if isinstance(card, dict):
+                    level = int(card.get("Level", 1))
+                    unlocked = bool(card.get("Unlocked", False))
+                else:
+                    level = 1
+                    unlocked = bool(card)
+                spin.setValue(max(1, min(3, level)))
+                chk.setChecked(unlocked)
+            elif f_type == "aspect_rank":
+                val = aspect_ranks.get(field_key, 1)
+                widget.setValue(max(1, min(5, int(val))))
+            elif f_type == "familiar_rank":
+                val = familiar_levels.get(field_key, familiar_status.get(field_key, {}).get("Level", 1) if isinstance(familiar_status.get(field_key), dict) else 1)
+                widget.setValue(max(1, min(5, int(val))))
+            elif f_type == "familiar_bool":
+                unlocked = bool(familiar_status.get(field_key, {}).get("Unlocked", False) if isinstance(familiar_status.get(field_key), dict) else familiar_status.get(field_key, False))
+                widget.setChecked(unlocked)
+            elif f_type == "gift_tier":
+                val = gift_data.get(field_key, {}).get("Value", npc_data.get(field_key, {}).get("Value", 0)) if isinstance(gift_data.get(field_key), dict) else gift_data.get(field_key, 0)
+                widget.setValue(max(0, min(10, int(val))))
+            elif f_type == "shrine_vow":
+                val = shrine_data.get(field_key, active_pacts.get(field_key, 0))
+                widget.setValue(max(0, min(3, int(val))))
+            elif f_type == "keepsake":
+                widget.setValue(int(keepsake_chambers.get(field_key, 0)))
+            elif f_type == "weapon_unlock":
+                widget.setChecked(bool(weapons_unlocked.get(field_key, False)))
+            elif f_type == "world_upgrade":
+                widget.setChecked(bool(world_upgrades.get(field_key, False)))
+            elif f_type == "state_num":
+                widget.setValue(int(game_state.get(field_key, 0)))
+            elif f_type == "run_hero":
+                widget.setValue(int(hero.get(field_key, 0)))
+            elif f_type == "run_meta":
+                widget.setValue(int(current_run.get(field_key, 0)))
+            elif f_type == "header_int":
+                widget.setValue(int(header.get(field_key, 0)))
+            elif f_type == "header_bool":
+                widget.setChecked(bool(header.get(field_key, False)))
+            elif f_type == "header_str":
+                widget.setText(str(header.get(field_key, "")))
+
+    def _collect_ui_to_data(self):
+        if not self.data:
+            return
+
+        header = self.data.setdefault("Header", {})
+        luabin = self.data.setdefault("_luabin", [{}])
+        root = luabin[0] if luabin else {}
+        game_state = root.setdefault("GameState", {})
+        current_run = root.setdefault("CurrentRun", {})
+        hero = current_run.setdefault("Hero", {})
+        resources = game_state.setdefault("Resources", {})
+        arcana_state = game_state.setdefault("MetaUpgradeState", {})
+        keepsake_chambers = game_state.setdefault("KeepsakeChambers", {})
+        weapons_unlocked = game_state.setdefault("WeaponsUnlocked", {})
+        world_upgrades = game_state.setdefault("WorldUpgradesAdded", {})
+
+        aspect_ranks = game_state.setdefault("WeaponAspectRanks", {})
+        familiar_levels = game_state.setdefault("FamiliarLevels", {})
+        familiar_status = game_state.setdefault("FamiliarStatus", {})
+        gift_data = game_state.setdefault("GiftData", {})
+        shrine_data = game_state.setdefault("ShrinePointData", {})
+
+        for field_key, (f_type, widget) in self._inputs.items():
+            if f_type == "res":
+                resources[field_key] = float(widget.value())
+            elif f_type == "arcana_card":
+                spin, chk = widget
+                card = arcana_state.setdefault(field_key, {})
+                if not isinstance(card, dict):
+                    card = {}
+                    arcana_state[field_key] = card
+                card["Level"] = float(spin.value())
+                card["Unlocked"] = chk.isChecked()
+            elif f_type == "aspect_rank":
+                aspect_ranks[field_key] = float(widget.value())
+                weapons_unlocked[field_key] = True
+            elif f_type == "familiar_rank":
+                familiar_levels[field_key] = float(widget.value())
+            elif f_type == "familiar_bool":
+                fam = familiar_status.setdefault(field_key, {})
+                if isinstance(fam, dict):
+                    fam["Unlocked"] = widget.isChecked()
+                else:
+                    familiar_status[field_key] = widget.isChecked()
+            elif f_type == "gift_tier":
+                entry = gift_data.setdefault(field_key, {})
+                if isinstance(entry, dict):
+                    entry["Value"] = float(widget.value())
+                else:
+                    gift_data[field_key] = float(widget.value())
+            elif f_type == "shrine_vow":
+                shrine_data[field_key] = float(widget.value())
+            elif f_type == "keepsake":
+                val = widget.value()
+                keepsake_chambers[field_key] = float(val)
+            elif f_type == "weapon_unlock":
+                weapons_unlocked[field_key] = widget.isChecked()
+            elif f_type == "world_upgrade":
+                world_upgrades[field_key] = widget.isChecked()
+            elif f_type == "state_num":
+                game_state[field_key] = float(widget.value())
+            elif f_type == "run_hero":
+                hero[field_key] = float(widget.value())
+            elif f_type == "run_meta":
+                current_run[field_key] = float(widget.value())
+            elif f_type == "header_int":
+                header[field_key] = widget.value()
+            elif f_type == "header_bool":
+                header[field_key] = widget.isChecked()
+            elif f_type == "header_str":
+                header[field_key] = widget.text().strip()
+
+        # Keep top-level Resources dictionary synchronized
+        self.data["Resources"] = resources
 
 
     def _save_file(self):
