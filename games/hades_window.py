@@ -518,7 +518,7 @@ class HadesEditorWindow(QDialog):
         layout = QVBoxLayout(widget)
 
         for group_title, items in groups:
-            if group_title.startswith("Arcana Cards") and len(items) == 25:
+            if ("Altar of Ashes" in group_title or "Arcana" in group_title) and len(items) == 25:
                 # 5x5 Altar of Ashes Grid Layout
                 grid_widget = QWidget()
                 grid_layout = QGridLayout(grid_widget)
