@@ -90,39 +90,39 @@ HADES2_SECTIONS = [
         "title": "Aspects & Weapons",
         "groups": [
             ("Descura - Witch's Staff", [
-                ("StaffMelinoeAspect", "Aspect of Melinoë (Staff)", "aspect_rank", 1, 5),
-                ("StaffCirceAspect", "Aspect of Circe", "aspect_rank", 1, 5),
-                ("StaffMomusAspect", "Aspect of Momus", "aspect_rank", 1, 5),
+                ("BaseStaffAspect", "Aspect of Melinoë (Staff)", "aspect_rank", 1, 5),
+                ("StaffClearCastAspect", "Aspect of Circe", "aspect_rank", 1, 5),
+                ("StaffSelfHitAspect", "Aspect of Momus", "aspect_rank", 1, 5),
                 ("StaffRaiseDeadAspect", "Aspect of Anubis (Hidden)", "aspect_rank", 1, 5),
             ]),
             ("Lim and Oros - Sister Blades", [
-                ("DaggerMelinoeAspect", "Aspect of Melinoë (Daggers)", "aspect_rank", 1, 5),
-                ("DaggerArtemisAspect", "Aspect of Artemis", "aspect_rank", 1, 5),
-                ("DaggerPanAspect", "Aspect of Pan", "aspect_rank", 1, 5),
+                ("DaggerBackstabAspect", "Aspect of Melinoë (Daggers)", "aspect_rank", 1, 5),
+                ("DaggerBlockAspect", "Aspect of Artemis", "aspect_rank", 1, 5),
+                ("DaggerHomingThrowAspect", "Aspect of Pan", "aspect_rank", 1, 5),
                 ("DaggerTripleAspect", "Aspect of the Morrigan (Hidden)", "aspect_rank", 1, 5),
             ]),
             ("Ygnium - Umbral Flames", [
-                ("TorchMelinoeAspect", "Aspect of Melinoë (Torches)", "aspect_rank", 1, 5),
-                ("TorchMorosAspect", "Aspect of Moros", "aspect_rank", 1, 5),
-                ("TorchEosAspect", "Aspect of Eos", "aspect_rank", 1, 5),
+                ("TorchSpecialDurationAspect", "Aspect of Melinoë (Torches)", "aspect_rank", 1, 5),
+                ("TorchDetonateAspect", "Aspect of Moros", "aspect_rank", 1, 5),
+                ("TorchSprintRecallAspect", "Aspect of Eos", "aspect_rank", 1, 5),
                 ("TorchAutofireAspect", "Aspect of Supay (Hidden)", "aspect_rank", 1, 5),
             ]),
             ("Zorephet - Moonstone Axe", [
-                ("AxeMelinoeAspect", "Aspect of Melinoë (Axe)", "aspect_rank", 1, 5),
-                ("AxeCharonAspect", "Aspect of Charon", "aspect_rank", 1, 5),
-                ("AxeThanatosAspect", "Aspect of Thanatos", "aspect_rank", 1, 5),
+                ("AxeRecoveryAspect", "Aspect of Melinoë (Axe)", "aspect_rank", 1, 5),
+                ("AxeArmCastAspect", "Aspect of Charon", "aspect_rank", 1, 5),
+                ("AxePerfectCriticalAspect", "Aspect of Thanatos", "aspect_rank", 1, 5),
                 ("AxeRallyAspect", "Aspect of Nergal (Hidden)", "aspect_rank", 1, 5),
             ]),
             ("Revaal - Argent Skull", [
-                ("LobMelinoeAspect", "Aspect of Melinoë (Skull)", "aspect_rank", 1, 5),
-                ("LobMedeaAspect", "Aspect of Medea", "aspect_rank", 1, 5),
-                ("LobPersephoneAspect", "Aspect of Persephone", "aspect_rank", 1, 5),
+                ("LobAmmoBoostAspect", "Aspect of Melinoë (Skull)", "aspect_rank", 1, 5),
+                ("LobCloseAttackAspect", "Aspect of Medea", "aspect_rank", 1, 5),
+                ("LobImpulseAspect", "Aspect of Persephone", "aspect_rank", 1, 5),
                 ("LobGunAspect", "Aspect of Hel (Hidden)", "aspect_rank", 1, 5),
             ]),
             ("Althea - Black Coat", [
-                ("SuitMelinoeAspect", "Aspect of Melinoë (Coat)", "aspect_rank", 1, 5),
-                ("SuitNyxAspect", "Aspect of Nyx", "aspect_rank", 1, 5),
-                ("SuitSeleneAspect", "Aspect of Selene", "aspect_rank", 1, 5),
+                ("BaseSuitAspect", "Aspect of Melinoë (Coat)", "aspect_rank", 1, 5),
+                ("SuitHexAspect", "Aspect of Nyx", "aspect_rank", 1, 5),
+                ("SuitMarkCritAspect", "Aspect of Selene", "aspect_rank", 1, 5),
                 ("SuitComboAspect", "Aspect of Shiva (Hidden)", "aspect_rank", 1, 5),
             ])
         ]
@@ -840,8 +840,11 @@ class HadesEditorWindow(QDialog):
                 spin.setValue(max(1, min(3, level)))
                 chk.setChecked(unlocked)
             elif f_type == "aspect_rank":
-                val = aspect_ranks.get(field_key, 1)
-                widget.setValue(max(1, min(5, int(val))))
+                lvl = 1
+                for r in range(2, 6):
+                    if weapons_unlocked.get(f"{field_key}{r}") or world_upgrades.get(f"{field_key}{r}"):
+                        lvl += 1
+                widget.setValue(lvl)
             elif f_type == "familiar_rank":
                 val = familiar_levels.get(field_key, familiar_status.get(field_key, {}).get("Level", 1) if isinstance(familiar_status.get(field_key), dict) else 1)
                 widget.setValue(max(1, min(5, int(val))))
@@ -921,7 +924,19 @@ class HadesEditorWindow(QDialog):
                 card["Level"] = float(spin.value())
                 card["Unlocked"] = chk.isChecked()
             elif f_type == "aspect_rank":
-                aspect_ranks[field_key] = float(widget.value())
+                val = int(widget.value())
+                is_base = field_key.startswith("Base") or "Backstab" in field_key or "Recovery" in field_key or "Duration" in field_key or "AmmoBoost" in field_key
+                if val > 1 or is_base:
+                    weapons_unlocked[field_key] = True
+                    world_upgrades[field_key] = True
+                    world_upgrades_added[field_key] = True
+                for r in range(2, 6):
+                    rk = f"{field_key}{r}"
+                    active = (r <= val)
+                    weapons_unlocked[rk] = active
+                    world_upgrades[rk] = active
+                    world_upgrades_added[rk] = active
+                aspect_ranks[field_key] = float(val)
                 weapons_unlocked[field_key] = True
             elif f_type == "familiar_rank":
                 familiar_levels[field_key] = float(widget.value())
