@@ -83,6 +83,7 @@ HADES2_SECTIONS = [
                 ("MixerOBoss", "Gale Iron (Thessaly Boss)", "res", 0, 999),
                 ("MixerPBoss", "Fire Feather (Prometheus / Olympus)", "res", 0, 999),
                 ("MixerQBoss", "Cosmic Entropy (Typhon / Summit)", "res", 0, 999),
+                ("Mixer6Common", "Darkness (Primordial Chaos Realm)", "res", 0, 999),
             ])
         ]
     },
@@ -815,8 +816,7 @@ class HadesEditorWindow(QDialog):
         arcana_state = game_state.get("MetaUpgradeState", {})
         keepsake_chambers = game_state.get("KeepsakeChambers", {})
         weapons_unlocked = game_state.get("WeaponsUnlocked", {})
-        world_upgrades = game_state.get("WorldUpgrades", {})
-        world_upgrades_added = game_state.get("WorldUpgradesAdded", {})
+        world_upgrades = game_state.get("WorldUpgradesAdded", {})
 
         aspect_ranks = game_state.get("WeaponAspectRanks", {})
         familiar_levels = game_state.get("FamiliarLevels", {})
@@ -891,8 +891,7 @@ class HadesEditorWindow(QDialog):
         arcana_state = game_state.setdefault("MetaUpgradeState", {})
         keepsake_chambers = game_state.setdefault("KeepsakeChambers", {})
         weapons_unlocked = game_state.setdefault("WeaponsUnlocked", {})
-        world_upgrades = game_state.setdefault("WorldUpgrades", {})
-        world_upgrades_added = game_state.setdefault("WorldUpgradesAdded", {})
+        world_upgrades = game_state.setdefault("WorldUpgradesAdded", {})
 
         aspect_ranks = game_state.setdefault("WeaponAspectRanks", {})
         familiar_levels = game_state.setdefault("FamiliarLevels", {})
@@ -931,14 +930,13 @@ class HadesEditorWindow(QDialog):
                 if val > 1 or is_base:
                     weapons_unlocked[field_key] = True
                     world_upgrades[field_key] = True
-                    world_upgrades_added[field_key] = True
                 for r in range(2, 6):
                     rk = f"{field_key}{r}"
                     active = (r <= val)
                     weapons_unlocked[rk] = active
                     world_upgrades[rk] = active
-                    world_upgrades_added[rk] = active
                 aspect_ranks[field_key] = float(val)
+                weapons_unlocked[field_key] = True
             elif f_type == "familiar_rank":
                 familiar_levels[field_key] = float(widget.value())
             elif f_type == "familiar_bool":
@@ -961,9 +959,7 @@ class HadesEditorWindow(QDialog):
             elif f_type == "weapon_unlock":
                 weapons_unlocked[field_key] = widget.isChecked()
             elif f_type == "world_upgrade":
-                is_chk = widget.isChecked()
-                world_upgrades[field_key] = is_chk
-                world_upgrades_added[field_key] = is_chk
+                world_upgrades[field_key] = widget.isChecked()
             elif f_type == "state_num":
                 game_state[field_key] = float(widget.value())
             elif f_type == "run_hero":
