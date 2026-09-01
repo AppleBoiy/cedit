@@ -56,9 +56,10 @@ HADES2_SECTIONS = [
                 ("MetaCardPointsCommon", "Ash", "res", 0, 99999),
                 ("MetaFabric", "Fate Fabric", "res", 0, 9999),
                 ("CardUpgradePoints", "Moon Dust", "res", 0, 9999),
-                ("CardUpgradePointsAdd", "Star Dust", "res", 0, 9999),
-                ("TalentPoints", "Shadow", "res", 0, 9999),
+                ("WeaponPointsRare", "Nightmare / Star Dust", "res", 0, 9999),
+                ("MixerShadow", "Shadow (Alchemy)", "res", 0, 9999),
                 ("MajorTalentPoints", "Zodiac Sand", "res", 0, 9999),
+                ("CharonPoints", "Obol Points (Charon Gold Credit)", "res", 0, 999),
                 ("TrashPoints", "Garbage", "res", 0, 999),
             ]),
             ("Mining Ores & Minerals", [
@@ -66,19 +67,22 @@ HADES2_SECTIONS = [
                 ("OreGLime", "Limestone (Oceanus)", "res", 0, 999),
                 ("OreHGlassrock", "Glassrock (Fields)", "res", 0, 999),
                 ("OreIMarble", "Marble (Tartarus)", "res", 0, 999),
-                ("OreJBronze", "Bronze (Ephyra)", "res", 0, 999),
-                ("OreKIron", "Iron (Thessaly)", "res", 0, 999),
-                ("OreLAdamant", "Adamant (Olympus)", "res", 0, 999),
-                ("OreMScales", "Scales (Summit)", "res", 0, 999),
-                ("OreNFlux", "Flux (Surface)", "res", 0, 999),
+                ("OreNBronze", "Bronze (City of Ephyra)", "res", 0, 999),
+                ("OreOIron", "Iron (Rift of Thessaly)", "res", 0, 999),
+                ("OrePAdamant", "Adamant (Mount Olympus)", "res", 0, 999),
+                ("OreQScales", "Plasma / Dragon Scales (Summit)", "res", 0, 999),
+                ("OreChaosProtoplasm", "Protoplasm (Primordial Chaos)", "res", 0, 999),
             ]),
-            ("Boss Reagents & Trophies", [
+            ("Boss Reagents & God Materials", [
                 ("MixerFBoss", "Cinder (Hecate)", "res", 0, 999),
-                ("MixerGBoss", "Pearl / Tears (Scylla)", "res", 0, 999),
+                ("MixerGBoss", "Pearl (Scylla & the Sirens)", "res", 0, 999),
                 ("MixerHBoss", "Wool (Polyphemus)", "res", 0, 999),
                 ("MixerIBoss", "Golden Apple (Eris)", "res", 0, 999),
-                ("MixerJBoss", "Entropy (Chronos)", "res", 0, 999),
-                ("MixerPBase", "Moss", "res", 0, 999),
+                ("MixerJBoss", "Entropy / Zodiac Sand (Chronos)", "res", 0, 999),
+                ("MixerNBoss", "Tears (Charybdis / Ephyra Boss)", "res", 0, 999),
+                ("MixerOBoss", "Gale Iron (Thessaly Boss)", "res", 0, 999),
+                ("MixerPBoss", "Fire Feather (Prometheus / Olympus)", "res", 0, 999),
+                ("MixerQBoss", "Cosmic Entropy (Typhon / Summit)", "res", 0, 999),
             ])
         ]
     },
@@ -182,12 +186,12 @@ HADES2_SECTIONS = [
                 ("NPC_Chaos_01", "Primordial Chaos", "gift_tier", 0, 10),
             ]),
             ("Gift Items & Indulgences", [
-                ("GiftPointsCommon", "Nectar", "res", 0, 999),
+                ("GiftPoints", "Nectar", "res", 0, 999),
                 ("GiftPointsRare", "Ambrosia", "res", 0, 999),
                 ("BathSalt", "Bath Salts (Hot Springs)", "res", 0, 999),
                 ("TwinLure", "Twin Lures (Fishing Pier)", "res", 0, 999),
                 ("BathingGifts", "Herbal Tea (Taverna)", "res", 0, 999),
-                ("BlindBoxPoints", "Obol Points", "res", 0, 999),
+                ("CharonPoints", "Obol Points", "res", 0, 999),
             ])
         ]
     },
@@ -234,32 +238,34 @@ HADES2_SECTIONS = [
         "title": "Garden",
         "groups": [
             ("Seeds & Harvest Spores", [
-                ("PlantFNightshadeSeed", "Nightshade Seeds", "res", 0, 999),
-                ("PlantGLotusSeed", "Lotus Seeds", "res", 0, 999),
-                ("PlantHMyrtleSeed", "Myrtle Seeds", "res", 0, 999),
-                ("PlantIShaderotSeed", "Shaderot Spores", "res", 0, 999),
-                ("PlantJCattailSeed", "Cattail Seeds", "res", 0, 999),
-                ("PlantKWheatSeed", "Wheat Seeds", "res", 0, 999),
-                ("PlantLPoppySeed", "Poppy Seeds", "res", 0, 999),
-                ("PlantMAlgaeSeed", "Algae Spores", "res", 0, 999),
-                ("PlantNGarlicSeed", "Garlic Tubers", "res", 0, 999),
-                ("PlantFMolySeed", "Moly Seeds", "res", 0, 999),
-                ("PlantFMandrakeSeed", "Mandrake Seeds", "res", 0, 999),
-                ("PlantFThalamusSeed", "Origin Seeds", "res", 0, 999),
+                ("PlantFNightshadeSeed", "Nightshade Seeds (Erebus)", "res", 0, 999),
+                ("PlantGCattailSeed", "Cattail Seeds (Oceanus)", "res", 0, 999),
+                ("PlantHWheatSeed", "Wheat Seeds (Fields of Mourning)", "res", 0, 999),
+                ("PlantIPoppySeed", "Poppy Seeds (Tartarus)", "res", 0, 999),
+                ("PlantNGarlicSeed", "Garlic Tubers (City of Ephyra)", "res", 0, 999),
+                ("PlantOMandrakeSeed", "Mandrake Seeds (Rift of Thessaly)", "res", 0, 999),
+                ("PlantPOliveSeed", "Olive Seeds (Mount Olympus)", "res", 0, 999),
+                ("PlantQSnakereedSeed", "Snakereed Seeds (The Summit)", "res", 0, 999),
+                ("PlantChaosThalamusSeed", "Origin Seeds (Primordial Chaos)", "res", 0, 999),
             ]),
-            ("Harvested Flora", [
-                ("PlantFNightshade", "Nightshade", "res", 0, 999),
-                ("PlantGLotus", "Lotus", "res", 0, 999),
-                ("PlantHMyrtle", "Myrtle", "res", 0, 999),
-                ("PlantIShaderot", "Shaderot", "res", 0, 999),
-                ("PlantJCattail", "Cattail", "res", 0, 999),
-                ("PlantKWheat", "Wheat", "res", 0, 999),
-                ("PlantLPoppy", "Poppy", "res", 0, 999),
-                ("PlantMAlgae", "Algae", "res", 0, 999),
-                ("PlantNGarlic", "Garlic", "res", 0, 999),
-                ("PlantFMoly", "Moly", "res", 0, 999),
-                ("PlantFMandrake", "Mandrake", "res", 0, 999),
-                ("PlantFThalamus", "Thalamus", "res", 0, 999),
+            ("Harvested Flora & Gathered Herbs", [
+                ("PlantFNightshade", "Nightshade (Erebus)", "res", 0, 999),
+                ("PlantFMoly", "Moly (Erebus - Wild)", "res", 0, 999),
+                ("PlantGCattail", "Cattail (Oceanus)", "res", 0, 999),
+                ("PlantGLotus", "Lotus (Oceanus - Wild)", "res", 0, 999),
+                ("PlantHWheat", "Wheat (Fields of Mourning)", "res", 0, 999),
+                ("PlantHMyrtle", "Myrtle (Fields - Wild)", "res", 0, 999),
+                ("PlantIPoppy", "Poppy (Tartarus)", "res", 0, 999),
+                ("PlantIShaderot", "Shaderot (Tartarus - Wild)", "res", 0, 999),
+                ("PlantNGarlic", "Garlic (City of Ephyra)", "res", 0, 999),
+                ("PlantNMoss", "Moss (Ephyra - Wild)", "res", 0, 999),
+                ("PlantOMandrake", "Mandrake (Rift of Thessaly)", "res", 0, 999),
+                ("PlantODriftwood", "Driftwood (Thessaly - Wild)", "res", 0, 999),
+                ("PlantPOlive", "Olive (Mount Olympus)", "res", 0, 999),
+                ("PlantPIris", "Iris (Olympus - Wild)", "res", 0, 999),
+                ("PlantQSnakereed", "Snakereed (The Summit)", "res", 0, 999),
+                ("PlantQFang", "Fang (Summit - Wild)", "res", 0, 999),
+                ("PlantChaosThalamus", "Thalamus (Chaos)", "res", 0, 999),
             ])
         ]
     },
@@ -290,6 +296,9 @@ HADES2_SECTIONS = [
                 ("FishPCommon", "Pillartop (Olympus)", "res", 0, 99),
                 ("FishPRare", "Chrestle (Olympus)", "res", 0, 99),
                 ("FishPLegendary", "Starsailor (Olympus)", "res", 0, 99),
+                ("FishQCommon", "Lamprey (Summit)", "res", 0, 99),
+                ("FishQRare", "Stormgullet (Summit)", "res", 0, 99),
+                ("FishQLegendary", "Chimaerid (Summit)", "res", 0, 99),
                 ("FishChaosCommon", "Mati (Chaos)", "res", 0, 99),
                 ("FishChaosRare", "Projelly (Chaos)", "res", 0, 99),
                 ("FishChaosLegendary", "Voidskate (Chaos)", "res", 0, 99),
@@ -886,9 +895,23 @@ class HadesEditorWindow(QDialog):
         gift_data = game_state.setdefault("GiftData", {})
         shrine_data = game_state.setdefault("ShrinePointData", {})
 
+        lifetime_res = game_state.setdefault("LifetimeResourcesGained", {})
+        resources_viewed = game_state.setdefault("ResourcesViewed", {})
+
         for field_key, (f_type, widget) in self._inputs.items():
             if f_type == "res":
-                resources[field_key] = float(widget.value())
+                val = float(widget.value())
+                resources[field_key] = val
+                # Keep Lifetime tracking synchronized so game quests, recipes, and shops reflect current stock
+                lifetime_res[field_key] = max(lifetime_res.get(field_key, 0.0), val)
+                resources_viewed[field_key] = True
+                # Also synchronize GiftPoints/GiftPointsCommon aliases
+                if field_key == "GiftPoints":
+                    resources["GiftPointsCommon"] = val
+                    lifetime_res["GiftPointsCommon"] = max(lifetime_res.get("GiftPointsCommon", 0.0), val)
+                elif field_key == "GiftPointsCommon":
+                    resources["GiftPoints"] = val
+                    lifetime_res["GiftPoints"] = max(lifetime_res.get("GiftPoints", 0.0), val)
             elif f_type == "arcana_card":
                 spin, chk = widget
                 card = arcana_state.setdefault(field_key, {})
@@ -964,14 +987,14 @@ class HadesEditorWindow(QDialog):
 
     def _batch_add_resources(self, amount: int):
         for field_key, (f_type, widget) in self._inputs.items():
-            if f_type == "res":
-                widget.setValue(widget.value() + amount)
+            if f_type == "res" and not field_key.startswith("Fish") and field_key not in ("MetaCurrency", "MemPointsCommon", "MetaCardPointsCommon"):
+                widget.setValue(min(widget.maximum(), widget.value() + amount))
 
     def _batch_add_currencies(self, amount: int):
-        for field_key in ["MetaCurrency", "MemPointsCommon", "MetaCardPointsCommon", "MetaFabric", "CardUpgradePoints"]:
+        for field_key in ["MetaCurrency", "MemPointsCommon", "MetaCardPointsCommon", "MetaFabric", "CardUpgradePoints", "WeaponPointsRare", "MixerShadow", "MajorTalentPoints"]:
             if field_key in self._inputs:
                 _, widget = self._inputs[field_key]
-                widget.setValue(widget.value() + amount)
+                widget.setValue(min(widget.maximum(), widget.value() + amount))
 
     def _batch_max_arcana(self):
         for field_key, (f_type, widget) in self._inputs.items():
