@@ -815,7 +815,8 @@ class HadesEditorWindow(QDialog):
         arcana_state = game_state.get("MetaUpgradeState", {})
         keepsake_chambers = game_state.get("KeepsakeChambers", {})
         weapons_unlocked = game_state.get("WeaponsUnlocked", {})
-        world_upgrades = game_state.get("WorldUpgradesAdded", {})
+        world_upgrades = game_state.get("WorldUpgrades", {})
+        world_upgrades_added = game_state.get("WorldUpgradesAdded", {})
 
         aspect_ranks = game_state.get("WeaponAspectRanks", {})
         familiar_levels = game_state.get("FamiliarLevels", {})
@@ -890,7 +891,8 @@ class HadesEditorWindow(QDialog):
         arcana_state = game_state.setdefault("MetaUpgradeState", {})
         keepsake_chambers = game_state.setdefault("KeepsakeChambers", {})
         weapons_unlocked = game_state.setdefault("WeaponsUnlocked", {})
-        world_upgrades = game_state.setdefault("WorldUpgradesAdded", {})
+        world_upgrades = game_state.setdefault("WorldUpgrades", {})
+        world_upgrades_added = game_state.setdefault("WorldUpgradesAdded", {})
 
         aspect_ranks = game_state.setdefault("WeaponAspectRanks", {})
         familiar_levels = game_state.setdefault("FamiliarLevels", {})
@@ -937,7 +939,6 @@ class HadesEditorWindow(QDialog):
                     world_upgrades[rk] = active
                     world_upgrades_added[rk] = active
                 aspect_ranks[field_key] = float(val)
-                weapons_unlocked[field_key] = True
             elif f_type == "familiar_rank":
                 familiar_levels[field_key] = float(widget.value())
             elif f_type == "familiar_bool":
@@ -960,7 +961,9 @@ class HadesEditorWindow(QDialog):
             elif f_type == "weapon_unlock":
                 weapons_unlocked[field_key] = widget.isChecked()
             elif f_type == "world_upgrade":
-                world_upgrades[field_key] = widget.isChecked()
+                is_chk = widget.isChecked()
+                world_upgrades[field_key] = is_chk
+                world_upgrades_added[field_key] = is_chk
             elif f_type == "state_num":
                 game_state[field_key] = float(widget.value())
             elif f_type == "run_hero":
