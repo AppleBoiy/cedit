@@ -2499,10 +2499,7 @@ class SaveEditorWindow(QMainWindow):
             QMessageBox.information(self, APP_TITLE, "Select a dict or list node first (or the root).")
             return
         container, key = self.node_lookup.get(item, (None, None))
-        if key is None and container is None:
-            target = self.data
-        else:
-            target = container[key]
+        target = self.data if key is None and container is None else container[key]
 
         if isinstance(target, dict):
             new_key, ok = QInputDialog.getText(self, "Add key", "New key name:")
