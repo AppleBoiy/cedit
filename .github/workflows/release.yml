@@ -27,14 +27,14 @@ jobs:
       - name: Ensure lz4 is installed
         run: brew list lz4 &>/dev/null || brew install lz4
 
-      - name: Run unit tests
-        run: python3 -m unittest discover -s tests -v
-
       - name: Install runtime + build requirements
         run: |
           python3 -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install -r packaging/requirements.txt
+
+      - name: Run unit tests
+        run: python3 -m unittest discover -s tests -v
 
       - name: Build cedit.app
         run: pyinstaller packaging/cedit.spec --noconfirm
