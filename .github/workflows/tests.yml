@@ -45,15 +45,28 @@ jobs:
       - name: Install lz4
         run: sudo apt-get update && sudo apt-get install -y lz4
 
+      # pycryptodome (Crypto.Cipher) is needed by games/mhw.py/lib/mhw_crypto.py,
+      # and the lz4 *Python package* (a separate thing from the lz4 CLI above)
+      # by lib/hades_lib.py - both are imported at module load time, so
+      # test_mhw/test_hades fail to even import without these. Deliberately
+      # NOT installing requirements.txt wholesale here: that would also pull
+      # in PySide6, defeating tests.test_cli's own
+      # test_games_package_does_not_require_pyside6, which exists to prove
+      # `import games` works with no GUI toolkit installed at all.
+      - name: Install pycryptodome and lz4 (Python packages)
+        run: pip install pycryptodome lz4
+
       # Only lib/base.py, lib/dredge_client.py, lib/octopath_lib.py,
-      # lib/bbee_lib.py, games/octopath.py, games/dave.py, games/bbee.py,
-      # games/duckov.py, and cli.py are covered here - they're pure Python
-      # with no PySide6/display dependency (this runner has no PySide6
-      # installed at all, and tests.test_cli's own
+      # lib/bbee_lib.py, lib/hades_lib.py, lib/mhw_crypto.py, games/octopath.py,
+      # games/dave.py, games/bbee.py, games/duckov.py, games/hades.py,
+      # games/hades2.py, games/mhw.py, and cli.py are covered here - they're
+      # pure Python with no PySide6/display dependency (this runner has no
+      # PySide6 installed at all, and tests.test_cli's own
       # test_games_package_does_not_require_pyside6 actively asserts that
       # `import games` stays that way). cedit.py and games/dredge_window.py
-      # (the PySide6 UI) have no automated coverage: a GUI test would need
-      # a real (or virtual) display, which is a bigger lift than this
-      # workflow's scope - see README.txt's TESTS section.
+      # and games/hades_window.py and games/mhw_window.py (the PySide6 UI)
+      # have no automated coverage: a GUI test would need a real (or virtual)
+      # display, which is a bigger lift than this workflow's scope - see
+      # README.txt's TESTS section.
       - name: Run unit tests
         run: python3 -m unittest discover -s tests -v
