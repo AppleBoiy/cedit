@@ -21,7 +21,6 @@ sys.path.insert(0, ROOT)
 # needs PySide6 (a real display), and these tests should run anywhere.
 sys.path.insert(0, os.path.join(ROOT, "games"))
 
-from lib import octopath_lib as octo_lib
 import octopath as octo_game
 
 

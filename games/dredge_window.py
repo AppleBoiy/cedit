@@ -15,18 +15,34 @@ import os
 import tempfile
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QBrush, QColor, QPen, QFont
+from PySide6.QtGui import QBrush, QColor, QFont, QPen
 from PySide6.QtWidgets import (
-    QDialog, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit,
-    QPushButton, QComboBox, QSplitter, QTreeWidget, QTreeWidgetItem,
-    QTableWidget, QTableWidgetItem,
-    QFileDialog, QMessageBox, QInputDialog, QTabWidget, QAbstractItemView,
-    QGraphicsView, QGraphicsScene,
-    QListWidget, QListWidgetItem,
+    QAbstractItemView,
+    QComboBox,
+    QDialog,
+    QFileDialog,
+    QGraphicsScene,
+    QGraphicsView,
+    QHBoxLayout,
+    QInputDialog,
+    QLabel,
+    QLineEdit,
+    QListWidget,
+    QListWidgetItem,
+    QMessageBox,
+    QPushButton,
+    QSplitter,
+    QTableWidget,
+    QTableWidgetItem,
+    QTabWidget,
+    QTreeWidget,
+    QTreeWidgetItem,
+    QVBoxLayout,
+    QWidget,
 )
 
-from lib.base import GameProfile, GAME_WINDOW_SIZE, GAME_WINDOW_MIN
 from lib import dredge_client as bridge
+from lib.base import GAME_WINDOW_MIN, GAME_WINDOW_SIZE
 
 CONTAINERS = ["inventory", "storage", "overflowStorage", "nonSpatialItems"]
 VARIABLE_GROUPS = ["decimals", "integers", "floats", "strings", "booleans"]

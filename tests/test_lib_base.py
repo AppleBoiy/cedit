@@ -5,22 +5,31 @@ Run:
     python3 -m unittest discover -s tests -v
 """
 
-import os
 import json
-import struct
+import os
+import sys
 import tempfile
 import unittest
 
-import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from lib.base import (
-    guess_type, smart_parse, coerce_value, get_by_path, set_by_path,
-    apply_text_quirks, make_json_loader, make_json_dumper,
-    make_base64_packed_node, GameProfile, SpecialNode,
-    backup_file, atomic_write_text, atomic_write_bytes,
-)
 import glob
+
+from lib.base import (
+    GameProfile,
+    apply_text_quirks,
+    atomic_write_bytes,
+    atomic_write_text,
+    backup_file,
+    coerce_value,
+    get_by_path,
+    guess_type,
+    make_base64_packed_node,
+    make_json_dumper,
+    make_json_loader,
+    set_by_path,
+    smart_parse,
+)
 
 
 class TestValueTypes(unittest.TestCase):
@@ -213,7 +222,6 @@ class TestGameProfile(unittest.TestCase):
 
     def test_discover_saves_most_recent_first(self):
         with tempfile.TemporaryDirectory() as d:
-            import time
             older = os.path.join(d, "old.sav")
             newer = os.path.join(d, "new.sav")
             with open(older, "w") as f:
@@ -303,8 +311,9 @@ if __name__ == "__main__":
     unittest.main()
 
     def test_list_and_restore_backups(self):
-        import tempfile
         import os
+        import tempfile
+
         from lib.base import backup_file, list_backups, restore_backup
 
         with tempfile.TemporaryDirectory() as td:
@@ -326,6 +335,6 @@ if __name__ == "__main__":
 
             # Restore backup
             restore_backup(b1, save_path)
-            with open(save_path, "r") as f:
+            with open(save_path) as f:
                 self.assertEqual(f.read(), "original_data")
 

@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-.PHONY: help run test build-app build-cli build install-app install-cli install clean release
+.PHONY: help run test lint format build-app build-cli build install-app install-cli install clean release
 
 help: ## Show this list
 	@echo "cedit - available targets:"
@@ -10,6 +10,12 @@ run: ## Launch the GUI (python3 cedit.py) - needs PySide6 (pip install -r requir
 
 test: ## Run the full test suite (no PySide6 needed)
 	python3 -m unittest discover -s tests -v
+
+lint: ## Check code with ruff (pip install ruff, or: pip install -e .[dev]) - no auto-fix
+	python3 -m ruff check .
+
+format: ## Show what `ruff format` would change, without writing anything
+	python3 -m ruff format --diff .
 
 build-app: ## Build dist/cedit.app (macOS only - see packaging/build_app.sh)
 	./packaging/build_app.sh

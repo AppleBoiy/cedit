@@ -10,14 +10,14 @@ To add support for a new game:
 That's it - cedit.py itself never needs to change.
 """
 
-from .duckov import PROFILE as DUCKOV_PROFILE
-from .octopath import PROFILE as OCTOPATH_PROFILE
-from .dredge import PROFILE as DREDGE_PROFILE
-from .dave import PROFILE as DAVE_PROFILE
 from .bbee import PROFILE as BBEE_PROFILE
-from .mhw import PROFILE as MHW_PROFILE
+from .dave import PROFILE as DAVE_PROFILE
+from .dredge import PROFILE as DREDGE_PROFILE
+from .duckov import PROFILE as DUCKOV_PROFILE
 from .hades import PROFILE as HADES_PROFILE
 from .hades2 import PROFILE as HADES2_PROFILE
+from .mhw import PROFILE as MHW_PROFILE
+from .octopath import PROFILE as OCTOPATH_PROFILE
 
 _REGISTRY = {
     DUCKOV_PROFILE.key: DUCKOV_PROFILE,

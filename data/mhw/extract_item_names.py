@@ -34,7 +34,7 @@ def parse_itm(path):
     magic1, magic2, entry_count = struct.unpack_from("<IHI", raw, 0)
     off = struct.calcsize("<IHI")
     entries = []
-    for i in range(entry_count):
+    for _i in range(entry_count):
         entry = struct.unpack_from(ITM_ENTRY_FMT, raw, off)
         entries.append((entry[0], entry[2]))  # (id, type/category)
         off += ITM_ENTRY_SIZE

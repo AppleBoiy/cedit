@@ -17,6 +17,7 @@ Bridge CLI contract (see lib/dredge_bridge/Program.cs):
      or to stderr with a nonzero exit code on failure ({"ok": false, "error": ...}).
 """
 
+import contextlib
 import json
 import os
 import platform
@@ -49,7 +50,7 @@ def candidate_locations():
         )
     if system == "Windows":
         local_low = Path(os.environ.get("USERPROFILE", str(home))) / "AppData/LocalLow/Black Salt Games/DREDGE"
-        steam = Path(os.environ.get("ProgramFiles(x86)", r"C:\Program Files (x86)"))
+        steam = Path(os.environ.get("ProgramFiles(x86)", r"C:\Program Files (x86)"))  # noqa: SIM112 - real Windows env var name, lookups are case-insensitive there
         return (
             [local_low / "saves", local_low / "eos/saves", local_low / "gog_galaxy/saves"],
             [steam / "Steam/steamapps/common/DREDGE/DREDGE_Data/Managed"],
@@ -115,10 +116,8 @@ def _run_bridge(command, save_path, managed_dir, patch_path=None):
     proc = subprocess.run(args, capture_output=True, text=True)
     if proc.returncode != 0:
         message = proc.stderr.strip() or proc.stdout.strip() or f"bridge exited with code {proc.returncode}"
-        try:
+        with contextlib.suppress(json.JSONDecodeError, AttributeError):
             message = json.loads(message).get("error", message)
-        except (json.JSONDecodeError, AttributeError):
-            pass
         raise DredgeBridgeError(message)
     try:
         return json.loads(proc.stdout)
@@ -275,7 +274,7 @@ def _load_manifest():
     if not MANIFEST_PATH.exists():
         return {}
     try:
-        with open(MANIFEST_PATH, "r", encoding="utf-8") as fh:
+        with open(MANIFEST_PATH, encoding="utf-8") as fh:
             return json.load(fh)
     except (json.JSONDecodeError, OSError):
         return {}

@@ -16,22 +16,31 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
-from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
-    QDialog, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QLabel,
-    QLineEdit, QPushButton, QComboBox, QFileDialog, QMessageBox,
-    QTabWidget, QSpinBox, QGroupBox, QScrollArea, QListWidget,
-    QListWidgetItem, QCheckBox, QFrame, QSplitter
+    QCheckBox,
+    QComboBox,
+    QDialog,
+    QFileDialog,
+    QGridLayout,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QMessageBox,
+    QPushButton,
+    QScrollArea,
+    QSpinBox,
+    QTabWidget,
+    QVBoxLayout,
+    QWidget,
 )
 
-from lib.base import GAME_WINDOW_SIZE, GAME_WINDOW_MIN, backup_file
-from lib import hades_lib
-from games import hades2 as hades2_profile
 from games import hades as hades_profile
-
-
+from games import hades2 as hades2_profile
+from lib import hades_lib
+from lib.base import GAME_WINDOW_MIN, GAME_WINDOW_SIZE, backup_file
 
 HADES2_SECTIONS = [
     {
@@ -488,7 +497,7 @@ class FixTextureDialog(QDialog):
         if not status.get("valid"):
             self.badge_label.setText("INVALID CONTENT DIRECTORY")
             self.badge_label.setStyleSheet("background-color: #552222; color: #ff9999; padding: 6px; font-weight: bold;")
-            self.details_label.setText(f"Error: {status.get("error")}")
+            self.details_label.setText(f"Error: {status.get('error')}")
             self.swap_btn.setEnabled(False)
             self.swap_btn.setText("Force High-Res (Unavailable)")
             return
@@ -520,7 +529,6 @@ class FixTextureDialog(QDialog):
     def _toggle_swap(self):
         if not self.content_dir:
             return
-        was_swapped = hades_lib.get_hades2_texture_status(self.content_dir).get("is_swapped", False)
         ok, msg = hades_lib.swap_hades2_texture_folders(self.content_dir)
         if ok:
             now_swapped = hades_lib.get_hades2_texture_status(self.content_dir).get("is_swapped", False)
@@ -559,8 +567,8 @@ class HadesEditorWindow(QDialog):
         self.setMinimumSize(*GAME_WINDOW_MIN)
 
         self.current_path = initial_path
-        self.data: Optional[Dict[str, Any]] = None
-        self._inputs: Dict[str, Tuple[str, QWidget]] = {}
+        self.data: dict[str, Any] | None = None
+        self._inputs: dict[str, tuple[str, QWidget]] = {}
 
         self._build_ui()
 
@@ -650,7 +658,7 @@ class HadesEditorWindow(QDialog):
         tester_bar.addStretch(1)
         root.addLayout(tester_bar)
 
-    def _build_section_tab(self, groups: List[Tuple[str, List[Tuple]]]) -> QWidget:
+    def _build_section_tab(self, groups: list[tuple[str, list[tuple]]]) -> QWidget:
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         widget = QWidget()
@@ -711,7 +719,7 @@ class HadesEditorWindow(QDialog):
                     for d in deltas:
                         btn = QPushButton(f"+{d}" if d > 0 else str(d))
                         btn.setFixedWidth(36)
-                        btn.clicked.connect(lambda _, s=spin, delta=d: s.setValue(max(min_v, min(max_v, s.value() + delta))))
+                        btn.clicked.connect(lambda _, s=spin, delta=d, lo=min_v, hi=max_v: s.setValue(max(lo, min(hi, s.value() + delta))))
                         btn_box.addWidget(btn)
 
                     if max_v <= 10:
@@ -818,7 +826,6 @@ class HadesEditorWindow(QDialog):
         weapons_unlocked = game_state.get("WeaponsUnlocked", {})
         world_upgrades = game_state.get("WorldUpgradesAdded", {})
 
-        aspect_ranks = game_state.get("WeaponAspectRanks", {})
         familiar_levels = game_state.get("FamiliarLevels", {})
         familiar_status = game_state.get("FamiliarStatus", {})
         gift_data = game_state.get("GiftData", {})
@@ -1011,38 +1018,38 @@ class HadesEditorWindow(QDialog):
                 widget.setValue(min(widget.maximum(), widget.value() + amount))
 
     def _batch_max_arcana(self):
-        for field_key, (f_type, widget) in self._inputs.items():
+        for _field_key, (f_type, widget) in self._inputs.items():
             if f_type == "arcana_card":
                 spin, chk = widget
                 spin.setValue(3)
                 chk.setChecked(True)
 
     def _batch_max_aspects(self):
-        for field_key, (f_type, widget) in self._inputs.items():
+        for _field_key, (f_type, widget) in self._inputs.items():
             if f_type == "aspect_rank":
                 widget.setValue(5)
             elif f_type == "weapon_unlock":
                 widget.setChecked(True)
 
     def _batch_max_familiars(self):
-        for field_key, (f_type, widget) in self._inputs.items():
+        for _field_key, (f_type, widget) in self._inputs.items():
             if f_type == "familiar_rank":
                 widget.setValue(5)
             elif f_type == "familiar_bool":
                 widget.setChecked(True)
 
     def _batch_max_affinity(self):
-        for field_key, (f_type, widget) in self._inputs.items():
+        for _field_key, (f_type, widget) in self._inputs.items():
             if f_type == "gift_tier":
                 widget.setValue(10)
 
     def _batch_unlock_incantations(self):
-        for field_key, (f_type, widget) in self._inputs.items():
+        for _field_key, (f_type, widget) in self._inputs.items():
             if f_type == "world_upgrade":
                 widget.setChecked(True)
 
     def _batch_unlock_aspects(self):
-        for field_key, (f_type, widget) in self._inputs.items():
+        for _field_key, (f_type, widget) in self._inputs.items():
             if f_type in ("weapon_unlock", "world_upgrade"):
                 widget.setChecked(True)
 

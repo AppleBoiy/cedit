@@ -11,22 +11,22 @@ import json
 import os
 import re
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
-from lib.base import GameProfile
 from lib import hades_lib
+from lib.base import GameProfile
 
-_ITEM_NAMES: Optional[Dict[str, str]] = None
+_ITEM_NAMES: dict[str, str] | None = None
 
 
-def _load_item_names() -> Dict[str, str]:
+def _load_item_names() -> dict[str, str]:
     global _ITEM_NAMES
     if _ITEM_NAMES is not None:
         return _ITEM_NAMES
     catalog_path = Path(__file__).parent.parent / "data" / "hades2" / "item_names.json"
     if catalog_path.is_file():
         try:
-            with open(catalog_path, "r", encoding="utf-8") as f:
+            with open(catalog_path, encoding="utf-8") as f:
                 _ITEM_NAMES = json.load(f)
         except Exception:
             _ITEM_NAMES = {}
@@ -35,12 +35,12 @@ def _load_item_names() -> Dict[str, str]:
     return _ITEM_NAMES
 
 
-def item_name(item_id: str) -> Optional[str]:
+def item_name(item_id: str) -> str | None:
     names = _load_item_names()
     return names.get(item_id)
 
 
-def describe_entry(parent_key: Optional[str], key: Any, val: Any) -> Optional[str]:
+def describe_entry(parent_key: str | None, key: Any, val: Any) -> str | None:
     if parent_key == "Resources":
         name = item_name(str(key))
         if name:
@@ -48,24 +48,24 @@ def describe_entry(parent_key: Optional[str], key: Any, val: Any) -> Optional[st
     return None
 
 
-def item_catalog(data: Optional[Dict[str, Any]]) -> List[Tuple[str, str]]:
+def item_catalog(data: dict[str, Any] | None) -> list[tuple[str, str]]:
     names = _load_item_names()
     rows = [(name, item_id) for item_id, name in names.items()]
     rows.sort(key=lambda r: r[0].lower())
     return rows
 
 
-def spawn_item_targets(data: Dict[str, Any]) -> List[Tuple[str, str]]:
+def spawn_item_targets(data: dict[str, Any]) -> list[tuple[str, str]]:
     return [("GameState.Resources", "Resources (Materials & Currencies)")]
 
 
-def item_quantity(data: Dict[str, Any], item_id: str, target: Optional[str] = None) -> int:
+def item_quantity(data: dict[str, Any], item_id: str, target: str | None = None) -> int:
     game_state = data.get("GameState", {})
     res = game_state.get("Resources", {})
     return int(res.get(item_id, 0))
 
 
-def set_item_quantity(data: Dict[str, Any], item_id: str, qty: int, target: Optional[str] = None) -> None:
+def set_item_quantity(data: dict[str, Any], item_id: str, qty: int, target: str | None = None) -> None:
     if qty < 0:
         raise ValueError(f"Item quantity cannot be negative: {qty}")
     game_state = data.setdefault("GameState", {})
@@ -76,19 +76,19 @@ def set_item_quantity(data: Dict[str, Any], item_id: str, qty: int, target: Opti
         res[item_id] = float(qty)
 
 
-def spawn_item(data: Dict[str, Any], item_id: str, qty: int, target: Optional[str] = None) -> None:
+def spawn_item(data: dict[str, Any], item_id: str, qty: int, target: str | None = None) -> None:
     current = item_quantity(data, item_id, target)
     set_item_quantity(data, item_id, current + qty, target)
 
 
-def remove_item(data: Dict[str, Any], item_id: str, qty: int, target: Optional[str] = None) -> None:
+def remove_item(data: dict[str, Any], item_id: str, qty: int, target: str | None = None) -> None:
     current = item_quantity(data, item_id, target)
     if current < qty:
         raise ValueError(f"Cannot remove {qty} of {item_id}; current count is {current}")
     set_item_quantity(data, item_id, current - qty, target)
 
 
-def inventory_state(data: Dict[str, Any]) -> Dict[str, List[Tuple[str, int, str]]]:
+def inventory_state(data: dict[str, Any]) -> dict[str, list[tuple[str, int, str]]]:
     game_state = data.get("GameState", {})
     res = game_state.get("Resources", {})
     slots = []
@@ -98,18 +98,18 @@ def inventory_state(data: Dict[str, Any]) -> Dict[str, List[Tuple[str, int, str]
     return {"GameState.Resources": slots}
 
 
-def discover_saves() -> List[str]:
+def discover_saves() -> list[str]:
     cfg_path = Path(__file__).parent.parent / "data" / "hades2.json"
     if not cfg_path.is_file():
         return []
     try:
-        with open(cfg_path, "r", encoding="utf-8") as f:
+        with open(cfg_path, encoding="utf-8") as f:
             cfg = json.load(f)
     except Exception:
         return []
 
     save_dirs = cfg.get("save_dirs", [])
-    results: List[str] = []
+    results: list[str] = []
 
     for dir_pattern in save_dirs:
         expanded = os.path.expandvars(os.path.expanduser(dir_pattern))
@@ -126,12 +126,12 @@ def discover_saves() -> List[str]:
     return results
 
 
-def find_default_save_dir() -> Optional[str]:
+def find_default_save_dir() -> str | None:
     cfg_path = Path(__file__).parent.parent / "data" / "hades2.json"
     if not cfg_path.is_file():
         return None
     try:
-        with open(cfg_path, "r", encoding="utf-8") as f:
+        with open(cfg_path, encoding="utf-8") as f:
             cfg = json.load(f)
     except Exception:
         return None

@@ -116,7 +116,7 @@ def _read_entries_from_bytes(raw, fields):
     out = []
     for _ in range(entry_count):
         values = struct_obj.unpack_from(raw, off)
-        out.append(dict(zip(names, values)))
+        out.append(dict(zip(names, values, strict=True)))
         off += struct_obj.size
     return out
 

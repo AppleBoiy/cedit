@@ -19,14 +19,29 @@ import os
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
-    QDialog, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QLabel,
-    QLineEdit, QPushButton, QComboBox, QTableWidget, QTableWidgetItem,
-    QFileDialog, QMessageBox, QTabWidget, QAbstractItemView, QGroupBox,
-    QListWidget, QListWidgetItem, QCheckBox,
+    QAbstractItemView,
+    QCheckBox,
+    QComboBox,
+    QDialog,
+    QFileDialog,
+    QGridLayout,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QListWidget,
+    QListWidgetItem,
+    QMessageBox,
+    QPushButton,
+    QTableWidget,
+    QTableWidgetItem,
+    QTabWidget,
+    QVBoxLayout,
+    QWidget,
 )
 
-from lib.base import GAME_WINDOW_SIZE, GAME_WINDOW_MIN, backup_file
 from games import mhw
+from lib.base import GAME_WINDOW_MIN, GAME_WINDOW_SIZE, backup_file
 
 _HUNTER_FIELDS = [
     ("name", "Name", str),
@@ -488,7 +503,8 @@ class MHWEditorWindow(QDialog):
         if not path:
             return
         try:
-            raw = open(path, "rb").read()
+            with open(path, "rb") as f:
+                raw = f.read()
             self.data = mhw.loads(raw)
         except Exception as e:
             QMessageBox.critical(self, "MHW Editor", f"Couldn't load this save:\n{e}")

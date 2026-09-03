@@ -407,12 +407,12 @@ def _resolve_container(data, target_key):
     try:
         slot_str, section, container = target_key.split(":")
         slot_idx = int(slot_str)
-    except ValueError:
-        raise ValueError(f"Unknown inventory target {target_key!r}.")
+    except ValueError as e:
+        raise ValueError(f"Unknown inventory target {target_key!r}.") from e
     try:
         slot = data["slots"][slot_idx]
-    except (IndexError, TypeError):
-        raise ValueError(f"No such save slot {slot_str!r}.")
+    except (IndexError, TypeError) as e:
+        raise ValueError(f"No such save slot {slot_str!r}.") from e
     section_data = slot.get(section)
     if not isinstance(section_data, dict) or container not in section_data:
         raise ValueError(f"Unknown inventory target {target_key!r}.")

@@ -42,11 +42,12 @@ names, and any item/monster id wouldn't be recognized as writable data
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
 import json
 import struct
 from dataclasses import dataclass
-from functools import lru_cache
+from functools import cache
 from pathlib import Path
 
 
@@ -146,13 +147,13 @@ class OctoGameProfile:
     character_id_key: str
     item_id_key: str
     item_count_key: str
-    temp_backpack_marker: "str | None"
+    temp_backpack_marker: str | None
     item_catalog_path: Path
     equipment_suffix: str
     job_first_key: str
     job_second_key: str
     job_names: dict
-    capture_catalog_path: "Path | None"
+    capture_catalog_path: Path | None
     capture_array_key: str
     capture_enemy_key: str
     capture_count_key: str
@@ -184,7 +185,7 @@ OT2_PROFILE = OctoGameProfile(
 GAME_PROFILES = {"ot1": OT1_PROFILE, "ot2": OT2_PROFILE}
 
 
-@lru_cache(maxsize=None)
+@cache
 def load_item_catalog(path: Path = ITEM_CATALOG_PATH):
     try:
         rows = json.loads(path.read_text(encoding="utf-8"))
@@ -193,7 +194,7 @@ def load_item_catalog(path: Path = ITEM_CATALOG_PATH):
     return {int(row["id"]): row for row in rows}
 
 
-@lru_cache(maxsize=None)
+@cache
 def load_monster_catalog(path: Path):
     try:
         rows = json.loads(path.read_text(encoding="utf-8"))
@@ -264,10 +265,8 @@ def _find_properties(data, needle: str, start: int = 0, end=None):
         offset = data.find(raw, cursor, limit)
         if offset < 0:
             break
-        try:
+        with contextlib.suppress(SaveError):
             result.append(_property_at(data, offset))
-        except SaveError:
-            pass
         cursor = offset + 1
     return result
 
@@ -315,10 +314,8 @@ def _find_bool_properties(data, needle: str, start: int = 0, end=None):
         offset = data.find(raw, cursor, limit)
         if offset < 0:
             break
-        try:
+        with contextlib.suppress(SaveError):
             result.append(_bool_property_at(data, offset))
-        except SaveError:
-            pass
         cursor = offset + 1
     return result
 
@@ -388,7 +385,7 @@ def _inventory_records(data, profile: OctoGameProfile):
     return records
 
 
-def parse_save(data, profile: "OctoGameProfile | None" = None) -> dict:
+def parse_save(data, profile: OctoGameProfile | None = None) -> dict:
     """Parse a full Octopath Traveler / Octopath Traveler II GVAS save into
     a plain nested dict: money, starting traveler, all 8 characters (core
     stats, stat bonuses, jobs, equipment), inventory, and (OT1) the

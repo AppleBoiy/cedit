@@ -1,5 +1,3 @@
-import csv
-import datetime
 #!/usr/bin/env python3
 """
 cedit - multi-game save editor
@@ -43,36 +41,61 @@ Run:
   python3 cedit.py --game duckov /path/to/Save_1.sav
 """
 
+import argparse
+import copy
+import csv
+import datetime
+import json
 import os
 import sys
-import json
-import copy
-import argparse
 
-from PySide6.QtCore import Qt, QSettings
-from PySide6.QtGui import QAction, QKeySequence, QIcon, QColor
+from PySide6.QtCore import QSettings, Qt
+from PySide6.QtGui import QAction, QColor, QIcon, QKeySequence
 from PySide6.QtWidgets import (
-    QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-    QLabel, QLineEdit, QPushButton, QComboBox, QTreeWidget, QTreeWidgetItem,
-    QPlainTextEdit, QSplitter, QFileDialog, QMessageBox, QInputDialog,
-    QGroupBox, QAbstractItemView, QMenu,
-    QTableWidget, QTableWidgetItem, QDialog, QCheckBox,
-    QListWidget, QListWidgetItem, QGridLayout, QSizePolicy, QHeaderView,
+    QAbstractItemView,
+    QApplication,
+    QCheckBox,
+    QComboBox,
+    QDialog,
+    QFileDialog,
+    QGridLayout,
+    QGroupBox,
+    QHBoxLayout,
+    QHeaderView,
+    QInputDialog,
+    QLabel,
+    QLineEdit,
+    QListWidget,
+    QListWidgetItem,
+    QMainWindow,
+    QMenu,
+    QMessageBox,
+    QPlainTextEdit,
+    QPushButton,
+    QSizePolicy,
+    QSplitter,
+    QTableWidget,
+    QTableWidgetItem,
+    QTreeWidget,
+    QTreeWidgetItem,
+    QVBoxLayout,
+    QWidget,
 )
 
-from games import list_games, get_game
+from games import get_game, list_games
 from lib.base import (
-    backup_file,
-    atomic_write_text,
-    atomic_write_bytes,
-    guess_type,
-    coerce_value,
-    smart_parse,
-    get_by_path,
-    set_by_path,
-    MAIN_WINDOW_SIZE,
     MAIN_WINDOW_MIN,
+    MAIN_WINDOW_SIZE,
+    atomic_write_bytes,
+    atomic_write_text,
+    backup_file,
+    coerce_value,
+    get_by_path,
+    guess_type,
+    set_by_path,
+    smart_parse,
 )
+
 
 def _resource_path(*parts):
     """Resolve a path that works both running from source and from a
@@ -344,7 +367,7 @@ class DictTableDialog(QDialog):
                 self._populate()
 
         elif act == add_num_act:
-            delta, ok = QInputDialog.getInt(self, "Add / Subtract Number", f"Enter amount to add (positive or negative):", 0, -9999999, 9999999)
+            delta, ok = QInputDialog.getInt(self, "Add / Subtract Number", "Enter amount to add (positive or negative):", 0, -9999999, 9999999)
             if ok:
                 for r in selected_rows:
                     k = self.table.item(r, 0).data(Qt.UserRole)
@@ -388,15 +411,15 @@ class DictTableDialog(QDialog):
             return
         try:
             updated = 0
-            with open(path, "r", encoding="utf-8") as f:
+            with open(path, encoding="utf-8") as f:
                 reader = csv.reader(f)
-                header = next(reader, None)
+                next(reader, None)  # skip header row
                 for row in reader:
                     if len(row) >= 3:
                         k, _, v_str = row[0], row[1], row[2]
                         # Match key in dict
                         matching_k = None
-                        for ek in self.dict_value.keys():
+                        for ek in self.dict_value:
                             if str(ek) == k:
                                 matching_k = ek
                                 break
@@ -503,7 +526,7 @@ class ListTableDialog(QDialog):
         has_scalar = False
         for item in self.list_value:
             if isinstance(item, dict):
-                for k in item.keys():
+                for k in item:
                     if k not in seen and (self.show_internal or not str(k).startswith("_")):
                         seen.add(k)
                         columns.append(k)
@@ -712,7 +735,7 @@ class ListTableDialog(QDialog):
             return
         try:
             updated = 0
-            with open(path, "r", encoding="utf-8") as f:
+            with open(path, encoding="utf-8") as f:
                 reader = csv.reader(f)
                 header = next(reader, None)
                 if not header or len(header) < 2:
@@ -1315,7 +1338,7 @@ class BackupManagerDialog(QDialog):
         self.save_path = save_path
         self.setWindowTitle(f"Backup & Snapshot Manager - {os.path.basename(save_path)}")
         self.resize(750, 480)
-        from lib.base import list_backups, backup_file, restore_backup
+        from lib.base import backup_file, list_backups, restore_backup
         self.list_backups = list_backups
         self.backup_file = backup_file
         self.restore_backup = restore_backup
@@ -1381,7 +1404,7 @@ class BackupManagerDialog(QDialog):
             dt = datetime.datetime.fromtimestamp(b["mtime"]).strftime("%Y-%m-%d %H:%M:%S")
             self.table.setItem(row, 1, QTableWidgetItem(dt))
 
-            size_str = f"{b["size"] / 1024:.1f} KB" if b["size"] >= 1024 else f"{b["size"]} B"
+            size_str = f"{b['size'] / 1024:.1f} KB" if b["size"] >= 1024 else f"{b['size']} B"
             self.table.setItem(row, 2, QTableWidgetItem(size_str))
 
             self.table.setItem(row, 3, QTableWidgetItem(b["path"]))
@@ -1997,7 +2020,7 @@ class SaveEditorWindow(QMainWindow):
                 with open(path, "rb") as f:
                     raw_text = f.read()
             else:
-                with open(path, "r", encoding="utf-8-sig") as f:
+                with open(path, encoding="utf-8-sig") as f:
                     raw_text = f.read()
         except UnicodeDecodeError:
             QMessageBox.critical(
@@ -2528,9 +2551,7 @@ class SaveEditorWindow(QMainWindow):
             return
         self._push_undo(self._snapshot())
         try:
-            if isinstance(container, dict):
-                del container[key]
-            elif isinstance(container, list):
+            if isinstance(container, (dict, list)):
                 del container[key]
         except (KeyError, IndexError):
             pass

@@ -1,0 +1,56 @@
+[project]
+name = "cedit"
+version = "1.8.0"
+description = "A PySide6 (Qt) save editor for several games, built around per-game profiles under games/"
+readme = "README.txt"
+requires-python = ">=3.10"
+license = { file = "LICENSE.txt" }
+dependencies = [
+    "PySide6",
+    "pycryptodome",
+    "lz4",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff",
+]
+
+# VERSION at the repo root stays the single source of truth for cedit's
+# own runtime version (GUI status bar, --version, PyInstaller specs -
+# see `make release`). project.version above is metadata for tooling
+# that expects pyproject to carry one (e.g. `pip show cedit`); bump it
+# alongside VERSION if the two ever need to agree exactly.
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+extend-exclude = [
+    "build",
+    "dist",
+    ".venv-build",
+    "lib/dredge_bridge",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "I",   # isort (import sorting)
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "SIM", # flake8-simplify
+]
+ignore = [
+    "E501",  # line length - formatter handles wrapping; long strings/URLs are fine as-is
+]
+
+[tool.ruff.lint.per-file-ignores]
+# GUI modules follow Qt's own naming/patterns and often need star-ish wide
+# imports of widget names; keep lint focused on the pure-Python layer.
+"cedit.py" = ["B008"]
+"games/*_window.py" = ["B008"]
+# tests/ deliberately sys.path.insert()s before importing games/lib modules
+# directly (bypassing games/__init__.py, which pulls in PySide6) - see each
+# test file's own docstring for why.
+"tests/*.py" = ["E402"]

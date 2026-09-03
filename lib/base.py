@@ -57,18 +57,19 @@ GameProfile by hand. The core editor (cedit.py) only ever talks to a
 GameProfile object; it has no per-game logic in it at all.
 """
 
+import base64
+import contextlib
+import datetime
+import fnmatch
+import json
 import os
 import re
-import json
-import base64
-import fnmatch
-import struct
 import shutil
-import datetime
+import struct
 import tempfile
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any, Callable, List, Optional, Tuple
-
+from typing import Any
 
 # ------------------------------------------------------------ window sizing
 #
@@ -141,10 +142,8 @@ def _prune_backups(path, keep):
     # filesystems with coarse (e.g. 1-second) mtime resolution.
     candidates.sort(reverse=True)  # newest first
     for stale in candidates[max(keep, 0):]:
-        try:
+        with contextlib.suppress(OSError):
             os.remove(stale)
-        except OSError:
-            pass
 
 
 def atomic_write_bytes(path, data):
@@ -402,7 +401,7 @@ class SpecialNode:
     matches: Callable[[Any, Any, Any], bool]
     decode: Callable[[Any, Any, Any], Any]
     encode: Callable[[Any, Any, Any], Any]
-    type_label: Optional[Callable[[Any, Any, Any], str]] = None
+    type_label: Callable[[Any, Any, Any], str] | None = None
 
     def label_for(self, container, key, value):
         if self.type_label:
@@ -417,20 +416,20 @@ class GameProfile:
 
     key: str                      # short id, e.g. "duckov" - used internally
     display_name: str             # shown in the game picker, e.g. "Escape from Duckov"
-    default_save_dirs: List[str]  # candidate folders to look in first
-    file_patterns: List[Tuple[str, str]]  # [(label, glob), ...] for the Open dialog
+    default_save_dirs: list[str]  # candidate folders to look in first
+    file_patterns: list[tuple[str, str]]  # [(label, glob), ...] for the Open dialog
     quick_fields: dict            # {"Money": ["EconomyData", "value", "money"], ...}
     loads: Callable[[str], Any] = json.loads
-    dumps: Optional[Callable[[Any], str]] = None  # None -> default json.dumps(indent=2)
-    special_nodes: List[SpecialNode] = field(default_factory=list)
+    dumps: Callable[[Any], str] | None = None  # None -> default json.dumps(indent=2)
+    special_nodes: list[SpecialNode] = field(default_factory=list)
     notes: str = ""                # freeform tips shown in the UI (file names, gotchas)
     binary: bool = False           # True: read/write the file as bytes, not text
-    read_only_check: Optional[Callable[[Any, Any, Any], bool]] = None
+    read_only_check: Callable[[Any, Any, Any], bool] | None = None
     # read_only_check(container, key, value) -> True blocks editing that node
     # in the tree (double-click shows a message instead). Use this when a
     # format's full parsed structure is worth browsing but only a narrow,
     # well-understood subset of it is safe to write back (see games/octopath.py).
-    describe_entry: Optional[Callable[[Any, Any, Any], Optional[str]]] = None
+    describe_entry: Callable[[Any, Any, Any], str | None] | None = None
     # describe_entry(container, key, value) -> a short human-readable hint
     # to show next to this entry in the tree's value column (e.g. an item
     # name looked up from that entry's id field), or None for no hint.
@@ -439,12 +438,12 @@ class GameProfile:
     # still show and edit normally, just with an extra label alongside it
     # (see games/dave.py, which looks up item names for Materials/Items
     # entries this way).
-    spawn_item_targets: Optional[Callable[[Any], List[Tuple[str, str]]]] = None
+    spawn_item_targets: Callable[[Any], list[tuple[str, str]]] | None = None
     # spawn_item_targets(data) -> [(label, target_key), ...], the places
     # Edit > Spawn Item... currently offers to create a new item in (e.g.
     # "Backpack", "Player Storage"). Set this together with spawn_item; a
     # game without either just doesn't show that menu item.
-    spawn_item: Optional[Callable[[Any, str, int, int], str]] = None
+    spawn_item: Callable[[Any, str, int, int], str] | None = None
     # spawn_item(data, target_key, item_id, quantity) -> a status message,
     # mutating `data` in place to add `quantity` of item type `item_id`
     # into whichever container `target_key` (one returned by
@@ -454,7 +453,7 @@ class GameProfile:
     # See games/duckov.py, whose save format has no name catalog to
     # validate an item id against, so this only checks structural things
     # (a real positive id, room in a capacity-bounded container).
-    item_catalog: Optional[Callable[[Any], List[Tuple[str, str]]]] = None
+    item_catalog: Callable[[Any], list[tuple[str, str]]] | None = None
     # item_catalog(data) -> [(display_name, item_id_str), ...], every item
     # this profile has a known name for. Purely a convenience for cedit's
     # Inventory Editor window's "Browse Catalog..." picker (a searchable
@@ -464,7 +463,7 @@ class GameProfile:
     # item_names.json). A game with a catalog but no known item ids for
     # *browsing* purposes (or none at all) just leaves this None; the
     # window falls back to a plain id text field with no browse button.
-    inventory_state: Optional[Callable[[Any, str], dict]] = None
+    inventory_state: Callable[[Any, str], dict] | None = None
     # inventory_state(data, target_key) -> {"capacity": int or None,
     # "capacity_note": str or None, "slots": [{"position", "instance_id",
     # "type_id"}, ...]} - a read-only snapshot of one of
@@ -475,20 +474,20 @@ class GameProfile:
     # enough empty slots to spawn into). Set this together with
     # remove_inventory_item to enable that window for a profile; a game
     # without both keeps the plain generic tree editor only.
-    remove_inventory_item: Optional[Callable[[Any, str, int], str]] = None
+    remove_inventory_item: Callable[[Any, str, int], str] | None = None
     # remove_inventory_item(data, target_key, instance_id) -> a status
     # message, mutating `data` in place to remove that item (and,
     # depending on the format, whatever it directly contains) from
     # target_key's container. Raise ValueError (before mutating anything)
     # to reject it, same convention as spawn_item.
-    pre_save_check: Optional[Callable[[str], Optional[str]]] = None
+    pre_save_check: Callable[[str], str | None] | None = None
     # pre_save_check(path) -> a block-reason string, or None to allow the
     # save. Called by cedit.py right before it backs up/writes `path` -
     # use this for an external-state check that has nothing to do with the
     # data itself (e.g. games/dave.py refuses to save while the game
     # process is running, since its next autosave would silently overwrite
     # the edit). Most games don't need this; leave it None.
-    custom_launcher: Optional[Callable[[Any], None]] = None
+    custom_launcher: Callable[[Any], None] | None = None
     # custom_launcher(parent) -> None. Set this instead of loads/dumps when a
     # game's save model genuinely doesn't fit "read whole file -> edit tree
     # -> write whole file back" - e.g. DREDGE, where the only legal way to

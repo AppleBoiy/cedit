@@ -27,9 +27,10 @@ ROOT = os.path.join(os.path.dirname(__file__), "..")
 sys.path.insert(0, ROOT)
 sys.path.insert(0, os.path.join(ROOT, "games"))
 
+import bbee as bbee_game  # noqa: E402
+
 from lib import bbee_lib  # noqa: E402
 from lib.bbee_wire import Field, WireError, encode_message, parse_message  # noqa: E402
-import bbee as bbee_game  # noqa: E402
 
 _HAS_LZ4 = bool(os.environ.get("BBEE_LZ4") or shutil.which("lz4"))
 

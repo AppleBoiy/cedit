@@ -31,14 +31,14 @@ import os
 import sys
 from pathlib import Path
 
-from games import list_games, get_game
+from games import get_game, list_games
 from lib.base import (
-    backup_file,
-    atomic_write_text,
     atomic_write_bytes,
+    atomic_write_text,
+    backup_file,
+    coerce_value,
     get_by_path,
     set_by_path,
-    coerce_value,
     smart_parse,
 )
 
@@ -80,21 +80,21 @@ def _load(profile, save_path):
             with open(save_path, "rb") as f:
                 raw = f.read()
         else:
-            with open(save_path, "r", encoding="utf-8-sig") as f:
+            with open(save_path, encoding="utf-8-sig") as f:
                 raw = f.read()
     except OSError as e:
-        raise CliError(f"Couldn't open {save_path}: {e}")
+        raise CliError(f"Couldn't open {save_path}: {e}") from e
     try:
         return profile.loads(raw)
     except (json.JSONDecodeError, ValueError) as e:
-        raise CliError(f"Couldn't parse {save_path} as a {profile.display_name} save: {e}")
+        raise CliError(f"Couldn't parse {save_path} as a {profile.display_name} save: {e}") from e
 
 
 def _save(profile, data, save_path, *, backup=True):
     try:
         payload = profile.dump(data)
     except (TypeError, ValueError) as e:
-        raise CliError(f"Couldn't serialize the data: {e}")
+        raise CliError(f"Couldn't serialize the data: {e}") from e
 
     if profile.pre_save_check:
         try:
@@ -108,7 +108,7 @@ def _save(profile, data, save_path, *, backup=True):
         try:
             backup_file(save_path)
         except OSError as e:
-            raise CliError(f"Couldn't create a backup before saving (use --no-backup to skip): {e}")
+            raise CliError(f"Couldn't create a backup before saving (use --no-backup to skip): {e}") from e
 
     try:
         if profile.binary:
@@ -116,7 +116,7 @@ def _save(profile, data, save_path, *, backup=True):
         else:
             atomic_write_text(save_path, payload)
     except OSError as e:
-        raise CliError(f"Couldn't save {save_path}: {e}")
+        raise CliError(f"Couldn't save {save_path}: {e}") from e
 
 
 def _parse_path(path_str):
@@ -152,7 +152,7 @@ def cmd_get(args):
     try:
         value = get_by_path(data, parts) if parts else data
     except (KeyError, IndexError, TypeError) as e:
-        raise CliError(f"Path {args.path!r} not found: {e}")
+        raise CliError(f"Path {args.path!r} not found: {e}") from e
     _print_json(value)
 
 
@@ -167,7 +167,7 @@ def cmd_set(args):
         try:
             value = json.loads(args.value)
         except json.JSONDecodeError as e:
-            raise CliError(f"--value isn't valid JSON: {e}")
+            raise CliError(f"--value isn't valid JSON: {e}") from e
     else:
         try:
             original = get_by_path(data, parts)
@@ -181,7 +181,7 @@ def cmd_set(args):
     try:
         set_by_path(data, parts, value)
     except (KeyError, IndexError, TypeError) as e:
-        raise CliError(f"Couldn't set {args.path!r}: {e}")
+        raise CliError(f"Couldn't set {args.path!r}: {e}") from e
 
     _save(profile, data, args.save, backup=not args.no_backup)
     print(f"Set {args.path} = {value!r} in {args.save}")
@@ -204,7 +204,7 @@ def cmd_inventory(args):
     try:
         state = profile.inventory_state(data, args.target)
     except ValueError as e:
-        raise CliError(str(e))
+        raise CliError(str(e)) from e
     _print_json(state)
 
 
@@ -216,7 +216,7 @@ def cmd_spawn(args):
     try:
         message = profile.spawn_item(data, args.target, args.item, args.quantity)
     except ValueError as e:
-        raise CliError(f"Couldn't spawn item: {e}")
+        raise CliError(f"Couldn't spawn item: {e}") from e
     _save(profile, data, args.save, backup=not args.no_backup)
     print(message)
 
@@ -229,7 +229,7 @@ def cmd_remove(args):
     try:
         message = profile.remove_inventory_item(data, args.target, args.instance)
     except ValueError as e:
-        raise CliError(f"Couldn't remove item: {e}")
+        raise CliError(f"Couldn't remove item: {e}") from e
     _save(profile, data, args.save, backup=not args.no_backup)
     print(message)
 

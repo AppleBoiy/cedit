@@ -30,8 +30,8 @@ lz4` on macOS, or set BBEE_LZ4 to its path if it's somewhere unusual.
 """
 from pathlib import Path
 
-from lib.base import GameProfile
 from lib import bbee_lib
+from lib.base import GameProfile
 
 
 class BbeeData(dict):

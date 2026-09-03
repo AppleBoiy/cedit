@@ -54,9 +54,8 @@ verify-before-write discipline (see dumps() below).
 import os
 import struct
 
-from lib.base import GameProfile
 from lib import octopath_lib as octo_lib
-
+from lib.base import GameProfile
 
 DEFAULT_SAVE_DIRS = [
     "~/Documents/My Games/Octopath_Traveler",
@@ -293,7 +292,7 @@ def dumps(data):
     try:
         verify = octo_lib.parse_save(new_bytes)
     except octo_lib.SaveError as e:
-        raise ValueError(f"Post-write verification failed to parse the result: {e}")
+        raise ValueError(f"Post-write verification failed to parse the result: {e}") from e
 
     if verify["money"] != money:
         raise ValueError("Post-write verification failed for money")

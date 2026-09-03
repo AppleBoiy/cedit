@@ -1,22 +1,26 @@
 from pathlib import Path
+
 """
 Unit tests for games/hades.py, games/hades2.py, and lib/hades_lib.py.
 """
 import os
+import struct
 import sys
 import unittest
-import struct
+
 import lz4.block
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
 sys.path.insert(0, ROOT)
 sys.path.insert(0, os.path.join(ROOT, "games"))
 
-from lib import hades_lib
 # pyrefly: ignore [missing-import]
 import hades as hades_game
+
 # pyrefly: ignore [missing-import]
 import hades2 as hades2_game
+
+from lib import hades_lib
 
 
 def create_synthetic_sgb1(
@@ -128,7 +132,6 @@ class TestHadesLib(unittest.TestCase):
 class TestHades2TextureFix(unittest.TestCase):
     def setUp(self):
         import tempfile
-        import shutil
         self.temp_dir = tempfile.mkdtemp()
         self.content_dir = Path(self.temp_dir) / "Content"
         self.movies_1080 = self.content_dir / "Movies" / "1080p"

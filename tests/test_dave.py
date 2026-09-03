@@ -8,9 +8,9 @@ test_octopath.py does for games/octopath.py.
 Run:
     python3 -m unittest discover -s tests -v
 """
+import json
 import os
 import sys
-import json
 import unittest
 from unittest import mock
 

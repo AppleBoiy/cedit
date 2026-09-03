@@ -9,11 +9,12 @@ Full implementation of Supergiant SGB1 container decoding and encoding:
 """
 from __future__ import annotations
 
+import contextlib
 import io
 import struct
 import zlib
-from typing import Any, Dict, List, Optional, Tuple
 from pathlib import Path
+from typing import Any
 
 import lz4.block
 
@@ -80,13 +81,13 @@ class BinaryReader:
         return v
 
     def read_str(self) -> str:
-        l = self.read_i32()
-        if l < 0:
+        length = self.read_i32()
+        if length < 0:
             raise HadesSaveError("Invalid string length.")
-        b = self.read_bytes(l)
+        b = self.read_bytes(length)
         return b.decode("utf-8", errors="replace")
 
-    def read_str_array(self) -> List[str]:
+    def read_str_array(self) -> list[str]:
         count = self.read_i32()
         return [self.read_str() for _ in range(count)]
 
@@ -118,7 +119,7 @@ class BinaryWriter:
         self.write_i32(len(encoded))
         self.write_bytes(encoded)
 
-    def write_str_array(self, items: List[str]):
+    def write_str_array(self, items: list[str]):
         self.write_i32(len(items))
         for item in items:
             self.write_str(item)
@@ -131,7 +132,7 @@ class LuaReader:
     def __init__(self, buf: bytes):
         self.reader = BinaryReader(buf)
 
-    def read_document(self) -> List[Any]:
+    def read_document(self) -> list[Any]:
         count = self.reader.read_u8()
         values = [self.read_tagged_val() for _ in range(count)]
         return values
@@ -155,7 +156,7 @@ class LuaReader:
             return self.read_table()
         raise HadesSaveError(f"Unsupported Lua type: {t}")
 
-    def read_table(self) -> Dict[Any, Any]:
+    def read_table(self) -> dict[Any, Any]:
         arr_sz = self.reader.read_i32()
         hash_sz = self.reader.read_i32()
         size = arr_sz + hash_sz
@@ -173,7 +174,7 @@ class LuaWriter:
     def __init__(self):
         self.writer = BinaryWriter()
 
-    def write_document(self, values: List[Any]) -> bytes:
+    def write_document(self, values: list[Any]) -> bytes:
         self.writer.write_u8(len(values))
         for v in values:
             self.write_tagged_val(v)
@@ -204,7 +205,7 @@ class LuaWriter:
         else:
             raise HadesSaveError(f"Unsupported Lua value type: {type(val)}")
 
-    def write_table(self, table: Dict[Any, Any]):
+    def write_table(self, table: dict[Any, Any]):
         keys = list(table.keys())
         numeric_keys = [k for k in keys if isinstance(k, (int, float)) or (isinstance(k, str) and k != "" and k.replace(".", "", 1).isdigit())]
         hash_count = len(keys) - len(numeric_keys)
@@ -217,7 +218,7 @@ class LuaWriter:
             self.write_tagged_val(table[k])
 
 
-def parse_sgb1_save(raw: bytes) -> Dict[str, Any]:
+def parse_sgb1_save(raw: bytes) -> dict[str, Any]:
     if len(raw) < 64:
         raise HadesSaveError("File is too small to be a valid Hades save profile.")
 
@@ -226,7 +227,7 @@ def parse_sgb1_save(raw: bytes) -> Dict[str, Any]:
     if sig != MAGIC:
         raise HadesSaveError(f"Invalid signature: expected SGB1, got {sig!r}")
 
-    checksum = reader.read_u32()
+    reader.read_u32()  # checksum - not verified on read, only recomputed on write
     raw_version = reader.read_i32()
     version = raw_version & SAVE_VERSION_MASK
     version_flags = raw_version & ~SAVE_VERSION_MASK
@@ -292,7 +293,7 @@ def parse_sgb1_save(raw: bytes) -> Dict[str, Any]:
     }
 
 
-def serialize_sgb1_save(data: Dict[str, Any], original_raw: Optional[bytes] = None) -> bytes:
+def serialize_sgb1_save(data: dict[str, Any], original_raw: bytes | None = None) -> bytes:
     header = data.get("Header", {})
     version = int(header.get("SaveVersion", 18))
     version_flags = int(header.get("VersionFlags", 0))
@@ -462,10 +463,8 @@ def swap_hades2_texture_folders(content_dir):
         except Exception as e:
             # Attempt to roll back if possible
             if d_temp.exists() and not d_1080.exists():
-                try:
+                with contextlib.suppress(Exception):
                     d_temp.rename(d_1080)
-                except Exception:
-                    pass
             return False, f"Failed to swap {folder_name} folders: {e}"
 
     new_status = get_hades2_texture_status(content_dir)

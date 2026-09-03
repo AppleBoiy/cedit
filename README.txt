@@ -388,6 +388,19 @@ validation). No PySide6/display needed to run these. The PySide6 UI itself
 real display to exercise, so verify it by running the app.
 
 
+LINTING
+-------
+    pip install ruff    # or: pip install -e .[dev]
+    make lint           # ruff check . - same as CI's lint job
+    make format         # ruff format --diff . - shows what formatting would
+                         # change, without writing anything (the codebase
+                         # isn't run through the formatter wholesale, so this
+                         # is opt-in, not enforced)
+
+Config lives in pyproject.toml. CI runs `ruff check .` on every push/PR
+alongside the unit tests (see .github/workflows/tests.yml).
+
+
 BUILD ARTIFACTS
 ----------------
 lib/dredge_bridge/bin/ and lib/dredge_bridge/obj/ are ordinary dotnet build

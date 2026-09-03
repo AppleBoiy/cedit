@@ -11,7 +11,6 @@ decrypt_save/encrypt_save to identity functions - that isolates exactly
 what this module is actually responsible for: mapping known byte offsets
 to/from a Python dict, correctly and without disturbing anything else.
 """
-import struct
 import unittest
 from unittest import mock
 

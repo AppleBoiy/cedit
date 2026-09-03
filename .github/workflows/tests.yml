@@ -5,6 +5,25 @@ on:
   pull_request:
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install ruff
+        run: pip install ruff
+
+      # Config lives in pyproject.toml. This only checks (no --fix / no
+      # `ruff format`) - formatting the whole tree is a separate, deliberate
+      # decision (`make format` shows the diff without writing anything).
+      - name: Run ruff
+        run: ruff check .
+
   unittest:
     runs-on: ubuntu-latest
     strategy:
